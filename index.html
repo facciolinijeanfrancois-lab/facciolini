@@ -722,16 +722,32 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     </div>
 
     <div class="toggle-row" style="padding:8px 0 14px">
-      <span style="font-size:0.9rem">Retour à vide</span>
+      <span style="font-size:0.9rem">Retour à vide après l'<b>aller</b></span>
       <label class="toggle"><input type="checkbox" id="t-retour-vide" onchange="toggleRetourVide()"><span class="toggle-slider"></span></label>
     </div>
 
     <div id="retour-vide-section" style="display:none">
       <div class="return-info">
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Km retour à vide</label>
-          <input type="number" class="form-input" id="t-km-vide" placeholder="Ex: 95" step="0.1">
+          <label class="form-label">Km retour à vide (aller)</label>
+          <input type="number" class="form-input" id="t-km-vide" placeholder="Ex: 65" step="0.1">
           <div class="form-hint">Laissez vide = même distance que l'aller</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="retour-vide-retour-section" style="display:none">
+      <div class="toggle-row" style="padding:8px 0 14px">
+        <span style="font-size:0.9rem">Retour à vide après le <b>retour</b></span>
+        <label class="toggle"><input type="checkbox" id="t-retour-vide2" onchange="toggleRetourVide2()"><span class="toggle-slider"></span></label>
+      </div>
+      <div id="retour-vide2-section" style="display:none">
+        <div class="return-info">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Km retour à vide (retour)</label>
+            <input type="number" class="form-input" id="t-km-vide2" placeholder="Ex: 65" step="0.1">
+            <div class="form-hint">Laissez vide = même distance que l'aller</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1098,13 +1114,22 @@ function getClientTrajetsCount(clientId) {
   return db.trajets.filter(t => t.clientId === clientId).length;
 }
 
-// Calcule les km réels totaux d'un trajet (aller + retour si A/R + retour à vide)
+// Calcule les km réels totaux d'un trajet (aller + retour si A/R + retour(s) à vide)
 function getTotalKmTrajet(t) {
-  let km = parseFloat(t.distance || 0);
-  if (t.type === 'aller-retour') km *= 2;
-  if (t.retourVide && !t.retourVideAnnule) {
-    km += parseFloat(t.kmVide || t.distance || 0);
-  }
+  const distAller = parseFloat(t.distance || 0);
+  const distVide = parseFloat(t.kmVide || t.distance || 0);
+  const distVide2 = parseFloat(t.kmVide2 || t.distance || 0);
+  let km = distAller;
+
+  // Aller-retour même jour ou date différente : ajouter le retour
+  if (t.type === 'aller-retour' || t.type === 'retour-diff') km += distAller;
+
+  // Retour à vide après l'aller
+  if (t.retourVide && !t.retourVideAnnule) km += distVide;
+
+  // Retour à vide après le retour (uniquement pour retour-diff)
+  if (t.retourVide2 && !t.retourVide2Annule) km += distVide2;
+
   return km;
 }
 
@@ -1515,6 +1540,8 @@ function openTrajetModal(editId) {
     document.getElementById('t-attente').value = t.attente||0;
     document.getElementById('t-retour-vide').checked = t.retourVide||false;
     document.getElementById('t-km-vide').value = t.kmVide||'';
+    document.getElementById('t-retour-vide2').checked = t.retourVide2||false;
+    document.getElementById('t-km-vide2').value = t.kmVide2||'';
     document.getElementById('t-notes').value = t.notes||'';
     document.getElementById('t-date-retour').value = t.dateRetour||'';
     document.getElementById('t-heure-retour').value = t.heureRetour||'';
@@ -1544,6 +1571,8 @@ function openTrajetModal(editId) {
     document.getElementById('t-attente').value = 0;
     document.getElementById('t-retour-vide').checked = false;
     document.getElementById('t-km-vide').value = '';
+    document.getElementById('t-retour-vide2').checked = false;
+    document.getElementById('t-km-vide2').value = '';
     document.getElementById('t-notes').value = '';
     document.getElementById('t-date-retour').value = '';
     document.getElementById('t-heure-retour').value = '';
@@ -1554,6 +1583,8 @@ function openTrajetModal(editId) {
     setChips('t-paiement-chips', 'cash');
     document.getElementById('retour-vide-section').style.display = 'none';
     document.getElementById('retour-diff-section').style.display = 'none';
+    document.getElementById('retour-vide-retour-section').style.display = 'none';
+    document.getElementById('retour-vide2-section').style.display = 'none';
   }
   updateClientSelect();
   updateVipHint();
@@ -1621,6 +1652,8 @@ function saveTrajet() {
     attente: document.getElementById('t-attente').value,
     retourVide: document.getElementById('t-retour-vide').checked,
     kmVide: document.getElementById('t-km-vide').value,
+    retourVide2: document.getElementById('t-retour-vide2').checked,
+    kmVide2: document.getElementById('t-km-vide2').value,
     notes: document.getElementById('t-notes').value
   };
   if (!trajet.clientId) { alert('Veuillez sélectionner un client'); return; }
@@ -1775,6 +1808,11 @@ function selectChip(el, hiddenId, val) {
   document.getElementById(hiddenId).value = val;
   if (hiddenId === 't-type') {
     document.getElementById('retour-diff-section').style.display = val === 'retour-diff' ? 'block' : 'none';
+    document.getElementById('retour-vide-retour-section').style.display = val === 'retour-diff' ? 'block' : 'none';
+    if (val !== 'retour-diff') {
+      document.getElementById('t-retour-vide2').checked = false;
+      document.getElementById('retour-vide2-section').style.display = 'none';
+    }
   }
 }
 function setChips(containerId, val) {
@@ -1790,11 +1828,21 @@ function setChips(containerId, val) {
 function toggleRetourVide() {
   const checked = document.getElementById('t-retour-vide').checked;
   document.getElementById('retour-vide-section').style.display = checked ? 'block' : 'none';
-  // Pré-remplir avec la distance aller si disponible
   if (checked) {
     const dist = document.getElementById('t-distance').value;
     if (dist && !document.getElementById('t-km-vide').value) {
       document.getElementById('t-km-vide').value = dist;
+    }
+  }
+}
+
+function toggleRetourVide2() {
+  const checked = document.getElementById('t-retour-vide2').checked;
+  document.getElementById('retour-vide2-section').style.display = checked ? 'block' : 'none';
+  if (checked) {
+    const dist = document.getElementById('t-distance').value;
+    if (dist && !document.getElementById('t-km-vide2').value) {
+      document.getElementById('t-km-vide2').value = dist;
     }
   }
 }
