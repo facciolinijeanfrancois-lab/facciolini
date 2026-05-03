@@ -769,7 +769,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     </div>
     <div class="form-group">
       <label class="form-label">Adresse domicile (pré-remplissage auto)</label>
-      <input type="text" class="form-input" id="c-adresse" placeholder="Ex: 12 rue des Fleurs, Liège">
+      <div class="autocomplete-wrapper">
+        <input type="text" class="form-input" id="c-adresse" placeholder="Tapez une adresse..." autocomplete="off" oninput="acSearch(this,'ac-client-adresse','client-adresse')">
+        <input type="hidden" id="c-adresse-lat">
+        <input type="hidden" id="c-adresse-lon">
+        <div class="autocomplete-dropdown" id="ac-client-adresse" style="display:none"></div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Langue parlée</label>
@@ -1093,6 +1098,25 @@ function getClientTrajetsCount(clientId) {
   return db.trajets.filter(t => t.clientId === clientId).length;
 }
 
+// Calcule les km réels totaux d'un trajet (aller + retour si A/R + retour à vide)
+function getTotalKmTrajet(t) {
+  let km = parseFloat(t.distance || 0);
+  if (t.type === 'aller-retour') km *= 2;
+  if (t.retourVide && !t.retourVideAnnule) {
+    km += parseFloat(t.kmVide || t.distance || 0);
+  }
+  return km;
+}
+
+// Calcule le bénéfice net réel d'un trajet
+function getBeneficeTrajet(t) {
+  const prix = parseFloat(t.prix || 0);
+  const cout = getTotalKmTrajet(t) * db.settings.coutKm;
+  const peages = parseFloat(t.peages || 0);
+  const parking = parseFloat(t.parking || 0);
+  return prix - cout - peages - parking;
+}
+
 // ==================== DASHBOARD ====================
 function renderDashboard() {
   const trajets = getMonthTrajets(currentMonth, currentYear);
@@ -1100,12 +1124,7 @@ function renderDashboard() {
 
   // Calculs
   const recettes = trajets.reduce((s,t) => s + parseFloat(t.prix||0), 0);
-  const totalKm = trajets.reduce((s,t) => {
-    let km = parseFloat(t.distance||0);
-    if (t.type === 'aller-retour') km *= 2;
-    if (t.retourVide && !t.retourVideAnnule) km += parseFloat(t.kmVide || t.distance || 0);
-    return s + km;
-  }, 0);
+  const totalKm = trajets.reduce((s,t) => s + getTotalKmTrajet(t), 0);
   const kmVide = trajets.reduce((s,t) => {
     if (t.retourVide && !t.retourVideAnnule) return s + parseFloat(t.kmVide || t.distance || 0);
     return s;
@@ -1211,9 +1230,8 @@ function renderTrajets() {
 
   el.innerHTML = trajets.map(t => {
     const vip = isVip(t.clientId);
-    const km = parseFloat(t.distance||0);
-    const cout = km * db.settings.coutKm;
-    const gain = parseFloat(t.prix||0) - cout;
+    const gain = getBeneficeTrajet(t);
+    const totalKmT = getTotalKmTrajet(t);
     const dateStr = new Date(t.date).toLocaleDateString('fr-BE', {day:'2-digit', month:'short'});
     const typeLabel = {aller:'Aller',  'aller-retour':'A/R', 'retour-diff':'A/R différé'}[t.type] || t.type;
     const serviceLabel = {depose:'Dépose', recuperation:'Récup.', navette:'Navette', autre:'Autre'}[t.service] || '';
@@ -1231,9 +1249,9 @@ function renderTrajets() {
           <span class="badge badge-blue">${typeLabel}</span>
           <span class="badge badge-purple">${serviceLabel}</span>
           <span class="badge ${gain>=0?'badge-green':'badge-red'}">${gain>=0?'+':''}${fmt(gain)}</span>
-          ${t.distance ? `<span class="badge badge-blue">${t.distance} km</span>` : ''}
+          ${totalKmT ? `<span class="badge badge-blue">${totalKmT.toFixed(1)} km total</span>` : ''}
           ${t.vol ? `<span class="badge badge-gold">✈ ${t.vol}</span>` : ''}
-          ${t.retourVide && !t.retourVideAnnule ? `<span class="badge badge-red">↩ Vide</span>` : ''}
+          ${t.retourVide && !t.retourVideAnnule ? `<span class="badge badge-red">↩ Vide ${parseFloat(t.kmVide||t.distance||0).toFixed(1)}km</span>` : ''}
           ${t.retourVideAnnule ? `<span class="badge badge-green">↩ Rempli ✓</span>` : ''}
         </div>
       </div>
@@ -1262,9 +1280,9 @@ function showDetailTrajet(id) {
   const t = db.trajets.find(t => t.id === id);
   if (!t) return;
   const vip = isVip(t.clientId);
-  const km = parseFloat(t.distance||0);
-  const cout = km * db.settings.coutKm;
-  const gain = parseFloat(t.prix||0) - cout;
+  const totalKmT = getTotalKmTrajet(t);
+  const cout = totalKmT * db.settings.coutKm;
+  const gain = getBeneficeTrajet(t);
   const typeLabel = {aller:'Aller simple', 'aller-retour':'Aller-retour même jour', 'retour-diff':'Aller-retour retour différé'}[t.type]||t.type;
 
   document.getElementById('dt-title').textContent = clientName(t.clientId) + (vip?' ⭐':'');
@@ -1276,7 +1294,10 @@ function showDetailTrajet(id) {
     <div class="detail-row"><span class="detail-label">Départ</span><span class="detail-value">${t.depart||'—'}</span></div>
     <div class="detail-row"><span class="detail-label">Arrivée</span><span class="detail-value">${t.arrivee||'—'}</span></div>
     ${t.terminal ? `<div class="detail-row"><span class="detail-label">Terminal</span><span class="detail-value">${t.terminal}</span></div>` : ''}
-    <div class="detail-row"><span class="detail-label">Distance</span><span class="detail-value">${t.distance||'—'} km</span></div>
+    <div class="detail-row"><span class="detail-label">Distance aller</span><span class="detail-value">${t.distance||'—'} km</span></div>
+    ${t.retourVide && !t.retourVideAnnule ? `<div class="detail-row"><span class="detail-label">Retour à vide</span><span class="detail-value red">+ ${parseFloat(t.kmVide||t.distance||0).toFixed(1)} km</span></div>` : ''}
+    ${t.type === 'aller-retour' ? `<div class="detail-row"><span class="detail-label">Retour inclus</span><span class="detail-value">+ ${t.distance||0} km</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Km total réel</span><span class="detail-value blue">${totalKmT.toFixed(1)} km</span></div>
     ${t.duree ? `<div class="detail-row"><span class="detail-label">Durée</span><span class="detail-value">${t.duree} min</span></div>` : ''}
     ${t.vol ? `<div class="detail-row"><span class="detail-label">Vol</span><span class="detail-value"><a href="https://www.flightradar24.com/data/flights/${t.vol.toLowerCase()}" target="_blank" class="flight-link">✈ ${t.vol} →</a></span></div>` : ''}
     <div class="detail-row"><span class="detail-label">Passagers</span><span class="detail-value">${t.passagers||1}</span></div>
@@ -1284,12 +1305,12 @@ function showDetailTrajet(id) {
     <div class="detail-row"><span class="detail-label">Prix demandé</span><span class="detail-value gold">${fmt(t.prix)}</span></div>
     ${vip ? `<div class="detail-row"><span class="detail-label">Statut VIP</span><span class="detail-value gold">⭐ -${db.settings.vipReduc}%</span></div>` : ''}
     <div class="detail-row"><span class="detail-label">Paiement</span><span class="detail-value">${{cash:'💵 Cash', carte:'💳 Carte', virement:'🏦 Virement'}[t.paiement]||t.paiement}</span></div>
-    ${parseFloat(t.peages||0)>0 ? `<div class="detail-row"><span class="detail-label">Péages</span><span class="detail-value">${fmt(t.peages)}</span></div>` : ''}
-    ${parseFloat(t.parking||0)>0 ? `<div class="detail-row"><span class="detail-label">Parking</span><span class="detail-value">${fmt(t.parking)}</span></div>` : ''}
+    ${parseFloat(t.peages||0)>0 ? `<div class="detail-row"><span class="detail-label">Péages</span><span class="detail-value red">- ${fmt(t.peages)}</span></div>` : ''}
+    ${parseFloat(t.parking||0)>0 ? `<div class="detail-row"><span class="detail-label">Parking</span><span class="detail-value red">- ${fmt(t.parking)}</span></div>` : ''}
     ${parseInt(t.attente||0)>0 ? `<div class="detail-row"><span class="detail-label">Attente</span><span class="detail-value">${t.attente} min</span></div>` : ''}
-    <div class="detail-row"><span class="detail-label">Coût km (${db.settings.coutKm.toFixed(2)}€/km)</span><span class="detail-value red">${fmt(cout)}</span></div>
-    <div class="detail-row"><span class="detail-label">Bénéfice net</span><span class="detail-value ${gain>=0?'green':'red'}">${fmt(gain)}</span></div>
-    ${t.retourVide ? `<div class="detail-row"><span class="detail-label">Retour à vide</span><span class="detail-value ${t.retourVideAnnule?'green':'red'}">${t.retourVideAnnule?'✓ Annulé (trajet suivant)':'⚠ '+fmtKm(t.kmVide||t.distance)}</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Coût km réel (${totalKmT.toFixed(1)}km × ${db.settings.coutKm.toFixed(2)}€)</span><span class="detail-value red">- ${fmt(cout)}</span></div>
+    <div class="detail-row" style="background:var(--bg3);border-radius:8px;padding:10px;margin-top:4px"><span class="detail-label" style="font-weight:700;color:var(--text)">Bénéfice net réel</span><span class="detail-value ${gain>=0?'green':'red'}" style="font-size:1.1rem">${fmt(gain)}</span></div>
+    ${t.retourVideAnnule ? `<div class="detail-row"><span class="detail-label">Retour à vide</span><span class="detail-value green">✓ Couvert par trajet suivant</span></div>` : ''}
     ${t.notes ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${t.notes}</span></div>` : ''}
   `;
   document.getElementById('dt-edit-btn').onclick = () => { closeModal('modal-detail-trajet'); openTrajetModal(id); };
@@ -1769,6 +1790,13 @@ function setChips(containerId, val) {
 function toggleRetourVide() {
   const checked = document.getElementById('t-retour-vide').checked;
   document.getElementById('retour-vide-section').style.display = checked ? 'block' : 'none';
+  // Pré-remplir avec la distance aller si disponible
+  if (checked) {
+    const dist = document.getElementById('t-distance').value;
+    if (dist && !document.getElementById('t-km-vide').value) {
+      document.getElementById('t-km-vide').value = dist;
+    }
+  }
 }
 
 // ==================== EXPORT ====================
@@ -1871,6 +1899,13 @@ async function acSearch(input, dropdownId, role) {
 }
 
 function acSelect(role, display, lat, lon) {
+  if (role === 'client-adresse') {
+    document.getElementById('c-adresse').value = display;
+    document.getElementById('c-adresse-lat').value = lat;
+    document.getElementById('c-adresse-lon').value = lon;
+    document.getElementById('ac-client-adresse').style.display = 'none';
+    return;
+  }
   const inputId = role === 'depart' ? 't-depart' : 't-arrivee';
   const dropId = role === 'depart' ? 'ac-depart' : 'ac-arrivee';
   const latId = role === 'depart' ? 't-depart-lat' : 't-arrivee-lat';
