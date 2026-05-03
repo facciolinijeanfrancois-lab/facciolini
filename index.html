@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Facciolini Transport</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg2: #111827;
+  --bg3: #1a2235;
+  --card: #151e2e;
+  --card2: #1e2a3f;
+  --border: #2a3a54;
+  --gold: #f5a623;
+  --gold2: #ffd166;
+  --blue: #3b82f6;
+  --green: #10b981;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+  --text: #f0f4ff;
+  --text2: #8899bb;
+  --text3: #566480;
+  --vip: #f5a623;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* PIN SCREEN */
+#pin-screen {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.pin-logo { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--gold); margin-bottom: 8px; }
+.pin-sub { color: var(--text2); font-size: 0.85rem; margin-bottom: 40px; }
+.pin-dots { display: flex; gap: 16px; margin-bottom: 32px; }
+.pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all 0.2s; }
+.pin-dot.filled { background: var(--gold); border-color: var(--gold); }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 280px; }
+.pin-btn { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text); cursor: pointer; transition: all 0.15s; }
+.pin-btn:active { background: var(--gold); color: #000; transform: scale(0.95); }
+.pin-error { color: var(--red); font-size: 0.85rem; margin-top: 12px; min-height: 20px; }
+.pin-setup { color: var(--text2); font-size: 0.8rem; margin-top: 16px; cursor: pointer; text-decoration: underline; }
+
+/* LAYOUT */
+#app { display: none; }
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  background: rgba(10,14,26,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; z-index: 100;
+}
+.topbar-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--gold); }
+.topbar-month { font-size: 0.8rem; color: var(--text2); }
+
+.content { padding: 72px 0 80px; }
+
+.navbar {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+  background: rgba(10,14,26,0.97); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex; z-index: 100;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; border: none; background: transparent; color: var(--text3);
+  font-family: 'DM Sans', sans-serif; font-size: 0.65rem; font-weight: 500;
+  transition: all 0.2s;
+}
+.nav-btn.active { color: var(--gold); }
+.nav-btn svg { width: 20px; height: 20px; }
+
+/* PAGES */
+.page { display: none; padding: 0 12px; }
+.page.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* STATS GRID */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 12px;
+}
+.stat-label { font-size: 0.72rem; color: var(--text2); margin-bottom: 4px; }
+.stat-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; }
+.stat-sub { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+.gold { color: var(--gold); }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.blue { color: var(--blue); }
+.purple { color: var(--purple); }
+
+/* PROGRESS BAR */
+.progress-bar { background: var(--bg3); border-radius: 99px; height: 8px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold), var(--gold2)); transition: width 0.5s; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+  font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.2s;
+}
+.btn-gold { background: var(--gold); color: #000; }
+.btn-gold:active { opacity: 0.85; transform: scale(0.97); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:active { background: var(--card2); }
+.btn-red { background: var(--red); color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-full { width: 100%; justify-content: center; padding: 14px; }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+/* FAB */
+.fab {
+  position: fixed; bottom: 76px; right: 16px;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--gold); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(245,166,35,0.4);
+  z-index: 99; transition: all 0.2s;
+}
+.fab:active { transform: scale(0.92); }
+.fab svg { width: 24px; height: 24px; color: #000; }
+
+/* SECTION HEADER */
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 10px; }
+.section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+
+/* LIST ITEMS */
+.list-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.15s;
+}
+.list-item:active { background: var(--card2); }
+.list-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.list-item-title { font-weight: 600; font-size: 0.95rem; }
+.list-item-sub { font-size: 0.8rem; color: var(--text2); }
+.badge {
+  padding: 3px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700;
+}
+.badge-gold { background: rgba(245,166,35,0.15); color: var(--gold); border: 1px solid rgba(245,166,35,0.3); }
+.badge-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+.badge-purple { background: rgba(139,92,246,0.15); color: var(--purple); border: 1px solid rgba(139,92,246,0.3); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 200; display: none; align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border-radius: 20px 20px 0 0;
+  border: 1px solid var(--border); border-bottom: none;
+  width: 100%; max-height: 92vh; overflow-y: auto;
+  padding: 20px 16px 32px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; }
+
+/* FORMS */
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 0.8rem; color: var(--text2); font-weight: 500; margin-bottom: 6px; display: block; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 13px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+.form-select option { background: var(--bg2); }
+.form-textarea { resize: none; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-hint { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+
+/* TABS */
+.tabs { display: flex; background: var(--bg3); border-radius: 10px; padding: 3px; margin-bottom: 14px; }
+.tab { flex: 1; padding: 8px; text-align: center; font-size: 0.8rem; font-weight: 600; border-radius: 8px; cursor: pointer; color: var(--text2); transition: all 0.2s; }
+.tab.active { background: var(--card); color: var(--text); }
+
+/* MONTH SELECTOR */
+.month-nav { display: flex; align-items: center; gap: 12px; justify-content: center; padding: 8px 0 14px; }
+.month-nav-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
+.month-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; min-width: 140px; text-align: center; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text2); }
+.empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-state-text { font-size: 0.9rem; }
+
+/* ALERT */
+.alert { border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; font-size: 0.85rem; }
+.alert-gold { background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.3); color: var(--gold2); }
+.alert-green { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+
+/* DETAIL VIEW */
+.detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-size: 0.83rem; color: var(--text2); }
+.detail-value { font-size: 0.9rem; font-weight: 600; text-align: right; max-width: 60%; }
+
+/* TOGGLE */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.toggle { position: relative; width: 44px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--bg3); border: 1px solid var(--border); border-radius: 99px; cursor: pointer; transition: 0.3s; }
+.toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; top: 2px; background: var(--text3); border-radius: 50%; transition: 0.3s; }
+.toggle input:checked + .toggle-slider { background: var(--gold); border-color: var(--gold); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(20px); background: #000; }
+
+/* CHART */
+.chart-bar-container { display: flex; align-items: flex-end; gap: 6px; height: 100px; padding: 0 4px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.chart-bar { width: 100%; border-radius: 6px 6px 0 0; background: var(--gold); min-height: 4px; transition: height 0.4s; opacity: 0.85; }
+.chart-bar.selected { opacity: 1; background: var(--gold2); }
+.chart-label { font-size: 0.6rem; color: var(--text3); }
+
+/* SETTINGS */
+.settings-section { margin-bottom: 20px; }
+.settings-title { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; padding: 0 4px; margin-bottom: 8px; }
+.settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; }
+.settings-item-left { display: flex; flex-direction: column; gap: 2px; }
+.settings-item-label { font-size: 0.9rem; font-weight: 500; }
+.settings-item-sub { font-size: 0.78rem; color: var(--text2); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* VIP STAR */
+.vip-star { color: var(--gold); font-size: 1rem; }
+
+/* FLIGHT LINK */
+.flight-link { color: var(--blue); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.flight-link:hover { color: var(--gold); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip { padding: 4px 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 99px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; color: var(--text2); }
+.chip.active { background: rgba(245,166,35,0.15); border-color: var(--gold); color: var(--gold); }
+
+.return-info { background: var(--bg3); border-radius: 10px; padding: 12px; margin-top: 8px; border: 1px solid var(--border); }
+
+/* AUTOCOMPLETE */
+.autocomplete-wrapper { position: relative; }
+.autocomplete-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg2); border: 1px solid var(--gold);
+  border-radius: 10px; z-index: 9999; max-height: 220px; overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.autocomplete-item {
+  padding: 11px 14px; font-size: 0.85rem; cursor: pointer;
+  border-bottom: 1px solid var(--border); color: var(--text);
+  transition: background 0.15s;
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:active, .autocomplete-item:hover { background: var(--card2); }
+.autocomplete-item-main { font-weight: 500; }
+.autocomplete-item-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+
+/* DISTANCE CALC */
+.distance-result {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; margin-top: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.distance-result.loading { border-color: var(--gold); }
+.distance-result.success { border-color: var(--green); }
+.distance-result-icon { font-size: 1.2rem; }
+.distance-result-text { flex: 1; }
+.distance-result-km { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--green); }
+.distance-result-time { font-size: 0.8rem; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-logo">✈ Facciolini</div>
+  <div class="pin-sub">Transport Privé</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-pad" id="pin-pad">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')">9</button>
+    <button class="pin-btn" onclick="pinPress('clear')" style="font-size:0.9rem">Effacer</button>
+    <button class="pin-btn" onclick="pinPress('0')">0</button>
+    <button class="pin-btn" onclick="pinPress('del')" style="font-size:1.2rem">⌫</button>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-setup" onclick="skipPin()">Passer / Configurer PIN</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-title">✈ Facciolini</div>
+    <div class="topbar-month" id="topbar-month"></div>
+  </div>
+
+  <div class="content">
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <div class="month-name" id="dash-month-name"></div>
+        <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+
+      <!-- Objectif -->
+      <div class="card" id="objectif-card">
+        <div class="card-header">
+          <span class="card-title">Objectif mensuel</span>
+          <button class="btn btn-outline btn-sm" onclick="openObjectifModal()">Modifier</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+          <span class="stat-value gold" id="obj-gains">0 €</span>
+          <span style="color:var(--text2);font-size:0.85rem">/ <span id="obj-target">2000</span> €</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="obj-progress" style="width:0%"></div></div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:6px" id="obj-remaining"></div>
+      </div>
+
+      <!-- Stats principales -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Recettes brutes</div>
+          <div class="stat-value gold" id="d-recettes">0 €</div>
+          <div class="stat-sub" id="d-trajets-count">0 trajets</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bénéfice net</div>
+          <div class="stat-value" id="d-benefice">0 €</div>
+          <div class="stat-sub" id="d-marge">Marge 0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Km parcourus</div>
+          <div class="stat-value blue" id="d-km">0 km</div>
+          <div class="stat-sub" id="d-km-vide">dont 0 à vide</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Coût total km</div>
+          <div class="stat-value red" id="d-cout-km">0 €</div>
+          <div class="stat-sub" id="d-cout-par-km">0,66 €/km</div>
+        </div>
+      </div>
+
+      <!-- Diesel + Charges -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Diesel mois</div>
+          <div class="stat-value purple" id="d-diesel">0 €</div>
+          <div class="stat-sub" id="d-litres">0 L</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Charges fixes</div>
+          <div class="stat-value red" id="d-charges">0 €</div>
+          <div class="stat-sub">Ce mois</div>
+        </div>
+      </div>
+
+      <!-- Alertes VIP -->
+      <div id="vip-alerts"></div>
+
+      <!-- Graphique 6 mois -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">Gains — 6 derniers mois</div>
+        <div class="chart-bar-container" id="chart-6m"></div>
+      </div>
+
+      <!-- Top clients -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Top clients ce mois</span>
+        </div>
+        <div id="top-clients"></div>
+      </div>
+    </div>
+
+    <!-- TRAJETS -->
+    <div class="page" id="page-trajets">
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <div class="month-name" id="traj-month-name"></div>
+        <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="section-header">
+        <span class="section-title">Trajets</span>
+        <button class="btn btn-gold btn-sm" onclick="openTrajetModal()">+ Nouveau</button>
+      </div>
+      <div id="trajets-list"></div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="section-header" style="padding-top:8px">
+        <span class="section-title">Clients</span>
+        <button class="btn btn-gold btn-sm" onclick="openClientModal()">+ Nouveau</button>
+      </div>
+      <div id="clients-list"></div>
+    </div>
+
+    <!-- CARBURANT -->
+    <div class="page" id="page-carburant">
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <div class="month-name" id="carb-month-name"></div>
+        <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="section-header">
+        <span class="section-title">Carburant</span>
+        <button class="btn btn-gold btn-sm" onclick="openCarburantModal()">+ Plein</button>
+      </div>
+      <!-- Stats carburant -->
+      <div class="stats-grid" style="margin-bottom:12px">
+        <div class="stat-card">
+          <div class="stat-label">Dépensé</div>
+          <div class="stat-value purple" id="carb-depense">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Litres</div>
+          <div class="stat-value blue" id="carb-litres">0 L</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Coût/km réel</div>
+          <div class="stat-value gold" id="carb-cout-km">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Conso moy.</div>
+          <div class="stat-value" id="carb-conso">—</div>
+        </div>
+      </div>
+      <div id="carburant-list"></div>
+    </div>
+
+    <!-- PARAMÈTRES -->
+    <div class="page" id="page-params">
+      <div class="section-header" style="padding-top:8px">
+        <span class="section-title">Paramètres</span>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Tarification</div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Coût au kilomètre</div>
+            <div class="settings-item-sub" id="cout-km-display">0,66 €/km</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openCoutKmModal()">Modifier</button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Seuil VIP</div>
+            <div class="settings-item-sub" id="vip-seuil-display">Dès le 4ème trajet → -10%</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openVipModal()">Modifier</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Charges fixes mensuelles</div>
+        <div id="charges-list-settings"></div>
+        <button class="btn btn-outline btn-full" style="margin-top:6px" onclick="openChargeModal()">+ Ajouter une charge</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Calcul coût réel au km</div>
+        <div class="card" id="cout-reel-card">
+          <div class="detail-row"><span class="detail-label">Coût carburant/km</span><span class="detail-value" id="calc-carb">—</span></div>
+          <div class="detail-row"><span class="detail-label">Charges fixes/km</span><span class="detail-value" id="calc-charges">—</span></div>
+          <div class="detail-row"><span class="detail-label">Km à vide inclus</span><span class="detail-value" id="calc-vide">—</span></div>
+          <div class="detail-row" style="border-bottom:none">
+            <span class="detail-label" style="font-weight:700;color:var(--text)">Coût réel estimé/km</span>
+            <span class="detail-value gold" style="font-size:1.1rem" id="calc-reel">—</span>
+          </div>
+        </div>
+        <div class="form-hint" style="padding:4px">Basé sur les 3 derniers mois de données</div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Sécurité</div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Code PIN</div>
+            <div class="settings-item-sub">Protection de l'app</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openPinModal()">Modifier</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Données</div>
+        <button class="btn btn-outline btn-full" onclick="exportExcel()" style="margin-bottom:8px">📊 Exporter Excel (CSV)</button>
+        <button class="btn btn-outline btn-full" onclick="exportBackup()">💾 Sauvegarder données</button>
+        <button class="btn btn-outline btn-full" style="margin-top:8px" onclick="importBackup()">📂 Restaurer données</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="doImport(event)">
+      </div>
+
+      <div style="text-align:center;padding:20px;color:var(--text3);font-size:0.78rem">
+        Facciolini Transport v2.0<br>Données sauvegardées localement
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button class="nav-btn active" onclick="showPage('dashboard',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-btn" onclick="showPage('trajets',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Trajets
+    </button>
+    <button class="nav-btn" onclick="showPage('clients',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Clients
+    </button>
+    <button class="nav-btn" onclick="showPage('carburant',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 22V8l9-6 9 6v14"/><path d="M9 22V12h6v10"/></svg>
+      Carburant
+    </button>
+    <button class="nav-btn" onclick="showPage('params',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Paramètres
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL TRAJET -->
+<div class="modal-overlay" id="modal-trajet">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="trajet-modal-title">Nouveau trajet</div>
+    <input type="hidden" id="trajet-edit-id">
+
+    <div class="form-group">
+      <label class="form-label">Client</label>
+      <select class="form-select" id="t-client">
+        <option value="">-- Sélectionner un client --</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date départ</label>
+        <input type="date" class="form-input" id="t-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Heure départ</label>
+        <input type="time" class="form-input" id="t-heure">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Type de trajet</label>
+      <div class="chips" id="t-type-chips">
+        <div class="chip active" onclick="selectChip(this,'t-type','aller')">Aller simple</div>
+        <div class="chip" onclick="selectChip(this,'t-type','aller-retour')">Aller-retour même jour</div>
+        <div class="chip" onclick="selectChip(this,'t-type','retour-diff')">Retour date différente</div>
+      </div>
+      <input type="hidden" id="t-type" value="aller">
+    </div>
+
+    <div id="retour-diff-section" style="display:none">
+      <div class="return-info">
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Date retour</label>
+            <input type="date" class="form-input" id="t-date-retour">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Heure retour</label>
+            <input type="time" class="form-input" id="t-heure-retour">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Type de service</label>
+      <div class="chips" id="t-service-chips">
+        <div class="chip active" onclick="selectChip(this,'t-service','depose')">Dépose</div>
+        <div class="chip" onclick="selectChip(this,'t-service','recuperation')">Récupération</div>
+        <div class="chip" onclick="selectChip(this,'t-service','navette')">Navette A/R</div>
+        <div class="chip" onclick="selectChip(this,'t-service','autre')">Autre</div>
+      </div>
+      <input type="hidden" id="t-service" value="depose">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Adresse de départ</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" class="form-input" id="t-depart" placeholder="Tapez une adresse..." autocomplete="off" oninput="acSearch(this,'ac-depart','depart')">
+        <input type="hidden" id="t-depart-lat">
+        <input type="hidden" id="t-depart-lon">
+        <div class="autocomplete-dropdown" id="ac-depart" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Adresse d'arrivée</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" class="form-input" id="t-arrivee" placeholder="Tapez une adresse..." autocomplete="off" oninput="acSearch(this,'ac-arrivee','arrivee')">
+        <input type="hidden" id="t-arrivee-lat">
+        <input type="hidden" id="t-arrivee-lon">
+        <div class="autocomplete-dropdown" id="ac-arrivee" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Résultat distance calculée -->
+    <div id="distance-result-box" style="display:none" class="distance-result">
+      <div class="distance-result-icon">📍</div>
+      <div class="distance-result-text">
+        <div class="distance-result-km" id="dr-km">—</div>
+        <div class="distance-result-time" id="dr-time">—</div>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" onclick="recalcDistance()">↺</button>
+    </div>
+    <div id="distance-loading" style="display:none" class="distance-result loading">
+      <div class="distance-result-icon">⏳</div>
+      <div class="distance-result-text" style="color:var(--gold)">Calcul de la distance...</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Distance (km)</label>
+        <input type="number" class="form-input" id="t-distance" placeholder="Auto ou manuel" step="0.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Durée (min)</label>
+        <input type="number" class="form-input" id="t-duree" placeholder="Auto ou manuel">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Numéro de vol (optionnel)</label>
+      <input type="text" class="form-input" id="t-vol" placeholder="Ex: SN3724" style="text-transform:uppercase">
+      <div class="form-hint">Lien FlightRadar24 automatique</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nb passagers</label>
+        <input type="number" class="form-input" id="t-passagers" value="1" min="1" max="8">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bagages</label>
+        <select class="form-select" id="t-bagages">
+          <option value="non">Non</option>
+          <option value="oui">Oui</option>
+          <option value="volumineux">Volumineux</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Terminal (optionnel)</label>
+      <input type="text" class="form-input" id="t-terminal" placeholder="Ex: T1, T2...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Prix demandé (€)</label>
+      <input type="number" class="form-input" id="t-prix" placeholder="Ex: 85" step="0.01">
+      <div class="form-hint" id="t-vip-hint" style="color:var(--gold)"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mode de paiement</label>
+      <div class="chips" id="t-paiement-chips">
+        <div class="chip active" onclick="selectChip(this,'t-paiement','cash')">💵 Cash</div>
+        <div class="chip" onclick="selectChip(this,'t-paiement','carte')">💳 Carte</div>
+        <div class="chip" onclick="selectChip(this,'t-paiement','virement')">🏦 Virement</div>
+      </div>
+      <input type="hidden" id="t-paiement" value="cash">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Péages (€)</label>
+        <input type="number" class="form-input" id="t-peages" value="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parking (€)</label>
+        <input type="number" class="form-input" id="t-parking" value="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Temps d'attente (min)</label>
+      <input type="number" class="form-input" id="t-attente" value="0" min="0">
+    </div>
+
+    <div class="toggle-row" style="padding:8px 0 14px">
+      <span style="font-size:0.9rem">Retour à vide</span>
+      <label class="toggle"><input type="checkbox" id="t-retour-vide" onchange="toggleRetourVide()"><span class="toggle-slider"></span></label>
+    </div>
+
+    <div id="retour-vide-section" style="display:none">
+      <div class="return-info">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Km retour à vide</label>
+          <input type="number" class="form-input" id="t-km-vide" placeholder="Ex: 95" step="0.1">
+          <div class="form-hint">Laissez vide = même distance que l'aller</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="t-notes" placeholder="Infos supplémentaires..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-trajet')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveTrajet()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENT -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="client-modal-title">Nouveau client</div>
+    <input type="hidden" id="client-edit-id">
+
+    <div class="form-group">
+      <label class="form-label">Nom complet</label>
+      <input type="text" class="form-input" id="c-nom" placeholder="Ex: Marie Dupont">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Téléphone</label>
+      <input type="tel" class="form-input" id="c-tel" placeholder="Ex: +32 471 23 45 67">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email (optionnel)</label>
+      <input type="email" class="form-input" id="c-email" placeholder="Ex: marie@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Adresse domicile (pré-remplissage auto)</label>
+      <input type="text" class="form-input" id="c-adresse" placeholder="Ex: 12 rue des Fleurs, Liège">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Langue parlée</label>
+      <select class="form-select" id="c-langue">
+        <option value="fr">Français</option>
+        <option value="nl">Néerlandais</option>
+        <option value="en">Anglais</option>
+        <option value="de">Allemand</option>
+        <option value="es">Espagnol</option>
+        <option value="ar">Arabe</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="c-notes" placeholder="Préférences, habitudes..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-client')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveClient()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CARBURANT -->
+<div class="modal-overlay" id="modal-carburant">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouveau plein</div>
+    <input type="hidden" id="carb-edit-id">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="carb-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Km compteur</label>
+        <input type="number" class="form-input" id="carb-km" placeholder="Ex: 125430">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Litres</label>
+        <input type="number" class="form-input" id="carb-litres-input" placeholder="Ex: 55" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prix total (€)</label>
+        <input type="number" class="form-input" id="carb-prix" placeholder="Ex: 87.50" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Station (optionnel)</label>
+      <input type="text" class="form-input" id="carb-station" placeholder="Ex: Total, Q8...">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-carburant')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveCarburant()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OBJECTIF -->
+<div class="modal-overlay" id="modal-objectif">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Objectif mensuel</div>
+    <div class="form-group">
+      <label class="form-label">Objectif de gains (€)</label>
+      <input type="number" class="form-input" id="obj-input" placeholder="Ex: 3000">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-objectif')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveObjectif()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COÛT KM -->
+<div class="modal-overlay" id="modal-cout-km">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Coût au kilomètre</div>
+    <div class="form-group">
+      <label class="form-label">Coût (€/km)</label>
+      <input type="number" class="form-input" id="cout-km-input" step="0.01" placeholder="Ex: 0.66">
+      <div class="form-hint">Voir calcul réel dans les paramètres pour ajuster</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-cout-km')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveCoutKm()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VIP -->
+<div class="modal-overlay" id="modal-vip">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Paramètres VIP</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Trajets pour VIP</label>
+        <input type="number" class="form-input" id="vip-seuil-input" min="1" max="50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Réduction VIP (%)</label>
+        <input type="number" class="form-input" id="vip-reduc-input" min="1" max="50">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-vip')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveVip()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHARGE -->
+<div class="modal-overlay" id="modal-charge">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Charge fixe mensuelle</div>
+    <div class="form-group">
+      <label class="form-label">Nom</label>
+      <input type="text" class="form-input" id="charge-nom" placeholder="Ex: Assurance, Leasing...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Montant mensuel (€)</label>
+      <input type="number" class="form-input" id="charge-montant" placeholder="Ex: 320" step="0.01">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-charge')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveCharge()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL TRAJET -->
+<div class="modal-overlay" id="modal-detail-trajet">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dt-title">Détail trajet</div>
+    <div id="dt-content"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-detail-trajet')">Fermer</button>
+      <button class="btn btn-gold btn-sm" id="dt-edit-btn">Modifier</button>
+      <button class="btn btn-red btn-sm" id="dt-delete-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL CLIENT -->
+<div class="modal-overlay" id="modal-detail-client">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dc-title">Fiche client</div>
+    <div id="dc-content"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-detail-client')">Fermer</button>
+      <button class="btn btn-gold btn-sm" id="dc-edit-btn">Modifier</button>
+      <button class="btn btn-red btn-sm" id="dc-delete-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PIN CONFIG -->
+<div class="modal-overlay" id="modal-pin">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Configurer le PIN</div>
+    <div class="form-group">
+      <label class="form-label">Nouveau PIN (4 chiffres)</label>
+      <input type="password" class="form-input" id="new-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirmer PIN</label>
+      <input type="password" class="form-input" id="confirm-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+    </div>
+    <div class="form-hint" id="pin-modal-error" style="color:var(--red)"></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-pin')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="savePinConfig()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+let db = {
+  clients: [],
+  trajets: [],
+  carburant: [],
+  charges: [],
+  settings: {
+    pin: null,
+    coutKm: 0.66,
+    vipSeuil: 4,
+    vipReduc: 10,
+    objectif: 2000
+  }
+};
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+// ==================== STORAGE ====================
+function save() {
+  localStorage.setItem('facciolini_db', JSON.stringify(db));
+}
+function load() {
+  const d = localStorage.getItem('facciolini_db');
+  if (d) {
+    try { db = JSON.parse(d); } catch(e) {}
+  }
+}
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+// ==================== PIN ====================
+let pinBuffer = '';
+let pinState = 'check'; // 'check' or 'setup'
+
+function pinPress(v) {
+  const err = document.getElementById('pin-error');
+  if (v === 'clear') { pinBuffer = ''; updateDots(); return; }
+  if (v === 'del') { pinBuffer = pinBuffer.slice(0,-1); updateDots(); return; }
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += v;
+  updateDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(() => checkPin(), 100);
+  }
+}
+function updateDots() {
+  for (let i=0;i<4;i++) {
+    document.getElementById('d'+i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+function checkPin() {
+  if (!db.settings.pin) {
+    unlockApp();
+    return;
+  }
+  if (pinBuffer === db.settings.pin) {
+    unlockApp();
+  } else {
+    document.getElementById('pin-error').textContent = 'PIN incorrect. Réessayez.';
+    pinBuffer = '';
+    updateDots();
+    setTimeout(() => document.getElementById('pin-error').textContent = '', 2000);
+  }
+}
+function skipPin() {
+  unlockApp();
+}
+function unlockApp() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderAll();
+}
+
+// ==================== NAVIGATION ====================
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  updateTopbar();
+  renderDashboard();
+  renderTrajets();
+  renderClients();
+  renderCarburant();
+  renderSettings();
+}
+
+// ==================== TOPBAR ====================
+function updateTopbar() {
+  const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  document.getElementById('topbar-month').textContent = months[currentMonth] + ' ' + currentYear;
+  document.getElementById('dash-month-name').textContent = months[currentMonth] + ' ' + currentYear;
+  document.getElementById('traj-month-name').textContent = months[currentMonth] + ' ' + currentYear;
+  document.getElementById('carb-month-name').textContent = months[currentMonth] + ' ' + currentYear;
+}
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderAll();
+}
+
+// ==================== HELPERS ====================
+function getMonthTrajets(m, y) {
+  return db.trajets.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth() === m && d.getFullYear() === y;
+  });
+}
+function getMonthCarburant(m, y) {
+  return db.carburant.filter(c => {
+    const d = new Date(c.date);
+    return d.getMonth() === m && d.getFullYear() === y;
+  });
+}
+function fmt(n) { return parseFloat(n||0).toFixed(2).replace('.',',') + ' €'; }
+function fmtKm(n) { return parseFloat(n||0).toFixed(1).replace('.',',') + ' km'; }
+function clientName(id) {
+  const c = db.clients.find(c => c.id === id);
+  return c ? c.nom : 'Client inconnu';
+}
+function isVip(clientId) {
+  const trajets = db.trajets.filter(t => t.clientId === clientId);
+  return trajets.length >= db.settings.vipSeuil;
+}
+function getClientTrajetsCount(clientId) {
+  return db.trajets.filter(t => t.clientId === clientId).length;
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  const trajets = getMonthTrajets(currentMonth, currentYear);
+  const carbs = getMonthCarburant(currentMonth, currentYear);
+
+  // Calculs
+  const recettes = trajets.reduce((s,t) => s + parseFloat(t.prix||0), 0);
+  const totalKm = trajets.reduce((s,t) => {
+    let km = parseFloat(t.distance||0);
+    if (t.type === 'aller-retour') km *= 2;
+    if (t.retourVide && !t.retourVideAnnule) km += parseFloat(t.kmVide || t.distance || 0);
+    return s + km;
+  }, 0);
+  const kmVide = trajets.reduce((s,t) => {
+    if (t.retourVide && !t.retourVideAnnule) return s + parseFloat(t.kmVide || t.distance || 0);
+    return s;
+  }, 0);
+  const coutKm = totalKm * db.settings.coutKm;
+  const chargesTotal = db.charges.reduce((s,c) => s + parseFloat(c.montant||0), 0);
+  const dieselDepense = carbs.reduce((s,c) => s + parseFloat(c.prix||0), 0);
+  const dieselLitres = carbs.reduce((s,c) => s + parseFloat(c.litres||0), 0);
+  const benefice = recettes - coutKm - chargesTotal;
+  const marge = recettes > 0 ? Math.round(benefice / recettes * 100) : 0;
+
+  // Objectif
+  const obj = db.settings.objectif;
+  const pct = Math.min(100, Math.round(recettes / obj * 100));
+  document.getElementById('obj-gains').textContent = fmt(recettes);
+  document.getElementById('obj-target').textContent = obj;
+  document.getElementById('obj-progress').style.width = pct + '%';
+  const reste = obj - recettes;
+  document.getElementById('obj-remaining').textContent = reste > 0 ? `Il reste ${fmt(reste)} à atteindre (${pct}%)` : `🎉 Objectif atteint !`;
+
+  document.getElementById('d-recettes').textContent = fmt(recettes);
+  document.getElementById('d-trajets-count').textContent = trajets.length + ' trajet' + (trajets.length>1?'s':'');
+  document.getElementById('d-benefice').textContent = fmt(benefice);
+  document.getElementById('d-benefice').className = 'stat-value ' + (benefice >= 0 ? 'green' : 'red');
+  document.getElementById('d-marge').textContent = 'Marge ' + marge + '%';
+  document.getElementById('d-km').textContent = fmtKm(totalKm);
+  document.getElementById('d-km-vide').textContent = 'dont ' + fmtKm(kmVide) + ' à vide';
+  document.getElementById('d-cout-km').textContent = fmt(coutKm);
+  document.getElementById('d-cout-par-km').textContent = db.settings.coutKm.toFixed(2).replace('.',',') + ' €/km';
+  document.getElementById('d-diesel').textContent = fmt(dieselDepense);
+  document.getElementById('d-litres').textContent = dieselLitres.toFixed(1).replace('.',',') + ' L';
+  document.getElementById('d-charges').textContent = fmt(chargesTotal);
+
+  // Alertes VIP
+  const vipAlerts = document.getElementById('vip-alerts');
+  const alerts = db.clients.filter(c => {
+    const n = getClientTrajetsCount(c.id);
+    return n > 0 && n < db.settings.vipSeuil && n >= db.settings.vipSeuil - 1;
+  });
+  vipAlerts.innerHTML = alerts.map(c => `
+    <div class="alert alert-gold">⭐ ${c.nom} est à ${db.settings.vipSeuil - getClientTrajetsCount(c.id)} trajet(s) du statut VIP !</div>
+  `).join('');
+
+  // Graphique 6 mois
+  renderChart();
+
+  // Top clients
+  const clientStats = {};
+  db.trajets.forEach(t => {
+    if (!clientStats[t.clientId]) clientStats[t.clientId] = {gains:0, trajets:0};
+    clientStats[t.clientId].gains += parseFloat(t.prix||0);
+    clientStats[t.clientId].trajets++;
+  });
+  const topClients = Object.entries(clientStats)
+    .sort((a,b) => b[1].gains - a[1].gains)
+    .slice(0,3);
+
+  const topEl = document.getElementById('top-clients');
+  if (topClients.length === 0) {
+    topEl.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;padding:8px 0">Aucun trajet ce mois</div>';
+  } else {
+    topEl.innerHTML = topClients.map(([id, s], i) => `
+      <div class="detail-row">
+        <span class="detail-label">${['🥇','🥈','🥉'][i]} ${clientName(id)} ${isVip(id)?'⭐':''}</span>
+        <span class="detail-value">${fmt(s.gains)} · ${s.trajets} trajet${s.trajets>1?'s':''}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function renderChart() {
+  const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const bars = [];
+  for (let i=5; i>=0; i--) {
+    let m = currentMonth - i;
+    let y = currentYear;
+    if (m < 0) { m += 12; y--; }
+    const gains = getMonthTrajets(m, y).reduce((s,t) => s + parseFloat(t.prix||0), 0);
+    bars.push({ m: months[m], gains, current: i===0 });
+  }
+  const maxG = Math.max(...bars.map(b => b.gains), 1);
+  document.getElementById('chart-6m').innerHTML = bars.map(b => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar ${b.current?'selected':''}" style="height:${Math.max(4, b.gains/maxG*88)}px"></div>
+      <div class="chart-label">${b.m}</div>
+    </div>
+  `).join('');
+}
+
+// ==================== TRAJETS ====================
+function renderTrajets() {
+  const trajets = getMonthTrajets(currentMonth, currentYear)
+    .sort((a,b) => new Date(b.date+' '+b.heure) - new Date(a.date+' '+a.heure));
+
+  const el = document.getElementById('trajets-list');
+  if (trajets.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚗</div><div class="empty-state-text">Aucun trajet ce mois</div></div>';
+    return;
+  }
+
+  // Détection retour à vide intelligent
+  detectRetourVideIntelligent();
+
+  el.innerHTML = trajets.map(t => {
+    const vip = isVip(t.clientId);
+    const km = parseFloat(t.distance||0);
+    const cout = km * db.settings.coutKm;
+    const gain = parseFloat(t.prix||0) - cout;
+    const dateStr = new Date(t.date).toLocaleDateString('fr-BE', {day:'2-digit', month:'short'});
+    const typeLabel = {aller:'Aller',  'aller-retour':'A/R', 'retour-diff':'A/R différé'}[t.type] || t.type;
+    const serviceLabel = {depose:'Dépose', recuperation:'Récup.', navette:'Navette', autre:'Autre'}[t.service] || '';
+
+    return `
+      <div class="list-item" onclick="showDetailTrajet('${t.id}')">
+        <div class="list-item-header">
+          <span class="list-item-title">${clientName(t.clientId)} ${vip?'⭐':''}</span>
+          <span class="stat-value gold" style="font-size:1rem">${fmt(t.prix)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="list-item-sub">${dateStr} · ${t.heure||''} · ${t.depart} → ${t.arrivee}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <span class="badge badge-blue">${typeLabel}</span>
+          <span class="badge badge-purple">${serviceLabel}</span>
+          <span class="badge ${gain>=0?'badge-green':'badge-red'}">${gain>=0?'+':''}${fmt(gain)}</span>
+          ${t.distance ? `<span class="badge badge-blue">${t.distance} km</span>` : ''}
+          ${t.vol ? `<span class="badge badge-gold">✈ ${t.vol}</span>` : ''}
+          ${t.retourVide && !t.retourVideAnnule ? `<span class="badge badge-red">↩ Vide</span>` : ''}
+          ${t.retourVideAnnule ? `<span class="badge badge-green">↩ Rempli ✓</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function detectRetourVideIntelligent() {
+  const sorted = [...db.trajets].sort((a,b) => new Date(a.date+' '+a.heure) - new Date(b.date+' '+b.heure));
+  sorted.forEach((t, i) => {
+    if (!t.retourVide) { t.retourVideAnnule = false; return; }
+    // Cherche un trajet suivant dont le départ est proche de l'arrivée
+    const next = sorted.slice(i+1).find(n => {
+      if (!n.depart || !t.arrivee) return false;
+      const dep = n.depart.toLowerCase().trim();
+      const arr = t.arrivee.toLowerCase().trim();
+      // Vérifie si les adresses partagent des mots clés
+      const wordsArr = arr.split(/[\s,]+/).filter(w => w.length > 3);
+      return wordsArr.some(w => dep.includes(w));
+    });
+    t.retourVideAnnule = !!next;
+  });
+}
+
+function showDetailTrajet(id) {
+  const t = db.trajets.find(t => t.id === id);
+  if (!t) return;
+  const vip = isVip(t.clientId);
+  const km = parseFloat(t.distance||0);
+  const cout = km * db.settings.coutKm;
+  const gain = parseFloat(t.prix||0) - cout;
+  const typeLabel = {aller:'Aller simple', 'aller-retour':'Aller-retour même jour', 'retour-diff':'Aller-retour retour différé'}[t.type]||t.type;
+
+  document.getElementById('dt-title').textContent = clientName(t.clientId) + (vip?' ⭐':'');
+  document.getElementById('dt-content').innerHTML = `
+    <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${new Date(t.date).toLocaleDateString('fr-BE')} ${t.heure||''}</span></div>
+    <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">${typeLabel}</span></div>
+    ${t.type === 'retour-diff' && t.dateRetour ? `<div class="detail-row"><span class="detail-label">Retour le</span><span class="detail-value">${new Date(t.dateRetour).toLocaleDateString('fr-BE')} ${t.heureRetour||''}</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Service</span><span class="detail-value">${{depose:'Dépose', recuperation:'Récupération', navette:'Navette A/R', autre:'Autre'}[t.service]||''}</span></div>
+    <div class="detail-row"><span class="detail-label">Départ</span><span class="detail-value">${t.depart||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Arrivée</span><span class="detail-value">${t.arrivee||'—'}</span></div>
+    ${t.terminal ? `<div class="detail-row"><span class="detail-label">Terminal</span><span class="detail-value">${t.terminal}</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Distance</span><span class="detail-value">${t.distance||'—'} km</span></div>
+    ${t.duree ? `<div class="detail-row"><span class="detail-label">Durée</span><span class="detail-value">${t.duree} min</span></div>` : ''}
+    ${t.vol ? `<div class="detail-row"><span class="detail-label">Vol</span><span class="detail-value"><a href="https://www.flightradar24.com/data/flights/${t.vol.toLowerCase()}" target="_blank" class="flight-link">✈ ${t.vol} →</a></span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Passagers</span><span class="detail-value">${t.passagers||1}</span></div>
+    <div class="detail-row"><span class="detail-label">Bagages</span><span class="detail-value">${{non:'Non', oui:'Oui', volumineux:'Volumineux'}[t.bagages]||'Non'}</span></div>
+    <div class="detail-row"><span class="detail-label">Prix demandé</span><span class="detail-value gold">${fmt(t.prix)}</span></div>
+    ${vip ? `<div class="detail-row"><span class="detail-label">Statut VIP</span><span class="detail-value gold">⭐ -${db.settings.vipReduc}%</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Paiement</span><span class="detail-value">${{cash:'💵 Cash', carte:'💳 Carte', virement:'🏦 Virement'}[t.paiement]||t.paiement}</span></div>
+    ${parseFloat(t.peages||0)>0 ? `<div class="detail-row"><span class="detail-label">Péages</span><span class="detail-value">${fmt(t.peages)}</span></div>` : ''}
+    ${parseFloat(t.parking||0)>0 ? `<div class="detail-row"><span class="detail-label">Parking</span><span class="detail-value">${fmt(t.parking)}</span></div>` : ''}
+    ${parseInt(t.attente||0)>0 ? `<div class="detail-row"><span class="detail-label">Attente</span><span class="detail-value">${t.attente} min</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Coût km (${db.settings.coutKm.toFixed(2)}€/km)</span><span class="detail-value red">${fmt(cout)}</span></div>
+    <div class="detail-row"><span class="detail-label">Bénéfice net</span><span class="detail-value ${gain>=0?'green':'red'}">${fmt(gain)}</span></div>
+    ${t.retourVide ? `<div class="detail-row"><span class="detail-label">Retour à vide</span><span class="detail-value ${t.retourVideAnnule?'green':'red'}">${t.retourVideAnnule?'✓ Annulé (trajet suivant)':'⚠ '+fmtKm(t.kmVide||t.distance)}</span></div>` : ''}
+    ${t.notes ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${t.notes}</span></div>` : ''}
+  `;
+  document.getElementById('dt-edit-btn').onclick = () => { closeModal('modal-detail-trajet'); openTrajetModal(id); };
+  document.getElementById('dt-delete-btn').onclick = () => { if(confirm('Supprimer ce trajet ?')) { db.trajets = db.trajets.filter(x=>x.id!==id); save(); closeModal('modal-detail-trajet'); renderAll(); }};
+  openModal('modal-detail-trajet');
+}
+
+// ==================== CLIENTS ====================
+function renderClients() {
+  const el = document.getElementById('clients-list');
+  if (db.clients.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">Aucun client enregistré</div></div>';
+    return;
+  }
+  const sorted = [...db.clients].sort((a,b) => a.nom.localeCompare(b.nom, 'fr'));
+  el.innerHTML = sorted.map(c => {
+    const n = getClientTrajetsCount(c.id);
+    const vip = isVip(c.id);
+    const gains = db.trajets.filter(t=>t.clientId===c.id).reduce((s,t)=>s+parseFloat(t.prix||0),0);
+    const prochain = db.settings.vipSeuil - n;
+    return `
+      <div class="list-item" onclick="showDetailClient('${c.id}')">
+        <div class="list-item-header">
+          <span class="list-item-title">${c.nom} ${vip?'⭐':''}</span>
+          <span class="badge ${vip?'badge-gold':'badge-blue'}">${vip?'VIP':n+' trajet'+(n>1?'s':'')}</span>
+        </div>
+        <div class="list-item-sub">${c.tel||''} ${c.langue&&c.langue!=='fr'?'· '+c.langue.toUpperCase():''}</div>
+        <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+          <span class="badge badge-green">${fmt(gains)} total</span>
+          ${!vip && prochain <= 2 ? `<span class="badge badge-gold">⭐ ${prochain} trajet${prochain>1?'s':''} pour VIP</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showDetailClient(id) {
+  const c = db.clients.find(c => c.id === id);
+  if (!c) return;
+  const n = getClientTrajetsCount(id);
+  const vip = isVip(id);
+  const gains = db.trajets.filter(t=>t.clientId===id).reduce((s,t)=>s+parseFloat(t.prix||0),0);
+  const trajets = db.trajets.filter(t=>t.clientId===id).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+
+  document.getElementById('dc-title').textContent = c.nom + (vip?' ⭐':'');
+  document.getElementById('dc-content').innerHTML = `
+    <div class="detail-row"><span class="detail-label">Téléphone</span><span class="detail-value">${c.tel ? `<a href="tel:${c.tel}" style="color:var(--blue)">${c.tel}</a>` : '—'}</span></div>
+    ${c.email ? `<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${c.email}</span></div>` : ''}
+    ${c.adresse ? `<div class="detail-row"><span class="detail-label">Adresse</span><span class="detail-value">${c.adresse}</span></div>` : ''}
+    <div class="detail-row"><span class="detail-label">Langue</span><span class="detail-value">${({fr:'Français',nl:'Néerlandais',en:'Anglais',de:'Allemand',es:'Espagnol',ar:'Arabe',autre:'Autre'})[c.langue||'fr']}</span></div>
+    <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value ${vip?'gold':''}">${vip?'⭐ VIP':'Normal'}</span></div>
+    <div class="detail-row"><span class="detail-label">Trajets effectués</span><span class="detail-value">${n}</span></div>
+    <div class="detail-row"><span class="detail-label">Gains totaux</span><span class="detail-value gold">${fmt(gains)}</span></div>
+    ${!vip ? `<div class="detail-row"><span class="detail-label">Vers VIP</span><span class="detail-value">${db.settings.vipSeuil-n} trajet(s) restant(s)</span></div>` : ''}
+    ${c.notes ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${c.notes}</span></div>` : ''}
+    ${trajets.length > 0 ? `
+      <div class="divider"></div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px">5 derniers trajets</div>
+      ${trajets.map(t=>`
+        <div class="detail-row">
+          <span class="detail-label">${new Date(t.date).toLocaleDateString('fr-BE')} · ${t.depart} → ${t.arrivee}</span>
+          <span class="detail-value gold">${fmt(t.prix)}</span>
+        </div>
+      `).join('')}
+    ` : ''}
+  `;
+  document.getElementById('dc-edit-btn').onclick = () => { closeModal('modal-detail-client'); openClientModal(id); };
+  document.getElementById('dc-delete-btn').onclick = () => { if(confirm('Supprimer ce client ?')) { db.clients = db.clients.filter(x=>x.id!==id); save(); closeModal('modal-detail-client'); renderAll(); }};
+  openModal('modal-detail-client');
+}
+
+// ==================== CARBURANT ====================
+function renderCarburant() {
+  const carbs = getMonthCarburant(currentMonth, currentYear)
+    .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  const depense = carbs.reduce((s,c) => s+parseFloat(c.prix||0), 0);
+  const litres = carbs.reduce((s,c) => s+parseFloat(c.litres||0), 0);
+
+  // Calcul coût/km sur ce mois
+  const trajetsMonth = getMonthTrajets(currentMonth, currentYear);
+  const kmMonth = trajetsMonth.reduce((s,t) => s + parseFloat(t.distance||0), 0);
+  const coutKmCalc = kmMonth > 0 ? depense / kmMonth : 0;
+  const conso = kmMonth > 0 && litres > 0 ? litres / kmMonth * 100 : 0;
+
+  document.getElementById('carb-depense').textContent = fmt(depense);
+  document.getElementById('carb-litres').textContent = litres.toFixed(1) + ' L';
+  document.getElementById('carb-cout-km').textContent = coutKmCalc > 0 ? coutKmCalc.toFixed(3).replace('.',',') + ' €' : '—';
+  document.getElementById('carb-conso').textContent = conso > 0 ? conso.toFixed(1).replace('.',',') + ' L/100' : '—';
+
+  const el = document.getElementById('carburant-list');
+  if (carbs.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⛽</div><div class="empty-state-text">Aucun plein ce mois</div></div>';
+    return;
+  }
+  el.innerHTML = carbs.map(c => `
+    <div class="list-item" onclick="deleteCarburant('${c.id}')">
+      <div class="list-item-header">
+        <span class="list-item-title">${new Date(c.date).toLocaleDateString('fr-BE')} ${c.station?'· '+c.station:''}</span>
+        <span class="stat-value purple" style="font-size:1rem">${fmt(c.prix)}</span>
+      </div>
+      <div class="list-item-sub">${c.litres} L · ${c.km ? c.km+' km au compteur' : ''}</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-top:4px">Appuyer pour supprimer</div>
+    </div>
+  `).join('');
+}
+
+function deleteCarburant(id) {
+  if (confirm('Supprimer ce plein ?')) {
+    db.carburant = db.carburant.filter(c => c.id !== id);
+    save(); renderAll();
+  }
+}
+
+// ==================== SETTINGS ====================
+function renderSettings() {
+  document.getElementById('cout-km-display').textContent = db.settings.coutKm.toFixed(2).replace('.',',') + ' €/km';
+  document.getElementById('vip-seuil-display').textContent = `Dès le ${db.settings.vipSeuil}ème trajet → -${db.settings.vipReduc}%`;
+
+  // Charges
+  const chargesEl = document.getElementById('charges-list-settings');
+  if (db.charges.length === 0) {
+    chargesEl.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;padding:8px 0">Aucune charge enregistrée</div>';
+  } else {
+    chargesEl.innerHTML = db.charges.map(c => `
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-label">${c.nom}</div>
+          <div class="settings-item-sub">${fmt(c.montant)} / mois</div>
+        </div>
+        <button class="btn btn-red btn-sm" onclick="deleteCharge('${c.id}')">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // Calcul coût réel
+  const now = new Date();
+  let totalKm3m = 0, totalDepense3m = 0, totalKmVide3m = 0;
+  for (let i=0; i<3; i++) {
+    let m = now.getMonth() - i;
+    let y = now.getFullYear();
+    if (m < 0) { m += 12; y--; }
+    const t = getMonthTrajets(m, y);
+    totalKm3m += t.reduce((s,x) => s + parseFloat(x.distance||0), 0);
+    totalKmVide3m += t.reduce((s,x) => { if(x.retourVide&&!x.retourVideAnnule) return s+parseFloat(x.kmVide||x.distance||0); return s; }, 0);
+    const c = getMonthCarburant(m, y);
+    totalDepense3m += c.reduce((s,x) => s + parseFloat(x.prix||0), 0);
+  }
+  const chargesM = db.charges.reduce((s,c) => s+parseFloat(c.montant||0), 0);
+  const carbKm = totalKm3m > 0 ? totalDepense3m / 3 / (totalKm3m / 3) : 0;
+  const chargeKm = totalKm3m > 0 ? chargesM / (totalKm3m / 3) : 0;
+  const totalReel = carbKm + chargeKm;
+
+  document.getElementById('calc-carb').textContent = carbKm > 0 ? carbKm.toFixed(3).replace('.',',') + ' €/km' : '—';
+  document.getElementById('calc-charges').textContent = chargeKm > 0 ? chargeKm.toFixed(3).replace('.',',') + ' €/km' : '—';
+  document.getElementById('calc-vide').textContent = totalKm3m > 0 ? Math.round(totalKmVide3m / totalKm3m * 100) + '% des km' : '—';
+  document.getElementById('calc-reel').textContent = totalReel > 0 ? totalReel.toFixed(3).replace('.',',') + ' €/km' : '—';
+}
+
+function deleteCharge(id) {
+  if (confirm('Supprimer cette charge ?')) {
+    db.charges = db.charges.filter(c => c.id !== id);
+    save(); renderAll();
+  }
+}
+
+// ==================== MODALS ====================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+function openTrajetModal(editId) {
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date().toTimeString().slice(0,5);
+
+  if (editId) {
+    const t = db.trajets.find(x => x.id === editId);
+    if (!t) return;
+    document.getElementById('trajet-modal-title').textContent = 'Modifier trajet';
+    document.getElementById('trajet-edit-id').value = editId;
+    document.getElementById('t-client').value = t.clientId||'';
+    document.getElementById('t-date').value = t.date||today;
+    document.getElementById('t-heure').value = t.heure||now;
+    document.getElementById('t-type').value = t.type||'aller';
+    document.getElementById('t-service').value = t.service||'depose';
+    document.getElementById('t-depart').value = t.depart||'';
+    document.getElementById('t-arrivee').value = t.arrivee||'';
+    document.getElementById('t-distance').value = t.distance||'';
+    document.getElementById('t-duree').value = t.duree||'';
+    document.getElementById('t-vol').value = t.vol||'';
+    document.getElementById('t-passagers').value = t.passagers||1;
+    document.getElementById('t-bagages').value = t.bagages||'non';
+    document.getElementById('t-terminal').value = t.terminal||'';
+    document.getElementById('t-prix').value = t.prix||'';
+    document.getElementById('t-paiement').value = t.paiement||'cash';
+    document.getElementById('t-peages').value = t.peages||0;
+    document.getElementById('t-parking').value = t.parking||0;
+    document.getElementById('t-attente').value = t.attente||0;
+    document.getElementById('t-retour-vide').checked = t.retourVide||false;
+    document.getElementById('t-km-vide').value = t.kmVide||'';
+    document.getElementById('t-notes').value = t.notes||'';
+    document.getElementById('t-date-retour').value = t.dateRetour||'';
+    document.getElementById('t-heure-retour').value = t.heureRetour||'';
+    setChips('t-type-chips', t.type||'aller');
+    setChips('t-service-chips', t.service||'depose');
+    setChips('t-paiement-chips', t.paiement||'cash');
+    document.getElementById('retour-vide-section').style.display = t.retourVide ? 'block' : 'none';
+    document.getElementById('retour-diff-section').style.display = t.type === 'retour-diff' ? 'block' : 'none';
+  } else {
+    document.getElementById('trajet-modal-title').textContent = 'Nouveau trajet';
+    document.getElementById('trajet-edit-id').value = '';
+    document.getElementById('t-date').value = today;
+    document.getElementById('t-heure').value = now;
+    document.getElementById('t-type').value = 'aller';
+    document.getElementById('t-service').value = 'depose';
+    document.getElementById('t-depart').value = '';
+    document.getElementById('t-arrivee').value = '';
+    document.getElementById('t-distance').value = '';
+    document.getElementById('t-duree').value = '';
+    document.getElementById('t-vol').value = '';
+    document.getElementById('t-passagers').value = 1;
+    document.getElementById('t-bagages').value = 'non';
+    document.getElementById('t-terminal').value = '';
+    document.getElementById('t-prix').value = '';
+    document.getElementById('t-peages').value = 0;
+    document.getElementById('t-parking').value = 0;
+    document.getElementById('t-attente').value = 0;
+    document.getElementById('t-retour-vide').checked = false;
+    document.getElementById('t-km-vide').value = '';
+    document.getElementById('t-notes').value = '';
+    document.getElementById('t-date-retour').value = '';
+    document.getElementById('t-heure-retour').value = '';
+    document.getElementById('t-paiement').value = 'cash';
+    document.getElementById('t-client').value = '';
+    setChips('t-type-chips', 'aller');
+    setChips('t-service-chips', 'depose');
+    setChips('t-paiement-chips', 'cash');
+    document.getElementById('retour-vide-section').style.display = 'none';
+    document.getElementById('retour-diff-section').style.display = 'none';
+  }
+  updateClientSelect();
+  updateVipHint();
+  openModal('modal-trajet');
+}
+
+function updateClientSelect() {
+  const sel = document.getElementById('t-client');
+  const cur = sel.value;
+  const sortedClients = [...db.clients].sort((a,b) => a.nom.localeCompare(b.nom, 'fr'));
+  sel.innerHTML = '<option value="">-- Sélectionner un client --</option>' +
+    sortedClients.map(c => {
+      const vip = isVip(c.id);
+      return `<option value="${c.id}" ${cur===c.id?'selected':''}>${c.nom}${vip?' ⭐':''}</option>`;
+    }).join('');
+  sel.onchange = updateVipHint;
+  if (cur) sel.value = cur;
+}
+
+function updateVipHint() {
+  const cid = document.getElementById('t-client').value;
+  const hint = document.getElementById('t-vip-hint');
+  if (cid && isVip(cid)) {
+    hint.textContent = `⭐ Client VIP — réduction de ${db.settings.vipReduc}% appliquée`;
+  } else if (cid) {
+    const n = getClientTrajetsCount(cid);
+    const reste = db.settings.vipSeuil - n - 1;
+    if (reste >= 0) hint.textContent = `Encore ${reste} trajet${reste>1?'s':''} pour être VIP`;
+    else hint.textContent = '';
+  } else {
+    hint.textContent = '';
+  }
+  // Pré-remplir adresse domicile du client
+  if (cid) {
+    const c = db.clients.find(x => x.id === cid);
+    if (c && c.adresse && !document.getElementById('t-depart').value) {
+      document.getElementById('t-depart').value = c.adresse;
+    }
+  }
+}
+
+function saveTrajet() {
+  const editId = document.getElementById('trajet-edit-id').value;
+  const trajet = {
+    id: editId || genId(),
+    clientId: document.getElementById('t-client').value,
+    date: document.getElementById('t-date').value,
+    heure: document.getElementById('t-heure').value,
+    type: document.getElementById('t-type').value,
+    dateRetour: document.getElementById('t-date-retour').value,
+    heureRetour: document.getElementById('t-heure-retour').value,
+    service: document.getElementById('t-service').value,
+    depart: document.getElementById('t-depart').value,
+    arrivee: document.getElementById('t-arrivee').value,
+    distance: document.getElementById('t-distance').value,
+    duree: document.getElementById('t-duree').value,
+    vol: document.getElementById('t-vol').value.toUpperCase(),
+    passagers: document.getElementById('t-passagers').value,
+    bagages: document.getElementById('t-bagages').value,
+    terminal: document.getElementById('t-terminal').value,
+    prix: document.getElementById('t-prix').value,
+    paiement: document.getElementById('t-paiement').value,
+    peages: document.getElementById('t-peages').value,
+    parking: document.getElementById('t-parking').value,
+    attente: document.getElementById('t-attente').value,
+    retourVide: document.getElementById('t-retour-vide').checked,
+    kmVide: document.getElementById('t-km-vide').value,
+    notes: document.getElementById('t-notes').value
+  };
+  if (!trajet.clientId) { alert('Veuillez sélectionner un client'); return; }
+  if (!trajet.date) { alert('Veuillez entrer une date'); return; }
+
+  if (editId) {
+    const idx = db.trajets.findIndex(t => t.id === editId);
+    if (idx !== -1) db.trajets[idx] = trajet;
+  } else {
+    db.trajets.push(trajet);
+  }
+  save(); closeModal('modal-trajet'); renderAll();
+}
+
+function openClientModal(editId) {
+  if (editId) {
+    const c = db.clients.find(x => x.id === editId);
+    if (!c) return;
+    document.getElementById('client-modal-title').textContent = 'Modifier client';
+    document.getElementById('client-edit-id').value = editId;
+    document.getElementById('c-nom').value = c.nom||'';
+    document.getElementById('c-tel').value = c.tel||'';
+    document.getElementById('c-email').value = c.email||'';
+    document.getElementById('c-adresse').value = c.adresse||'';
+    document.getElementById('c-langue').value = c.langue||'fr';
+    document.getElementById('c-notes').value = c.notes||'';
+  } else {
+    document.getElementById('client-modal-title').textContent = 'Nouveau client';
+    document.getElementById('client-edit-id').value = '';
+    document.getElementById('c-nom').value = '';
+    document.getElementById('c-tel').value = '';
+    document.getElementById('c-email').value = '';
+    document.getElementById('c-adresse').value = '';
+    document.getElementById('c-langue').value = 'fr';
+    document.getElementById('c-notes').value = '';
+  }
+  openModal('modal-client');
+}
+
+function saveClient() {
+  const editId = document.getElementById('client-edit-id').value;
+  const client = {
+    id: editId || genId(),
+    nom: document.getElementById('c-nom').value.trim(),
+    tel: document.getElementById('c-tel').value.trim(),
+    email: document.getElementById('c-email').value.trim(),
+    adresse: document.getElementById('c-adresse').value.trim(),
+    langue: document.getElementById('c-langue').value,
+    notes: document.getElementById('c-notes').value.trim()
+  };
+  if (!client.nom) { alert('Veuillez entrer un nom'); return; }
+  if (editId) {
+    const idx = db.clients.findIndex(c => c.id === editId);
+    if (idx !== -1) db.clients[idx] = client;
+  } else {
+    db.clients.push(client);
+  }
+  save(); closeModal('modal-client'); renderAll();
+}
+
+function openCarburantModal() {
+  document.getElementById('carb-edit-id').value = '';
+  document.getElementById('carb-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('carb-km').value = '';
+  document.getElementById('carb-litres-input').value = '';
+  document.getElementById('carb-prix').value = '';
+  document.getElementById('carb-station').value = '';
+  openModal('modal-carburant');
+}
+
+function saveCarburant() {
+  const carb = {
+    id: genId(),
+    date: document.getElementById('carb-date').value,
+    km: document.getElementById('carb-km').value,
+    litres: document.getElementById('carb-litres-input').value,
+    prix: document.getElementById('carb-prix').value,
+    station: document.getElementById('carb-station').value
+  };
+  if (!carb.date || !carb.prix) { alert('Veuillez remplir la date et le prix'); return; }
+  db.carburant.push(carb);
+  save(); closeModal('modal-carburant'); renderAll();
+}
+
+function openObjectifModal() {
+  document.getElementById('obj-input').value = db.settings.objectif;
+  openModal('modal-objectif');
+}
+function saveObjectif() {
+  db.settings.objectif = parseFloat(document.getElementById('obj-input').value) || 2000;
+  save(); closeModal('modal-objectif'); renderAll();
+}
+
+function openCoutKmModal() {
+  document.getElementById('cout-km-input').value = db.settings.coutKm;
+  openModal('modal-cout-km');
+}
+function saveCoutKm() {
+  db.settings.coutKm = parseFloat(document.getElementById('cout-km-input').value) || 0.66;
+  save(); closeModal('modal-cout-km'); renderAll();
+}
+
+function openVipModal() {
+  document.getElementById('vip-seuil-input').value = db.settings.vipSeuil;
+  document.getElementById('vip-reduc-input').value = db.settings.vipReduc;
+  openModal('modal-vip');
+}
+function saveVip() {
+  db.settings.vipSeuil = parseInt(document.getElementById('vip-seuil-input').value) || 4;
+  db.settings.vipReduc = parseInt(document.getElementById('vip-reduc-input').value) || 10;
+  save(); closeModal('modal-vip'); renderAll();
+}
+
+function openChargeModal() {
+  document.getElementById('charge-nom').value = '';
+  document.getElementById('charge-montant').value = '';
+  openModal('modal-charge');
+}
+function saveCharge() {
+  const charge = {
+    id: genId(),
+    nom: document.getElementById('charge-nom').value.trim(),
+    montant: parseFloat(document.getElementById('charge-montant').value) || 0
+  };
+  if (!charge.nom) { alert('Veuillez entrer un nom'); return; }
+  db.charges.push(charge);
+  save(); closeModal('modal-charge'); renderAll();
+}
+
+function openPinModal() { openModal('modal-pin'); }
+function savePinConfig() {
+  const np = document.getElementById('new-pin').value;
+  const cp = document.getElementById('confirm-pin').value;
+  if (np.length !== 4 || !/^\d{4}$/.test(np)) {
+    document.getElementById('pin-modal-error').textContent = 'Le PIN doit contenir 4 chiffres';
+    return;
+  }
+  if (np !== cp) {
+    document.getElementById('pin-modal-error').textContent = 'Les PIN ne correspondent pas';
+    return;
+  }
+  db.settings.pin = np;
+  save(); closeModal('modal-pin');
+  alert('PIN mis à jour avec succès !');
+}
+
+// ==================== CHIPS ====================
+function selectChip(el, hiddenId, val) {
+  const container = el.closest('.chips');
+  container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(hiddenId).value = val;
+  if (hiddenId === 't-type') {
+    document.getElementById('retour-diff-section').style.display = val === 'retour-diff' ? 'block' : 'none';
+  }
+}
+function setChips(containerId, val) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.querySelectorAll('.chip').forEach(c => {
+    const onclick = c.getAttribute('onclick');
+    if (onclick && onclick.includes("'"+val+"'")) c.classList.add('active');
+    else c.classList.remove('active');
+  });
+}
+
+function toggleRetourVide() {
+  const checked = document.getElementById('t-retour-vide').checked;
+  document.getElementById('retour-vide-section').style.display = checked ? 'block' : 'none';
+}
+
+// ==================== EXPORT ====================
+function exportExcel() {
+  const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  let csv = 'Date;Client;VIP;Départ;Arrivée;Type;Service;Distance(km);Prix(€);Paiement;Péages;Parking;Retour Vide;Km Vide;Vol;Bénéfice Net;Notes\n';
+  db.trajets.sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(t => {
+    const vip = isVip(t.clientId);
+    const km = parseFloat(t.distance||0);
+    const cout = km * db.settings.coutKm;
+    const gain = parseFloat(t.prix||0) - cout;
+    csv += [
+      t.date, clientName(t.clientId), vip?'OUI':'NON',
+      t.depart, t.arrivee, t.type, t.service,
+      t.distance, t.prix, t.paiement, t.peages||0, t.parking||0,
+      t.retourVide?'OUI':'NON', t.kmVide||'',
+      t.vol||'', gain.toFixed(2), t.notes||''
+    ].map(v => '"'+String(v).replace(/"/g,'""')+'"').join(';') + '\n';
+  });
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'facciolini_trajets.csv'; a.click();
+}
+
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'facciolini_backup_'+new Date().toISOString().split('T')[0]+'.json'; a.click();
+}
+
+function importBackup() {
+  document.getElementById('import-file').click();
+}
+
+function doImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data.clients && data.trajets) {
+        if (confirm('Restaurer les données ? Les données actuelles seront remplacées.')) {
+          db = data;
+          save(); renderAll();
+          alert('Données restaurées avec succès !');
+        }
+      } else {
+        alert('Fichier invalide');
+      }
+    } catch(err) { alert('Erreur lors de la restauration'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ==================== AUTOCOMPLETE ADRESSES ====================
+let acTimers = {};
+let acCoords = { depart: null, arrivee: null };
+
+async function acSearch(input, dropdownId, role) {
+  const q = input.value.trim();
+  const dropdown = document.getElementById(dropdownId);
+
+  clearTimeout(acTimers[role]);
+  if (q.length < 3) { dropdown.style.display = 'none'; return; }
+
+  acTimers[role] = setTimeout(async () => {
+    try {
+      // Photon (Komoot) — CORS ouvert, fonctionne depuis fichier local et mobile
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=fr&bbox=2.3,49.4,6.5,51.5`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      const results = data.features || [];
+
+      if (!results.length) { dropdown.style.display = 'none'; return; }
+
+      dropdown.innerHTML = results.map(r => {
+        const p = r.properties;
+        const coords = r.geometry.coordinates; // [lon, lat]
+        const main = [p.name, p.street ? (p.housenumber ? p.street + ' ' + p.housenumber : p.street) : null].filter(Boolean).join(', ') || p.name || '';
+        const city = p.city || p.town || p.village || p.county || '';
+        const country = p.country || '';
+        const sub = [city, country].filter(Boolean).join(', ');
+        const displayFull = [main, city, country].filter(Boolean).join(', ');
+        const safeName = displayFull.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+        return `<div class="autocomplete-item" onclick="acSelect('${role}','${safeName}',${coords[1]},${coords[0]})">
+          <div class="autocomplete-item-main">${main || city}</div>
+          ${sub ? `<div class="autocomplete-item-sub">${sub}</div>` : ''}
+        </div>`;
+      }).join('');
+      dropdown.style.display = 'block';
+    } catch(e) {
+      dropdown.innerHTML = '<div class="autocomplete-item"><div class="autocomplete-item-sub">Pas de connexion internet</div></div>';
+      dropdown.style.display = 'block';
+    }
+  }, 350);
+}
+
+function acSelect(role, display, lat, lon) {
+  const inputId = role === 'depart' ? 't-depart' : 't-arrivee';
+  const dropId = role === 'depart' ? 'ac-depart' : 'ac-arrivee';
+  const latId = role === 'depart' ? 't-depart-lat' : 't-arrivee-lat';
+  const lonId = role === 'depart' ? 't-depart-lon' : 't-arrivee-lon';
+
+  document.getElementById(inputId).value = display;
+  document.getElementById(latId).value = lat;
+  document.getElementById(lonId).value = lon;
+  document.getElementById(dropId).style.display = 'none';
+
+  acCoords[role] = { lat: parseFloat(lat), lon: parseFloat(lon) };
+
+  // Si les deux points sont définis, calculer la distance
+  if (acCoords.depart && acCoords.arrivee) {
+    calcDistance();
+  }
+}
+
+// Fermer dropdown au clic extérieur
+document.addEventListener('click', e => {
+  if (!e.target.closest('.autocomplete-wrapper')) {
+    document.querySelectorAll('.autocomplete-dropdown').forEach(d => d.style.display = 'none');
+  }
+});
+
+async function calcDistance() {
+  const dep = acCoords.depart;
+  const arr = acCoords.arrivee;
+  if (!dep || !arr) return;
+
+  document.getElementById('distance-loading').style.display = 'flex';
+  document.getElementById('distance-result-box').style.display = 'none';
+
+  try {
+    // OSRM routing engine (gratuit, pas de clé API)
+    const url = `https://router.project-osrm.org/route/v1/driving/${dep.lon},${dep.lat};${arr.lon},${arr.lat}?overview=false`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    document.getElementById('distance-loading').style.display = 'none';
+
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      const km = (route.distance / 1000).toFixed(1);
+      const mins = Math.round(route.duration / 60);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      const timeStr = h > 0 ? `${h}h${m < 10 ? '0' : ''}${m}` : `${m} min`;
+
+      document.getElementById('t-distance').value = km;
+      document.getElementById('t-duree').value = mins;
+      document.getElementById('dr-km').textContent = km + ' km';
+      document.getElementById('dr-time').textContent = '⏱ ' + timeStr + ' de trajet';
+      document.getElementById('distance-result-box').style.display = 'flex';
+    } else {
+      document.getElementById('distance-result-box').style.display = 'flex';
+      document.getElementById('dr-km').textContent = 'Calcul impossible';
+      document.getElementById('dr-time').textContent = 'Entrez la distance manuellement';
+    }
+  } catch(e) {
+    document.getElementById('distance-loading').style.display = 'none';
+    document.getElementById('distance-result-box').style.display = 'flex';
+    document.getElementById('dr-km').textContent = 'Pas de connexion';
+    document.getElementById('dr-time').textContent = 'Entrez la distance manuellement';
+  }
+}
+
+function recalcDistance() {
+  calcDistance();
+}
+
+// Reset autocomplete state when modal opens
+const origOpenTrajetModal = openTrajetModal;
+function openTrajetModalWithReset(editId) {
+  acCoords = { depart: null, arrivee: null };
+  document.getElementById('distance-result-box').style.display = 'none';
+  document.getElementById('distance-loading').style.display = 'none';
+  document.getElementById('t-depart-lat').value = '';
+  document.getElementById('t-depart-lon').value = '';
+  document.getElementById('t-arrivee-lat').value = '';
+  document.getElementById('t-arrivee-lon').value = '';
+  origOpenTrajetModal(editId);
+}
+
+// ==================== INIT ====================
+load();
+updateTopbar();
+
+// Patch openTrajetModal
+window.openTrajetModal = openTrajetModalWithReset;
+
+// Check PIN
+if (!db.settings.pin) {
+  unlockApp();
+}
+</script>
+</body>
+</html>
