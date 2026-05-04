@@ -1059,8 +1059,22 @@ function renderFin(){
   document.getElementById('f-carb-dep').textContent=fmt(diesel);
   document.getElementById('f-carb-lit').textContent=litres.toFixed(1)+' L';
   document.getElementById('f-carb-px').textContent=litres>0?(diesel/litres).toFixed(3).replace('.',',')+' €/L':'—';
-  const kmM=res.reduce((s,r)=>s+parseFloat(r.distance||0),0);
-  document.getElementById('f-carb-co').textContent=kmM>0&&litres>0?(litres/kmM*100).toFixed(1).replace('.',',')+' L/100':'—';
+
+  // Consommation réelle = km entre pleins (via compteur) et litres du 2ème plein
+  const carbsAvecKm=[...db.carburant].filter(c=>c.km).sort((a,b)=>parseFloat(a.km)-parseFloat(b.km));
+  let consoText='—';
+  if(carbsAvecKm.length>=2){
+    // Prendre les 2 derniers pleins pour calculer la conso
+    const last=carbsAvecKm[carbsAvecKm.length-1];
+    const prev=carbsAvecKm[carbsAvecKm.length-2];
+    const kmEntre=parseFloat(last.km)-parseFloat(prev.km);
+    const litresEntre=parseFloat(last.litres||0);
+    if(kmEntre>0&&litresEntre>0){
+      const conso=litresEntre/kmEntre*100;
+      consoText=conso.toFixed(1).replace('.',',')+' L/100km';
+    }
+  }
+  document.getElementById('f-carb-co').textContent=consoText;
   const carbSorted=[...carbs].sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById('carb-list').innerHTML=carbSorted.length?carbSorted.map(c=>`<div class="item" onclick="if(confirm('Supprimer ce plein ?')){db.carburant=db.carburant.filter(x=>x.id!=='${c.id}');save();renderAll();}"><div class="item-header"><span class="item-title">${new Date(c.date).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'})}${c.station?' · '+c.station:''}</span><span class="orange" style="font-weight:700">${fmt(c.prix)}</span></div><div class="item-sub">${c.litres} L · ${c.km?c.km+' km':''} · ${db.settings.vehicles[c.vehicule||0]?.nom||'Voiture'}</div></div>`).join(''):'<div class="empty"><div class="empty-icon">⛽</div><div class="empty-text">Aucun plein ce mois</div></div>';
 }
