@@ -175,6 +175,39 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
 .res-client{font-weight:700;font-size:1rem}
 .res-price{font-weight:800;font-size:1.1rem;color:var(--gold)}
 .res-virement{background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);border-radius:6px;padding:3px 8px;font-size:0.7rem;color:var(--red2);font-weight:700}
+
+.status-upcoming{background:rgba(77,157,224,0.12);color:var(--blue2);border:1px solid rgba(77,157,224,0.3);padding:3px 8px;border-radius:99px;font-size:0.67rem;font-weight:700}
+.status-today{background:rgba(240,165,0,0.15);color:var(--gold);border:1px solid rgba(240,165,0,0.4);padding:3px 8px;border-radius:99px;font-size:0.67rem;font-weight:700}
+.status-done{background:rgba(14,173,105,0.12);color:var(--green);border:1px solid rgba(14,173,105,0.3);padding:3px 8px;border-radius:99px;font-size:0.67rem;font-weight:700}
+
+.week-day{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:6px}
+.week-day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.week-day-name{font-weight:700;font-size:0.85rem}
+.week-day-date{font-size:0.72rem;color:var(--text3)}
+.week-day.today-week{border-color:var(--gold)}
+.week-trip{background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:4px;cursor:pointer;transition:background 0.15s}
+.week-trip:last-child{margin-bottom:0}
+.week-trip:active{background:var(--card2)}
+.week-trip-time{font-size:0.72rem;color:var(--gold);font-weight:700}
+.week-trip-client{font-size:0.82rem;font-weight:600}
+.week-trip-route{font-size:0.72rem;color:var(--text2)}
+
+.search-bar{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.search-input{background:transparent;border:none;outline:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.9rem;flex:1}
+.search-input::placeholder{color:var(--text3)}
+
+.fav-addr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.fav-addr-chip{padding:5px 10px;background:var(--card);border:1px solid var(--border2);border-radius:99px;font-size:0.72rem;font-weight:600;cursor:pointer;color:var(--blue2);transition:all 0.15s}
+.fav-addr-chip:active{background:var(--gold);color:#000;border-color:var(--gold)}
+
+.template-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background 0.15s}
+.template-item:active{background:var(--card2)}
+
+.fab{position:fixed;bottom:calc(var(--nav-h) + 14px);right:14px;width:50px;height:50px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(240,165,0,0.4);z-index:99;font-size:1.4rem;transition:all 0.2s}
+.fab:active{transform:scale(0.92)}
+
+.annual-month{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.annual-month.best{border-color:var(--gold);background:rgba(240,165,0,0.05)}
 </style>
 </head>
 <body>
@@ -234,20 +267,34 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
       </div>
       <div class="card"><div style="font-size:0.72rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Top clients</div><div id="d-top"></div></div>
       <div id="d-virements"></div>
+      <div class="card card-sm" id="d-comparison" style="display:none;margin-bottom:10px"></div>
+      <div id="d-templates-dash"></div>
     </div>
 
     <!-- RESERVATIONS -->
     <div class="page" id="page-res">
       <div class="mnav"><div class="mnav-btn" onclick="changeMonth(-1)">‹</div><div class="mnav-name" id="res-month"></div><div class="mnav-btn" onclick="changeMonth(1)">›</div></div>
       <div class="sec"><span class="sec-title">Réservations</span><button class="btn btn-gold btn-sm" onclick="openNewRes()">+ Nouvelle</button></div>
+      <div class="search-bar"><span style="color:var(--text3)">🔍</span><input class="search-input" id="res-search" placeholder="Rechercher client, ville..." oninput="renderRes()"></div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <div class="chip active" onclick="setResFilter('tous',this)" id="rf-tous">Tous</div>
+        <div class="chip" onclick="setResFilter('upcoming',this)" id="rf-upcoming">À venir</div>
+        <div class="chip" onclick="setResFilter('today',this)" id="rf-today">Aujourd'hui</div>
+        <div class="chip" onclick="setResFilter('done',this)" id="rf-done">Terminées</div>
+      </div>
       <div id="res-list"></div>
     </div>
 
     <!-- CALENDRIER -->
     <div class="page" id="page-cal">
       <div class="mnav"><div class="mnav-btn" onclick="changeMonth(-1)">‹</div><div class="mnav-name" id="cal-month"></div><div class="mnav-btn" onclick="changeMonth(1)">›</div></div>
-      <div class="cal-grid" id="cal-grid"></div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <div class="chip active" onclick="setCalView('mois',this)">Mois</div>
+        <div class="chip" onclick="setCalView('semaine',this)">7 prochains jours</div>
+      </div>
+      <div id="cal-grid"></div>
       <div id="cal-detail"></div>
+      <div id="week-planning" style="display:none"></div>
     </div>
 
     <!-- CLIENTS -->
@@ -286,6 +333,12 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
       <div id="carb-list"></div>
       <div class="sec"><span class="sec-title">Note de frais</span><button class="btn btn-gold btn-sm" onclick="genNoteFrais()">📄 Générer</button></div>
       <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Note de frais mensuelle complète pour votre comptable Adam.</div>
+
+      <div class="sec"><span class="sec-title">Bilan annuel <span style="color:var(--text3)" id="fin-year"></span></span><button class="btn btn-outline btn-sm" onclick="genBilanAnnuel()">📊 Voir</button></div>
+      <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Résumé complet de l'année pour votre comptable.</div>
+
+      <div class="sec"><span class="sec-title">Modèles de trajets</span><button class="btn btn-outline btn-sm" onclick="openModal('m-templates')">Gérer</button></div>
+      <div id="templates-preview"></div>
     </div>
 
     <!-- PARAMÈTRES -->
@@ -313,6 +366,10 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
         <div class="dr"><span class="dr-label">Charges/km</span><span class="dr-val" id="p-calc-ch">—</span></div>
         <div class="dr" style="border-bottom:none"><span class="dr-label" style="color:var(--text);font-weight:700">Coût réel estimé</span><span class="dr-val gold" id="p-calc-reel">—</span></div>
       </div>
+      <div class="stitle">Adresses favorites</div>
+      <div id="fav-addr-settings"></div>
+      <button class="btn btn-outline btn-full" style="margin-top:6px" onclick="openModal('m-fav-addr')">+ Ajouter adresse favorite</button>
+
       <div class="stitle">Sécurité</div>
       <div class="sitem"><div class="sitem-left"><div class="sitem-label">Code PIN</div><div class="sitem-sub">Protection de l'app</div></div><button class="btn btn-outline btn-sm" onclick="openModal('m-pin')">Modifier</button></div>
       <div class="stitle">Données</div>
@@ -323,6 +380,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
       <div style="text-align:center;padding:24px;color:var(--text3);font-size:0.72rem;margin-top:8px">Facciolini Mobility v3.0<br>Données sauvegardées localement</div>
     </div>
   </div>
+
+  <button class="fab" onclick="openNewRes()" title="Nouvelle réservation">+</button>
 
   <nav class="navbar">
     <button class="nav-btn active" onclick="showPage('dash',this)">
@@ -404,8 +463,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
         <button class="btn btn-outline btn-sm" onclick="calcDist()">↺</button>
       </div>
       <div class="fr">
-        <div class="fg"><label class="fl">Distance (km)</label><input type="number" class="fi" id="r-distance" placeholder="Auto" step="0.1"></div>
+        <div class="fg"><label class="fl">Distance (km)</label><input type="number" class="fi" id="r-distance" placeholder="Auto" step="0.1" oninput="updDevis()"></div>
         <div class="fg"><label class="fl">Durée (min)</label><input type="number" class="fi" id="r-duree" placeholder="Auto"></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Km pour aller chercher le client (optionnel)</label>
+        <input type="number" class="fi" id="r-km-pickup" placeholder="Ex: 15" step="0.1">
+        <div class="fhint">Km depuis chez vous jusqu'au client — inclus dans votre coût réel</div>
       </div>
       <div class="fg"><label class="fl">Numéro de vol (optionnel)</label>
         <input type="text" class="fi" id="r-vol" placeholder="Ex: SN3724" style="text-transform:uppercase">
@@ -464,7 +528,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
         <button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="applyDevis()">Appliquer</button>
       </div>
       <div class="fg"><label class="fl">Prix demandé (€)</label>
-        <input type="number" class="fi" id="r-prix" placeholder="Ex: 95" step="0.01" oninput="updBenef()">
+        <input type="number" class="fi" id="r-prix" placeholder="Ex: 95" step="0.01" oninput="updBenef();checkPrixBas()">
         <div class="fhint" id="r-vip-hint" style="color:var(--gold)"></div>
       </div>
       <div class="fg"><label class="fl">Mode de paiement</label>
@@ -676,6 +740,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
     <div id="dr-content"></div>
     <div class="modal-actions" style="margin-top:16px">
       <button class="btn btn-outline" onclick="closeModal('m-detail-res')">Fermer</button>
+      <button class="btn btn-outline btn-sm" id="dr-dup-btn">Dupliquer</button>
       <button class="btn btn-outline btn-sm" id="dr-edit-btn">Modifier</button>
       <button class="btn btn-red btn-sm" id="dr-del-btn">Supprimer</button>
     </div>
@@ -702,10 +767,58 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
   </div>
 </div>
 
+<!-- MODAL TEMPLATES -->
+<div class="overlay" id="m-templates">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Modèles de trajets</div>
+    <div id="templates-list"></div>
+    <div class="divider"></div>
+    <div style="font-size:0.82rem;color:var(--text2);margin-bottom:12px">Ajouter un modèle</div>
+    <div class="fg"><label class="fl">Nom du modèle</label><input type="text" class="fi" id="tpl-nom" placeholder="Ex: Carnières → Zaventem"></div>
+    <div class="fg"><label class="fl">Adresse départ</label><input type="text" class="fi" id="tpl-depart" placeholder="Ex: Rue Saint-Eloi, Carnières"></div>
+    <div class="fg"><label class="fl">Adresse arrivée</label><input type="text" class="fi" id="tpl-arrivee" placeholder="Ex: Aéroport de Zaventem"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Distance (km)</label><input type="number" class="fi" id="tpl-distance" step="0.1"></div>
+      <div class="fg"><label class="fl">Prix habituel (€)</label><input type="number" class="fi" id="tpl-prix" step="0.5"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-full" onclick="closeModal('m-templates')">Fermer</button>
+      <button class="btn btn-gold btn-full" onclick="saveTemplate()">+ Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BILAN ANNUEL -->
+<div class="overlay" id="m-bilan">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title" id="bilan-title">Bilan annuel</div>
+    <div id="bilan-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-full" onclick="closeModal('m-bilan')">Fermer</button>
+      <button class="btn btn-gold btn-full" onclick="exportBilanCSV()">📊 Exporter CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADRESSES FAVORITES -->
+<div class="overlay" id="m-fav-addr">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Adresses favorites</div>
+    <div id="fav-addr-list"></div>
+    <div class="divider"></div>
+    <div class="fg"><label class="fl">Nom court</label><input type="text" class="fi" id="fav-nom" placeholder="Ex: Zaventem, Charleroi Airport..."></div>
+    <div class="fg"><label class="fl">Adresse complète</label>
+      <div class="ac-wrap"><input type="text" class="fi" id="fav-adresse" placeholder="Tapez l'adresse..." autocomplete="off" oninput="acSearch(this,'ac-fav','fav-addr')">
+      <input type="hidden" id="fav-lat"><input type="hidden" id="fav-lon"><div class="ac-drop" id="ac-fav"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-full" onclick="closeModal('m-fav-addr')">Fermer</button>
+      <button class="btn btn-gold btn-full" onclick="saveFavAddr()">+ Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===== DATA =====
-let db={reservations:[],clients:[],carburant:[],charges:[],entretien:[],settings:{pin:null,objectif:2000,homeAddress:null,vehicles:[{nom:'Voiture',cout:0.30,conso:6},{nom:'Camionnette',cout:0.45,conso:8}],tarifs:{rayon:30,court:1.40,long:1.50,min:45},vip:{seuil:4,reduc:10},activeVehicle:0}};
-let curMonth=new Date().getMonth(),curYear=new Date().getFullYear(),curStep=1;
+let db={reservations:[],clients:[],carburant:[],charges:[],entretien:[],templates:[],favAddresses:[],settings:{pin:null,objectif:2000,homeAddress:null,vehicles:[{nom:'Voiture',cout:0.30,conso:6},{nom:'Camionnette',cout:0.45,conso:8}],tarifs:{rayon:30,court:1.40,long:1.50,min:45},vip:{seuil:4,reduc:10},activeVehicle:0}};
+let curMonth=new Date().getMonth(),curYear=new Date().getFullYear(),curStep=1,resFilter='tous',calView='mois';
 let acTimers={},acCoords={};
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MONTHS_S=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
@@ -730,6 +843,7 @@ function getTotalKm(r){
   if(r.type==='ar-jour'||r.type==='ar-diff')km+=d;
   if(r.vide1)km+=parseFloat(r.km1||0);
   if(r.vide2)km+=parseFloat(r.km2||0);
+  if(r.kmPickup)km+=parseFloat(r.kmPickup||0); // km pour aller chercher le client
   return km;
 }
 function getKmVide(r){let km=0;if(r.vide1)km+=parseFloat(r.km1||0);if(r.vide2)km+=parseFloat(r.km2||0);return km;}
@@ -806,6 +920,23 @@ function renderDash(){
   document.getElementById('d-peages').textContent=fmt(peages);
   // Alertes
   const alerts=[];
+  // Bénéfice journalier
+  const today2=new Date();
+  const todayRes=db.reservations.filter(r=>{const d=new Date(r.dateAller);return d.toDateString()===today2.toDateString();});
+  const todayGains=todayRes.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+  const todayBenef=todayRes.reduce((s,r)=>s+getBenef(r),0);
+  if(todayRes.length>0){
+    alerts.push(`<div class="alert alert-green">📅 Aujourd'hui : ${fmt(todayGains)} encaissés · ${fmt(todayBenef)} de bénéfice net</div>`);
+  }
+  // Alertes bénéfice négatif
+  const negRes=res.filter(r=>getBenef(r)<0);
+  if(negRes.length>0){alerts.push(`<div class="alert alert-red">⚠️ ${negRes.length} réservation${negRes.length>1?'s':''} avec bénéfice négatif ce mois !</div>`);}
+  // Projection mensuelle
+  const joursEcoules=new Date().getDate();const joursMois=new Date(curYear,curMonth+1,0).getDate();
+  if(joursEcoules>0&&res.length>0&&curMonth===new Date().getMonth()&&curYear===new Date().getFullYear()){
+    const projection=Math.round(recettes/joursEcoules*joursMois);
+    alerts.push(`<div class="alert alert-gold">📈 Projection fin de mois : ${fmt(projection)} de recettes</div>`);
+  }
   db.clients.filter(c=>{const n=cntRes(c.id);return n>0&&n===db.settings.vip.seuil-1&&!isVip(c.id);}).forEach(c=>alerts.push(`<div class="alert alert-gold">⭐ ${c.nom} est à 1 réservation du statut VIP !</div>`));
   const vmts=db.reservations.filter(r=>r.paiement==='virement'&&!r.vmtRecu);
   if(vmts.length)alerts.push(`<div class="alert alert-red">🏦 ${vmts.length} virement${vmts.length>1?'s':''} en attente !</div>`);
@@ -821,45 +952,33 @@ function renderDash(){
   const top=Object.entries(cs).sort((a,b)=>b[1].g-a[1].g).slice(0,3);
   document.getElementById('d-top').innerHTML=top.length?top.map(([id,s],i)=>`<div class="dr"><span class="dr-label">${['🥇','🥈','🥉'][i]} ${clientName(id)}${isVip(id)?' ⭐':''}</span><span class="dr-val">${fmt(s.g)} · ${s.n} rés.</span></div>`).join(''):'<div style="color:var(--text3);font-size:0.82rem;padding:8px 0">Aucune réservation ce mois</div>';
   // Virements
-  const vEl=document.getElementById('d-virements');
-  if(vmts.length){vEl.innerHTML=`<div class="card"><div style="font-size:0.72rem;color:var(--red2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Virements en attente</div>${vmts.map(r=>`<div class="dr"><span class="dr-label">${clientName(r.clientId)} · ${new Date(r.dateAller).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'})}</span><div style="display:flex;align-items:center;gap:8px"><span class="dr-val gold">${fmt(r.prix)}</span><button class="btn btn-green btn-sm" onclick="markVmt('${r.id}')">✓ Reçu</button></div></div>`).join('')}</div>`;}else vEl.innerHTML='';
+  document.getElementById('d-virements').innerHTML=vmts.length?`<div class="card"><div style="font-size:0.72rem;color:var(--red2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Virements en attente</div>${vmts.map(r=>`<div class="dr"><span class="dr-label">${clientName(r.clientId)} · ${new Date(r.dateAller).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'})}</span><div style="display:flex;align-items:center;gap:8px"><span class="dr-val gold">${fmt(r.prix)}</span><button class="btn btn-green btn-sm" onclick="markVmt('${r.id}')">✓ Reçu</button></div></div>`).join('')}</div>`:'';
+
+  // Comparaison mois précédent
+  const comp=getComparison();
+  const compEl=document.getElementById('d-comparison');
+  if(comp&&compEl){
+    const sign=comp.pct>=0?'+':'';
+    const color=comp.pct>=0?'var(--green)':'var(--red)';
+    compEl.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:0.82rem;color:var(--text2)">vs mois précédent</span><span style="font-weight:700;color:${color}">${sign}${comp.pct}% (${fmt(comp.cur)} vs ${fmt(comp.prev)})</span></div>`;
+    compEl.style.display='block';
+  }else if(compEl)compEl.style.display='none';
+
+  // Templates preview
+  renderTemplates();
 }
 function markVmt(id){const r=db.reservations.find(r=>r.id===id);if(r){r.vmtRecu=true;save();renderAll();}}
 
 // ===== RESERVATIONS =====
 function renderRes(){
+  // Overridden by new renderRes below
   document.getElementById('res-month').textContent=MONTHS[curMonth]+' '+curYear;
-  const res=getMonthRes(curMonth,curYear).sort((a,b)=>new Date(b.dateAller)-new Date(a.dateAller));
-  const el=document.getElementById('res-list');
-  if(!res.length){el.innerHTML='<div class="empty"><div class="empty-icon">🚗</div><div class="empty-text">Aucune réservation ce mois</div></div>';return;}
-  el.innerHTML=res.map(r=>{
-    const vip=isVip(r.clientId);const benef=getBenef(r);const km=getTotalKm(r);
-    const c=clientObj(r.clientId);
-    const dStr=new Date(r.dateAller).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'});
-    const tLabel={aller:'Aller','ar-jour':'A/R jour','ar-diff':'A/R différé'}[r.type]||r.type;
-    const sLabel={depose:'Dépose',recuperation:'Récup.',navette:'Navette',autre:'Autre'}[r.service]||'';
-    return `<div class="res-card" onclick="showDetailRes('${r.id}')">
-      ${c?.blacklist?'<div class="item-accent" style="background:var(--red)"></div>':''}
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div><div class="res-client">${clientName(r.clientId)}${vip?' ⭐':''}${c?.blacklist?' ⛔':''}</div>
-        <div style="font-size:0.75rem;color:var(--text3)">${dStr}${r.type!=='aller'&&r.dateRetour?' → '+new Date(r.dateRetour).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'}):''}</div></div>
-        <div class="res-price">${fmt(r.prix)}</div>
-      </div>
-      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px">${r.depart||'—'} → ${r.arrivee||'—'}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">
-        <span class="badge bb">${tLabel}</span><span class="badge bp">${sLabel}</span>
-        <span class="badge ${benef>=0?'bgr':'br'}">${benef>=0?'+':''}${fmt(benef)}</span>
-        ${km?`<span class="badge bb">${km.toFixed(1)}km</span>`:''}
-        ${r.vol?`<span class="badge bg">✈ ${r.vol}</span>`:''}
-        ${r.paiement==='virement'&&!r.vmtRecu?`<div class="res-virement">💸 Virement en attente</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
 }
 
 // ===== CALENDRIER =====
 function renderCal(){
   document.getElementById('cal-month').textContent=MONTHS[curMonth]+' '+curYear;
+  if(calView==='semaine'){renderWeekPlanning();return;}
   const first=new Date(curYear,curMonth,1).getDay();
   const days=new Date(curYear,curMonth+1,0).getDate();
   const start=(first+6)%7;
@@ -955,6 +1074,13 @@ function renderParams(){
   document.getElementById('charges-list').innerHTML=db.charges.length?db.charges.map(c=>`<div class="sitem"><div class="sitem-left"><div class="sitem-label">${c.nom}</div><div class="sitem-sub">${fmt(c.montant)}/mois</div></div><button class="btn btn-red btn-sm" onclick="db.charges=db.charges.filter(x=>x.id!=='${c.id}');save();renderAll()">✕</button></div>`).join(''):'<div style="color:var(--text3);font-size:0.82rem;padding:8px 2px">Aucune charge</div>';
   const today=new Date();
   document.getElementById('entretien-list').innerHTML=db.entretien.length?db.entretien.map(e=>{const urgent=e.date&&(new Date(e.date)-today)/86400000<30;return `<div class="entretien-item ${urgent?'entretien-soon':'entretien-ok'}"><div><div style="font-weight:600;font-size:0.88rem">${e.type} · ${db.settings.vehicles[e.vehicule||0]?.nom||'Voiture'}</div><div style="font-size:0.75rem;color:var(--text2)">${e.date?'Avant le '+new Date(e.date).toLocaleDateString('fr-BE'):''}${e.kmLast?' · '+e.kmLast+'km':''}</div></div><button class="btn btn-red btn-sm" onclick="db.entretien=db.entretien.filter(x=>x.id!=='${e.id}');save();renderAll()">✕</button></div>`;}).join(''):'<div style="color:var(--text3);font-size:0.82rem;padding:8px 2px">Aucun entretien enregistré</div>';
+
+  // Adresses favorites
+  const favs=db.favAddresses||[];
+  const favEl=document.getElementById('fav-addr-settings');
+  if(favEl)favEl.innerHTML=favs.length?favs.map(f=>`<div class="sitem"><div class="sitem-left"><div class="sitem-label">📍 ${f.nom}</div><div class="sitem-sub">${f.adresse}</div></div><button class="btn btn-red btn-sm" onclick="db.favAddresses=db.favAddresses.filter(x=>x.id!=='${f.id}');save();renderAll()">✕</button></div>`).join(''):'<div style="color:var(--text3);font-size:0.82rem;padding:8px 2px">Aucune adresse favorite</div>';
+
+  document.getElementById('fin-year').textContent=curYear;
   let tot3Km=0,tot3Diesel=0;const ch=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0);
   for(let i=0;i<3;i++){let m=curMonth-i,y=curYear;if(m<0){m+=12;y--;}tot3Km+=getMonthRes(m,y).reduce((s,r)=>s+getTotalKm(r),0);tot3Diesel+=getMonthCarb(m,y).reduce((s,c)=>s+parseFloat(c.prix||0),0);}
   const cKm=tot3Km>0?tot3Diesel/3/(tot3Km/3):0;const chKm=tot3Km>0?ch/(tot3Km/3):0;
@@ -1001,6 +1127,7 @@ function acSel(role,display,lat,lon){
     'home':['home-adr','home-lat','home-lon','ac-home'],
     'dv-dep':['dv-dep','dv-dep-lat','dv-dep-lon','ac-dv-dep'],
     'dv-arr':['dv-arr','dv-arr-lat','dv-arr-lon','ac-dv-arr'],
+    'fav-addr':['fav-adresse','fav-lat','fav-lon','ac-fav'],
   };
   const m=map[role];
   if(m){document.getElementById(m[0]).value=display;document.getElementById(m[1]).value=lat;document.getElementById(m[2]).value=lon;document.getElementById(m[3]).style.display='none';}
@@ -1028,13 +1155,29 @@ async function calcDist(){
 }
 
 async function calcKmMaison(){
+  // Retour à vide = depuis le point d'ARRIVÉE (où on dépose le client) vers chez soi
   const home=db.settings.homeAddress;if(!home?.lat)return;
   const arr=acCoords['r-arrivee'];if(!arr)return;
   try{
     const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${arr.lon},${arr.lat};${home.lon},${home.lat}?overview=false`);
     const d=await r.json();
-    if(d.routes&&d.routes[0]){acCoords['km-maison']=parseFloat((d.routes[0].distance/1000).toFixed(1));updVideHint(1);updVideHint(2);}
+    if(d.routes&&d.routes[0]){
+      acCoords['km-maison']=parseFloat((d.routes[0].distance/1000).toFixed(1));
+      updVideHint(1);updVideHint(2);
+    }
   }catch(e){}
+}
+
+// Calcul km pour aller chercher le client (maison → point de départ)
+async function calcKmAller(){
+  const home=db.settings.homeAddress;if(!home?.lat)return 0;
+  const dep=acCoords['r-depart'];if(!dep)return 0;
+  try{
+    const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${home.lon},${home.lat};${dep.lon},${dep.lat}?overview=false`);
+    const d=await r.json();
+    if(d.routes&&d.routes[0])return parseFloat((d.routes[0].distance/1000).toFixed(1));
+  }catch(e){}
+  return 0;
 }
 
 // ===== RESERVATION STEPS =====
@@ -1046,7 +1189,7 @@ function openNewRes(){
 
 function resetResForm(){
   acCoords['r-depart']=null;acCoords['r-arrivee']=null;acCoords['km-maison']=null;acCoords['devis-prix']=null;
-  ['r-depart','r-dep-lat','r-dep-lon','r-arrivee','r-arr-lat','r-arr-lon','r-distance','r-duree','r-vol','r-prix','r-notes','r-date-retour','r-heure-retour'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['r-depart','r-dep-lat','r-dep-lon','r-arrivee','r-arr-lat','r-arr-lon','r-distance','r-duree','r-vol','r-prix','r-notes','r-date-retour','r-heure-retour','r-km-pickup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['r-peages','r-parking','r-attente'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='0';});
   document.getElementById('r-passagers').value=1;
   document.getElementById('r-vmt-recu').checked=false;
@@ -1157,10 +1300,12 @@ function updBenef(){
   const prix=parseFloat(document.getElementById('r-prix').value||0);
   const peages=parseFloat(document.getElementById('r-peages').value||0);
   const park=parseFloat(document.getElementById('r-parking').value||0);
+  const pickup=parseFloat(document.getElementById('r-km-pickup').value||0);
   const vIdx=parseInt(document.getElementById('r-vehicule').value||0);
   const v=db.settings.vehicles[vIdx]||db.settings.vehicles[0];
   let km=dist;if(type==='ar-jour'||type==='ar-diff')km+=dist;
   if(v1)km+=getKmVideVal(1);if(v2)km+=getKmVideVal(2);
+  km+=pickup; // km pour aller chercher le client
   const cout=km*v.cout;const benef=prix-cout-peages-park;
   document.getElementById('prev-km').textContent=fmtKm(km);
   document.getElementById('prev-cout').textContent=fmt(cout);
@@ -1177,12 +1322,19 @@ async function updDevis(){
     const distHome=d.routes[0].distance/1000;
     const tarif=distHome<=db.settings.tarifs.rayon?db.settings.tarifs.court:db.settings.tarifs.long;
     const distTrajet=parseFloat(document.getElementById('r-distance').value||0);if(!distTrajet)return;
+    const type=document.getElementById('r-type').value;
     const cid=document.getElementById('r-client').value;
-    let prix=Math.max(db.settings.tarifs.min,distTrajet*tarif);
-    if(cid&&isVip(cid))prix=prix*(1-db.settings.vip.reduc/100);
-    prix=Math.round(prix*2)/2;
+    // Prix selon type de trajet
+    let prixBase=Math.max(db.settings.tarifs.min,distTrajet*tarif);
+    if(type==='ar-jour'||type==='ar-diff'){
+      // Aller-retour : aller + retour (même tarif)
+      prixBase=Math.max(db.settings.tarifs.min*2, distTrajet*tarif*2);
+    }
+    if(cid&&isVip(cid))prixBase=prixBase*(1-db.settings.vip.reduc/100);
+    const prix=Math.round(prixBase*2)/2;
+    const typeLabel=type==='aller'?'Aller simple':'Aller-retour';
     document.getElementById('r-devis-price').textContent=fmt(prix);
-    document.getElementById('r-devis-detail').textContent=`${distHome.toFixed(1)}km de chez vous → ${tarif.toFixed(2).replace('.',',')}€/km · ${distTrajet}km de trajet${cid&&isVip(cid)?` · -${db.settings.vip.reduc}% VIP`:''}`;
+    document.getElementById('r-devis-detail').textContent=`${typeLabel} · ${distHome.toFixed(1)}km de chez vous → ${tarif.toFixed(2).replace('.',',')}€/km · ${distTrajet}km${type!=='aller'?' × 2':''} ${cid&&isVip(cid)?`· -${db.settings.vip.reduc}% VIP`:''}`;
     document.getElementById('r-devis-box').style.display='block';
     acCoords['devis-prix']=prix;
   }catch(e){}
@@ -1193,7 +1345,7 @@ async function saveReservation(){
   const editId=document.getElementById('res-edit-id').value;
   const v1=document.getElementById('r-vide1').checked;const v2=document.getElementById('r-vide2').checked;
   const km1=v1?getKmVideVal(1):0;const km2=v2?getKmVideVal(2):0;
-  const res={id:editId||genId(),clientId:document.getElementById('r-client').value,vehicule:parseInt(document.getElementById('r-vehicule').value||0),passagers:document.getElementById('r-passagers').value,bagages:document.getElementById('r-bagages').value,type:document.getElementById('r-type').value,service:document.getElementById('r-service').value,dateAller:document.getElementById('r-date-aller').value,heure:document.getElementById('r-heure-aller').value,dateRetour:document.getElementById('r-date-retour').value,heureRetour:document.getElementById('r-heure-retour').value,depart:document.getElementById('r-depart').value,arrivee:document.getElementById('r-arrivee').value,distance:document.getElementById('r-distance').value,duree:document.getElementById('r-duree').value,vol:document.getElementById('r-vol').value.toUpperCase(),vide1:v1,km1,vide2:v2,km2,prix:document.getElementById('r-prix').value,paiement:document.getElementById('r-paiement').value,vmtRecu:document.getElementById('r-vmt-recu').checked,peages:document.getElementById('r-peages').value,parking:document.getElementById('r-parking').value,attente:document.getElementById('r-attente').value,notes:document.getElementById('r-notes').value};
+  const res={id:editId||genId(),clientId:document.getElementById('r-client').value,vehicule:parseInt(document.getElementById('r-vehicule').value||0),passagers:document.getElementById('r-passagers').value,bagages:document.getElementById('r-bagages').value,type:document.getElementById('r-type').value,service:document.getElementById('r-service').value,dateAller:document.getElementById('r-date-aller').value,heure:document.getElementById('r-heure-aller').value,dateRetour:document.getElementById('r-date-retour').value,heureRetour:document.getElementById('r-heure-retour').value,depart:document.getElementById('r-depart').value,arrivee:document.getElementById('r-arrivee').value,distance:document.getElementById('r-distance').value,duree:document.getElementById('r-duree').value,vol:document.getElementById('r-vol').value.toUpperCase(),kmPickup:document.getElementById('r-km-pickup').value||0,vide1:v1,km1,vide2:v2,km2,prix:document.getElementById('r-prix').value,paiement:document.getElementById('r-paiement').value,vmtRecu:document.getElementById('r-vmt-recu').checked,peages:document.getElementById('r-peages').value,parking:document.getElementById('r-parking').value,attente:document.getElementById('r-attente').value,notes:document.getElementById('r-notes').value};
   if(editId){const i=db.reservations.findIndex(r=>r.id===editId);if(i!==-1)db.reservations[i]=res;}else db.reservations.push(res);
   save();closeModal('m-res');renderAll();
 }
@@ -1243,16 +1395,17 @@ function showDetailRes(id){
     <div class="dr"><span class="dr-label">Départ</span><span class="dr-val">${r.depart||'—'}</span></div>
     <div class="dr"><span class="dr-label">Arrivée</span><span class="dr-val">${r.arrivee||'—'}</span></div>
     <div class="dr"><span class="dr-label">Distance aller</span><span class="dr-val">${r.distance||'—'} km</span></div>
+    ${parseFloat(r.kmPickup||0)>0?`<div class="dr"><span class="dr-label">+ Km pour aller chercher client</span><span class="dr-val orange">+ ${parseFloat(r.kmPickup).toFixed(1)} km</span></div>`:''}
     ${r.type!=='aller'?`<div class="dr"><span class="dr-label">+ Retour inclus</span><span class="dr-val">+ ${r.distance||0} km</span></div>`:''}
-    ${r.vide1?`<div class="dr"><span class="dr-label">+ Retour à vide aller</span><span class="dr-val red">+ ${parseFloat(r.km1||0).toFixed(1)} km</span></div>`:''}
-    ${r.vide2?`<div class="dr"><span class="dr-label">+ Retour à vide retour</span><span class="dr-val red">+ ${parseFloat(r.km2||0).toFixed(1)} km</span></div>`:''}
+    ${r.vide1?`<div class="dr"><span class="dr-label">+ Retour à vide aller</span><span class="dr-val red">+ ${parseFloat(r.km1||0).toFixed(1)} km (${r.arrivee?.substring(0,20)||'—'} → maison)</span></div>`:''}
+    ${r.vide2?`<div class="dr"><span class="dr-label">+ Retour à vide retour</span><span class="dr-val red">+ ${parseFloat(r.km2||0).toFixed(1)} km (${r.arrivee?.substring(0,20)||'—'} → maison)</span></div>`:''}
     <div class="dr"><span class="dr-label">Km total réel</span><span class="dr-val blue">${km.toFixed(1)} km</span></div>
     ${r.vol?`<div class="dr"><span class="dr-label">Vol</span><span class="dr-val"><a href="https://www.flightradar24.com/data/flights/${r.vol.toLowerCase()}" target="_blank" style="color:var(--blue2)">✈ ${r.vol} →</a></span></div>`:''}
     <div class="dr"><span class="dr-label">Passagers</span><span class="dr-val">${r.passagers||1}</span></div>
     <div class="dr"><span class="dr-label">Bagages</span><span class="dr-val">${{non:'Non',oui:'Oui',volumineux:'Volumineux'}[r.bagages]||'Non'}</span></div>
     <div class="dr"><span class="dr-label">Véhicule</span><span class="dr-val">${v.nom}</span></div>
     <div class="dr"><span class="dr-label">Prix demandé</span><span class="dr-val gold">${fmt(r.prix)}</span></div>
-    <div class="dr"><span class="dr-label">Paiement</span><span class="dr-val">${{cash:'💵 Cash',carte:'💳 Carte',virement:'🏦 Virement'}[r.paiement]||r.paiement}${r.paiement==='virement'?(r.vmtRecu?' ✅':' ⏳'):''}</span></div>
+    <div class="dr"><span class="dr-label">Paiement</span><span class="dr-val">${{cash:'💵 Cash',carte:'💳 Carte',virement:'🏦 Virement'}[r.paiement]||r.paiement}${r.paiement==='virement'?(r.vmtRecu?' ✅':' ⏳'):''}</span>${r.paiement==='virement'&&!r.vmtRecu?`<button class="btn btn-green btn-sm" onclick="markVmt('${r.id}');closeModal('m-detail-res');renderAll()">✓ Marquer reçu</button>`:''}</div>
     ${parseFloat(r.peages||0)>0?`<div class="dr"><span class="dr-label">Péages</span><span class="dr-val red">- ${fmt(r.peages)}</span></div>`:''}
     ${parseFloat(r.parking||0)>0?`<div class="dr"><span class="dr-label">Parking</span><span class="dr-val red">- ${fmt(r.parking)}</span></div>`:''}
     ${parseInt(r.attente||0)>0?`<div class="dr"><span class="dr-label">Attente</span><span class="dr-val">${r.attente} min</span></div>`:''}
@@ -1261,6 +1414,7 @@ function showDetailRes(id){
     ${r.notes?`<div class="dr" style="border-bottom:none"><span class="dr-label">Notes</span><span class="dr-val">${r.notes}</span></div>`:''}`;
   document.getElementById('dr-edit-btn').onclick=()=>{closeModal('m-detail-res');editRes(id);};
   document.getElementById('dr-del-btn').onclick=()=>{if(confirm('Supprimer cette réservation ?')){db.reservations=db.reservations.filter(x=>x.id!==id);save();closeModal('m-detail-res');renderAll();}};
+  document.getElementById('dr-dup-btn').onclick=()=>duplicateRes(id);
   openModal('m-detail-res');
 }
 
@@ -1280,6 +1434,7 @@ function editRes(id){
   document.getElementById('r-arrivee').value=r.arrivee||'';
   document.getElementById('r-distance').value=r.distance||'';
   document.getElementById('r-duree').value=r.duree||'';
+  document.getElementById('r-km-pickup').value=r.kmPickup||'';
   document.getElementById('r-vol').value=r.vol||'';
   document.getElementById('r-date-retour').value=r.dateRetour||'';
   document.getElementById('r-heure-retour').value=r.heureRetour||'';
@@ -1439,8 +1594,299 @@ function selectChip(el,hiddenId,val){const c=el.closest('.chips');c.querySelecto
 function setChips(contId,hiddenId,val){const c=document.getElementById(contId);if(!c)return;c.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',(x.getAttribute('onclick')||'').includes("'"+val+"'")));const h=document.getElementById(hiddenId);if(h)h.value=val;}
 function updClientSelect(){const sel=document.getElementById('r-client');const cur=sel.value;sel.innerHTML='<option value="">-- Sélectionner --</option>'+[...db.clients].sort((a,b)=>a.nom.localeCompare(b.nom,'fr')).map(c=>`<option value="${c.id}" ${cur===c.id?'selected':''}>${c.nom}${isVip(c.id)?' ⭐':''}${c.blacklist?' ⛔':''}</option>`).join('');if(cur)sel.value=cur;}
 
+// ===== RESERVATION STATUS =====
+function getResStatus(r){
+  const today=new Date();today.setHours(0,0,0,0);
+  const d=new Date(r.dateAller);d.setHours(0,0,0,0);
+  const diff=(d-today)/86400000;
+  if(diff>0)return 'upcoming';
+  if(diff===0)return 'today';
+  return 'done';
+}
+function getStatusBadge(r){
+  const s=getResStatus(r);
+  if(s==='today')return `<span class="status-today">🔥 Aujourd'hui</span>`;
+  if(s==='upcoming'){const d=new Date(r.dateAller);const diff=Math.ceil((d-new Date())/(86400000));return `<span class="status-upcoming">Dans ${diff}j</span>`;}
+  return `<span class="status-done">✓ Terminée</span>`;
+}
+
+// ===== FILTER & SEARCH =====
+function setResFilter(f,el){
+  resFilter=f;
+  document.querySelectorAll('#page-res .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderRes();
+}
+function setCalView(v,el){
+  calView=v;
+  document.querySelectorAll('#page-cal .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if(v==='mois'){document.getElementById('cal-grid').style.display='grid';document.getElementById('cal-detail').style.display='block';document.getElementById('week-planning').style.display='none';}
+  else{document.getElementById('cal-grid').style.display='none';document.getElementById('cal-detail').style.display='none';document.getElementById('week-planning').style.display='block';renderWeekPlanning();}
+}
+
+// ===== WEEK PLANNING =====
+function renderWeekPlanning(){
+  const el=document.getElementById('week-planning');
+  const today=new Date();
+  let html='<div class="sec"><span class="sec-title">7 prochains jours</span></div>';
+  for(let i=0;i<7;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const dayRes=db.reservations.filter(r=>{const rd=new Date(r.dateAller);return rd.toDateString()===d.toDateString();}).sort((a,b)=>a.heure?.localeCompare(b.heure||'')||0);
+    const isToday=i===0;
+    const dayNames=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const dayName=dayNames[d.getDay()];
+    const dateStr=d.toLocaleDateString('fr-BE',{day:'2-digit',month:'short'});
+    const gains=dayRes.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+    html+=`<div class="week-day ${isToday?'today-week':''}">
+      <div class="week-day-header">
+        <span class="week-day-name">${isToday?'🔥 Aujourd\'hui':dayName}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${gains>0?`<span style="font-size:0.75rem;color:var(--green);font-weight:700">${fmt(gains)}</span>`:''}
+          <span class="week-day-date">${dateStr}</span>
+        </div>
+      </div>
+      ${dayRes.length?dayRes.map(r=>`
+        <div class="week-trip" onclick="showDetailRes('${r.id}')">
+          <div class="week-trip-time">${r.heure||'—'} · ${fmt(r.prix)}</div>
+          <div class="week-trip-client">${clientName(r.clientId)}${isVip(r.clientId)?' ⭐':''}</div>
+          <div class="week-trip-route">${r.depart?.substring(0,25)||'—'} → ${r.arrivee?.substring(0,25)||'—'}</div>
+        </div>`).join(''):`<div style="color:var(--text3);font-size:0.78rem;padding:4px 0">Aucun trajet</div>`}
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ===== FAV ADDRESSES =====
+function acSel(role,display,lat,lon){
+  acCoords[role]={lat:parseFloat(lat),lon:parseFloat(lon)};
+  const map={
+    'r-depart':['r-depart','r-dep-lat','r-dep-lon','ac-r-dep'],
+    'r-arrivee':['r-arrivee','r-arr-lat','r-arr-lon','ac-r-arr'],
+    'c-adresse':['c-adresse','c-lat','c-lon','ac-c-adr'],
+    'home':['home-adr','home-lat','home-lon','ac-home'],
+    'dv-dep':['dv-dep','dv-dep-lat','dv-dep-lon','ac-dv-dep'],
+    'dv-arr':['dv-arr','dv-arr-lat','dv-arr-lon','ac-dv-arr'],
+    'fav-addr':['fav-adresse','fav-lat','fav-lon','ac-fav'],
+  };
+  const m=map[role];
+  if(m){document.getElementById(m[0]).value=display;document.getElementById(m[1]).value=lat;document.getElementById(m[2]).value=lon;document.getElementById(m[3]).style.display='none';}
+  if(role==='r-depart'||role==='r-arrivee'){if(acCoords['r-depart']&&acCoords['r-arrivee'])calcDist();calcKmMaison();updDevis();}
+  if(role==='dv-dep'||role==='dv-arr'){if(acCoords['dv-dep']&&acCoords['dv-arr'])calcDevis();}
+}
+
+function saveFavAddr(){
+  const nom=document.getElementById('fav-nom').value.trim();
+  const adresse=document.getElementById('fav-adresse').value.trim();
+  if(!nom||!adresse){alert('Nom et adresse requis');return;}
+  if(!db.favAddresses)db.favAddresses=[];
+  db.favAddresses.push({id:genId(),nom,adresse,lat:parseFloat(document.getElementById('fav-lat').value)||null,lon:parseFloat(document.getElementById('fav-lon').value)||null});
+  document.getElementById('fav-nom').value='';document.getElementById('fav-adresse').value='';
+  save();renderFavAddrList();renderParams();
+}
+
+function renderFavAddrList(){
+  const favs=db.favAddresses||[];
+  const listEl=document.getElementById('fav-addr-list');
+  if(listEl)listEl.innerHTML=favs.length?favs.map(f=>`<div class="sitem"><div class="sitem-left"><div class="sitem-label">${f.nom}</div><div class="sitem-sub">${f.adresse}</div></div><button class="btn btn-red btn-sm" onclick="db.favAddresses=db.favAddresses.filter(x=>x.id!=='${f.id}');save();renderFavAddrList();renderParams()">✕</button></div>`).join(''):'<div style="color:var(--text3);font-size:0.82rem;padding:8px 0">Aucune adresse favorite</div>';
+}
+
+function applyFavAddr(role,f){
+  acCoords[role]={lat:f.lat,lon:f.lon};
+  const inputId=role==='r-depart'?'r-depart':'r-arrivee';
+  document.getElementById(inputId).value=f.adresse;
+  if(role==='r-depart'){document.getElementById('r-dep-lat').value=f.lat;document.getElementById('r-dep-lon').value=f.lon;}
+  else{document.getElementById('r-arr-lat').value=f.lat;document.getElementById('r-arr-lon').value=f.lon;}
+  if(acCoords['r-depart']&&acCoords['r-arrivee'])calcDist();
+}
+
+function renderFavChips(role){
+  const favs=db.favAddresses||[];
+  if(!favs.length)return '';
+  return `<div class="fav-addr">${favs.map(f=>`<div class="fav-addr-chip" onclick="applyFavAddr('${role}',${JSON.stringify(f).replace(/"/g,'&quot;')})">📍 ${f.nom}</div>`).join('')}</div>`;
+}
+
+// ===== TEMPLATES =====
+function saveTemplate(){
+  const tpl={id:genId(),nom:document.getElementById('tpl-nom').value.trim(),depart:document.getElementById('tpl-depart').value.trim(),arrivee:document.getElementById('tpl-arrivee').value.trim(),distance:document.getElementById('tpl-distance').value,prix:document.getElementById('tpl-prix').value};
+  if(!tpl.nom){alert('Nom requis');return;}
+  if(!db.templates)db.templates=[];
+  db.templates.push(tpl);
+  ['tpl-nom','tpl-depart','tpl-arrivee','tpl-distance','tpl-prix'].forEach(id=>document.getElementById(id).value='');
+  save();renderTemplates();
+}
+
+function renderTemplates(){
+  const tpls=db.templates||[];
+  const listEl=document.getElementById('templates-list');
+  if(listEl)listEl.innerHTML=tpls.length?tpls.map(t=>`<div class="template-item" onclick="applyTemplate('${t.id}')"><div><div style="font-weight:600;font-size:0.88rem">${t.nom}</div><div style="font-size:0.75rem;color:var(--text2)">${t.depart||'—'} → ${t.arrivee||'—'} · ${t.distance||'?'}km · ${fmt(t.prix)}</div></div><button class="btn btn-red btn-sm" onclick="event.stopPropagation();db.templates=db.templates.filter(x=>x.id!=='${t.id}');save();renderTemplates()">✕</button></div>`).join(''):'<div style="color:var(--text3);font-size:0.82rem;padding:8px 0">Aucun modèle enregistré</div>';
+  const prevEl=document.getElementById('templates-preview');
+  if(prevEl)prevEl.innerHTML=tpls.slice(0,2).map(t=>`<div class="template-item" onclick="applyTemplate('${t.id}')"><div><div style="font-weight:600;font-size:0.85rem">⚡ ${t.nom}</div><div style="font-size:0.72rem;color:var(--text2)">${t.distance||'?'}km · ${fmt(t.prix)}</div></div><span style="color:var(--gold);font-size:0.8rem">Utiliser →</span></div>`).join('');
+}
+
+function applyTemplate(id){
+  const t=(db.templates||[]).find(x=>x.id===id);if(!t)return;
+  openNewRes();
+  setTimeout(()=>{
+    document.getElementById('r-depart').value=t.depart||'';
+    document.getElementById('r-arrivee').value=t.arrivee||'';
+    document.getElementById('r-distance').value=t.distance||'';
+    document.getElementById('r-prix').value=t.prix||'';
+    updBenef();
+  },200);
+  closeModal('m-templates');
+}
+
+// ===== BILAN ANNUEL =====
+function genBilanAnnuel(){
+  const year=curYear;
+  document.getElementById('bilan-title').textContent='Bilan annuel '+year;
+  let totalRec=0,totalBenef=0,totalKm=0,bestMonth=-1,bestGains=0;
+  const rows=[];
+  for(let m=0;m<12;m++){
+    const res=getMonthRes(m,year);const carbs=getMonthCarb(m,year);
+    const v=getV();
+    const rec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+    const km=res.reduce((s,r)=>s+getTotalKm(r),0);
+    const diesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);
+    const charges=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0);
+    const benef=rec-km*v.cout-charges-diesel;
+    totalRec+=rec;totalBenef+=benef;totalKm+=km;
+    if(rec>bestGains){bestGains=rec;bestMonth=m;}
+    rows.push({m,rec,benef,km,nb:res.length});
+  }
+  document.getElementById('bilan-content').innerHTML=`
+    <div class="sg3" style="margin-bottom:12px">
+      <div class="stat"><div class="stat-label">Recettes totales</div><div class="stat-val gold">${fmt(totalRec)}</div></div>
+      <div class="stat"><div class="stat-label">Bénéfice net</div><div class="stat-val ${totalBenef>=0?'green':'red'}">${fmt(totalBenef)}</div></div>
+      <div class="stat"><div class="stat-label">Km totaux</div><div class="stat-val blue">${fmtKm(totalKm)}</div></div>
+    </div>
+    ${bestMonth>=0?`<div class="alert alert-gold">🏆 Meilleur mois : ${MONTHS[bestMonth]} avec ${fmt(bestGains)}</div>`:''}
+    <div class="divider"></div>
+    ${rows.map(r=>`<div class="annual-month ${r.m===bestMonth?'best':''}">
+      <div><div style="font-weight:600;font-size:0.85rem">${MONTHS[r.m]}${r.m===bestMonth?' 🏆':''}</div>
+      <div style="font-size:0.72rem;color:var(--text2)">${r.nb} rés. · ${fmtKm(r.km)}</div></div>
+      <div style="text-align:right"><div style="font-weight:700;color:var(--gold)">${fmt(r.rec)}</div>
+      <div style="font-size:0.72rem;color:${r.benef>=0?'var(--green)':'var(--red)'}">${fmt(r.benef)} net</div></div>
+    </div>`).join('')}`;
+  openModal('m-bilan');
+}
+
+function exportBilanCSV(){
+  let csv='Mois;Réservations;Recettes;Bénéfice;Km\n';
+  for(let m=0;m<12;m++){
+    const res=getMonthRes(m,curYear);const carbs=getMonthCarb(m,curYear);const v=getV();
+    const rec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+    const km=res.reduce((s,r)=>s+getTotalKm(r),0);
+    const diesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);
+    const charges=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0);
+    const benef=rec-km*v.cout-charges-diesel;
+    csv+=`${MONTHS[m]};${res.length};${rec.toFixed(2)};${benef.toFixed(2)};${km.toFixed(1)}\n`;
+  }
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`facciolini_bilan_${curYear}.csv`;a.click();
+}
+
+// ===== COMPARISON PREV MONTH =====
+function getComparison(){
+  let pm=curMonth-1,py=curYear;if(pm<0){pm=11;py--;}
+  const cur=getMonthRes(curMonth,curYear).reduce((s,r)=>s+parseFloat(r.prix||0),0);
+  const prev=getMonthRes(pm,py).reduce((s,r)=>s+parseFloat(r.prix||0),0);
+  if(prev===0)return null;
+  const pct=Math.round((cur-prev)/prev*100);
+  return{cur,prev,pct};
+}
+
+// ===== DUPLICATE RESERVATION =====
+function duplicateRes(id){
+  const r=db.reservations.find(x=>x.id===id);if(!r)return;
+  document.getElementById('res-edit-id').value='';
+  document.getElementById('res-modal-title').textContent='Dupliquer réservation';
+  resetResForm();
+  document.getElementById('r-client').value=r.clientId;onClientChange();
+  setChips('r-vehicule-chips','r-vehicule',String(r.vehicule||0));
+  document.getElementById('r-passagers').value=r.passagers||1;
+  setChips('r-type-chips','r-type',r.type||'aller');
+  setChips('r-service-chips','r-service',r.service||'depose');
+  document.getElementById('r-date-aller').value=new Date().toISOString().split('T')[0];
+  document.getElementById('r-heure-aller').value=r.heure||'';
+  document.getElementById('r-depart').value=r.depart||'';
+  document.getElementById('r-arrivee').value=r.arrivee||'';
+  document.getElementById('r-distance').value=r.distance||'';
+  document.getElementById('r-duree').value=r.duree||'';
+  document.getElementById('r-km-pickup').value=r.kmPickup||'';
+  document.getElementById('r-prix').value=r.prix||'';
+  setChips('r-paiement-chips','r-paiement',r.paiement||'cash');
+  document.getElementById('r-peages').value=r.peages||0;
+  document.getElementById('r-parking').value=r.parking||0;
+  document.getElementById('r-notes').value=r.notes||'';
+  updResType();updBenef();curStep=1;updResSteps();
+  closeModal('m-detail-res');openModal('m-res');
+}
+
+// ===== ALERT PRIX TROP BAS =====
+function checkPrixBas(){
+  const dist=parseFloat(document.getElementById('r-distance').value||0);
+  const type=document.getElementById('r-type').value;
+  const v1=document.getElementById('r-vide1').checked;const v2=document.getElementById('r-vide2').checked;
+  const prix=parseFloat(document.getElementById('r-prix').value||0);if(!prix)return;
+  const pickup=parseFloat(document.getElementById('r-km-pickup').value||0);
+  const vIdx=parseInt(document.getElementById('r-vehicule').value||0);
+  const v=db.settings.vehicles[vIdx]||db.settings.vehicles[0];
+  let km=dist;if(type==='ar-jour'||type==='ar-diff')km+=dist;
+  if(v1)km+=getKmVideVal(1);if(v2)km+=getKmVideVal(2);km+=pickup;
+  const cout=km*v.cout;
+  const hint=document.getElementById('r-vip-hint');
+  if(prix<cout){hint.textContent=`⚠️ Prix trop bas ! Votre coût réel est ${fmt(cout)} — vous perdez ${fmt(cout-prix)}`;hint.style.color='var(--red2)';}
+  else{const cid=document.getElementById('r-client').value;hint.textContent=isVip(cid)?`⭐ VIP — réduction de ${db.settings.vip.reduc}% suggérée`:'';hint.style.color='var(--gold)';}
+}
+
+// ===== CALL CLIENT =====
+function callClient(tel){if(tel)window.location.href='tel:'+tel;}
+
+// ===== RENDER RES (with filter + search + status) =====
+function renderRes(){
+  document.getElementById('res-month').textContent=MONTHS[curMonth]+' '+curYear;
+  const search=(document.getElementById('res-search')?.value||'').toLowerCase().trim();
+  let res;
+  if(resFilter==='upcoming')res=[...db.reservations].filter(r=>getResStatus(r)==='upcoming');
+  else if(resFilter==='today')res=[...db.reservations].filter(r=>getResStatus(r)==='today');
+  else if(resFilter==='done')res=[...db.reservations].filter(r=>getResStatus(r)==='done');
+  else res=getMonthRes(curMonth,curYear);
+  if(search)res=res.filter(r=>clientName(r.clientId).toLowerCase().includes(search)||(r.depart||'').toLowerCase().includes(search)||(r.arrivee||'').toLowerCase().includes(search));
+  res=res.sort((a,b)=>new Date(b.dateAller)-new Date(a.dateAller));
+  const el=document.getElementById('res-list');
+  if(!res.length){el.innerHTML='<div class="empty"><div class="empty-icon">🚗</div><div class="empty-text">Aucune réservation trouvée</div></div>';return;}
+  el.innerHTML=res.map(r=>{
+    const vip=isVip(r.clientId);const benef=getBenef(r);const km=getTotalKm(r);
+    const c=clientObj(r.clientId);
+    const dStr=new Date(r.dateAller).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'});
+    const tLabel={aller:'Aller','ar-jour':'A/R jour','ar-diff':'A/R différé'}[r.type]||r.type;
+    const sLabel={depose:'Dépose',recuperation:'Récup.',navette:'Navette',autre:'Autre'}[r.service]||'';
+    return `<div class="res-card" onclick="showDetailRes('${r.id}')">
+      ${c?.blacklist?'<div class="item-accent" style="background:var(--red)"></div>':''}
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div><div class="res-client">${clientName(r.clientId)}${vip?' ⭐':''}${c?.blacklist?' ⛔':''}</div>
+        <div style="font-size:0.75rem;color:var(--text3)">${dStr} ${r.heure||''}${r.type!=='aller'&&r.dateRetour?' → '+new Date(r.dateRetour).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'}):''}</div></div>
+        <div style="text-align:right"><div class="res-price">${fmt(r.prix)}</div><div style="margin-top:3px">${getStatusBadge(r)}</div></div>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px">${r.depart?.substring(0,28)||'—'} → ${r.arrivee?.substring(0,28)||'—'}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">
+        <span class="badge bb">${tLabel}</span><span class="badge bp">${sLabel}</span>
+        <span class="badge ${benef>=0?'bgr':'br'}">${benef>=0?'+':''}${fmt(benef)}</span>
+        ${km?`<span class="badge bb">${km.toFixed(1)}km</span>`:''}
+        ${r.vol?`<span class="badge bg">✈ ${r.vol}</span>`:''}
+        ${r.paiement==='virement'&&!r.vmtRecu?`<div class="res-virement">💸 Virement en attente</div>`:''}
+        ${c?.tel?`<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();callClient('${c.tel}')" style="padding:3px 8px;font-size:0.67rem">📞</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ===== INIT =====
 load();
+if(!db.favAddresses)db.favAddresses=[];
+if(!db.templates)db.templates=[];
 if(!db.settings.pin)unlockApp();
 </script>
 </body>
