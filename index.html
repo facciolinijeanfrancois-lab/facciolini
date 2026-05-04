@@ -1285,20 +1285,8 @@ function renderTrajets() {
 }
 
 function detectRetourVideIntelligent() {
-  const sorted = [...db.trajets].sort((a,b) => new Date(a.date+' '+a.heure) - new Date(b.date+' '+b.heure));
-  sorted.forEach((t, i) => {
-    if (!t.retourVide) { t.retourVideAnnule = false; return; }
-    // Cherche un trajet suivant dont le départ est proche de l'arrivée
-    const next = sorted.slice(i+1).find(n => {
-      if (!n.depart || !t.arrivee) return false;
-      const dep = n.depart.toLowerCase().trim();
-      const arr = t.arrivee.toLowerCase().trim();
-      // Vérifie si les adresses partagent des mots clés
-      const wordsArr = arr.split(/[\s,]+/).filter(w => w.length > 3);
-      return wordsArr.some(w => dep.includes(w));
-    });
-    t.retourVideAnnule = !!next;
-  });
+  // Détection automatique désactivée — l'utilisateur gère manuellement les retours à vide
+  db.trajets.forEach(t => { t.retourVideAnnule = false; t.retourVide2Annule = false; });
 }
 
 function showDetailTrajet(id) {
