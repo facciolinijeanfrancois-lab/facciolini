@@ -450,10 +450,12 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
         <div class="fg"><label class="fl">Heure aller</label><input type="time" class="fi" id="r-heure-aller"></div>
       </div>
       <div class="fg"><label class="fl">Adresse départ</label>
+        <div id="fav-chips-depart"></div>
         <div class="ac-wrap"><input type="text" class="fi" id="r-depart" placeholder="Tapez une adresse..." autocomplete="off" oninput="acSearch(this,'ac-r-dep','r-depart')">
         <input type="hidden" id="r-dep-lat"><input type="hidden" id="r-dep-lon"><div class="ac-drop" id="ac-r-dep"></div></div>
       </div>
       <div class="fg"><label class="fl">Adresse arrivée</label>
+        <div id="fav-chips-arrivee"></div>
         <div class="ac-wrap"><input type="text" class="fi" id="r-arrivee" placeholder="Tapez une adresse..." autocomplete="off" oninput="acSearch(this,'ac-r-arr','r-arrivee')">
         <input type="hidden" id="r-arr-lat"><input type="hidden" id="r-arr-lon"><div class="ac-drop" id="ac-r-arr"></div></div>
       </div>
@@ -1206,6 +1208,8 @@ function resetResForm(){
   document.getElementById('r-date-aller').value=new Date().toISOString().split('T')[0];
   document.getElementById('r-heure-aller').value=new Date().toTimeString().slice(0,5);
   updClientSelect();
+  // Afficher les adresses favorites
+  renderFavChipsInForm();
 }
 
 function updResSteps(){
@@ -1657,7 +1661,29 @@ function renderWeekPlanning(){
   el.innerHTML=html;
 }
 
-// ===== FAV ADDRESSES =====
+// ===== FAV CHIPS IN FORM =====
+function renderFavChipsInForm(){
+  const favs=db.favAddresses||[];
+  if(!favs.length)return;
+  const makeChips=(role)=>favs.map(f=>`<div class="fav-addr-chip" onclick="applyFavAddr('${role}',${JSON.stringify({id:f.id,nom:f.nom,adresse:f.adresse,lat:f.lat,lon:f.lon}).replace(/"/g,"'")})">📍 ${f.nom}</div>`).join('');
+  const depEl=document.getElementById('fav-chips-depart');
+  const arrEl=document.getElementById('fav-chips-arrivee');
+  if(depEl)depEl.innerHTML=`<div class="fav-addr" style="margin-bottom:6px">${makeChips('r-depart')}</div>`;
+  if(arrEl)arrEl.innerHTML=`<div class="fav-addr" style="margin-bottom:6px">${makeChips('r-arrivee')}</div>`;
+}
+
+function applyFavAddr(role,f){
+  if(typeof f==='string')try{f=JSON.parse(f.replace(/'/g,'"'));}catch(e){return;}
+  const inputId=role==='r-depart'?'r-depart':'r-arrivee';
+  const latId=role==='r-depart'?'r-dep-lat':'r-arr-lat';
+  const lonId=role==='r-depart'?'r-dep-lon':'r-arr-lon';
+  document.getElementById(inputId).value=f.adresse;
+  document.getElementById(latId).value=f.lat||'';
+  document.getElementById(lonId).value=f.lon||'';
+  if(f.lat&&f.lon)acCoords[role]={lat:parseFloat(f.lat),lon:parseFloat(f.lon)};
+  if(acCoords['r-depart']&&acCoords['r-arrivee'])calcDist();
+  updDevis();
+}
 function acSel(role,display,lat,lon){
   acCoords[role]={lat:parseFloat(lat),lon:parseFloat(lon)};
   const map={
