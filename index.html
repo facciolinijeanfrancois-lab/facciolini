@@ -1225,6 +1225,8 @@ function updResSteps(){
   if(curStep===5){nb.textContent='✅ Enregistrer';nb.onclick=saveReservation;}
   else{nb.textContent='Suivant →';nb.onclick=()=>resStep(1);}
   if(curStep===5)genResSummary();
+  // Afficher favoris à l'étape 2
+  if(curStep===2)renderFavChipsInForm();
 }
 
 async function resStep(dir){
