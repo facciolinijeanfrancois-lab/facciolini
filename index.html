@@ -470,6 +470,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
 
       <div class="settings-section">
+        <div class="settings-title">Adresse maison</div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Votre domicile</div>
+            <div class="settings-item-sub" id="home-address-display">Non configuré</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openHomeModal()">Modifier</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
         <div class="settings-title">Tarification</div>
         <div class="settings-item">
           <div class="settings-item-left">
@@ -721,33 +732,55 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <input type="number" class="form-input" id="t-attente" value="0" min="0">
     </div>
 
-    <div class="toggle-row" style="padding:8px 0 14px">
+    <div class="toggle-row" style="padding:8px 0 6px">
       <span style="font-size:0.9rem">Retour à vide après l'<b>aller</b></span>
       <label class="toggle"><input type="checkbox" id="t-retour-vide" onchange="toggleRetourVide()"><span class="toggle-slider"></span></label>
     </div>
 
     <div id="retour-vide-section" style="display:none">
       <div class="return-info">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Km retour à vide (aller)</label>
-          <input type="number" class="form-input" id="t-km-vide" placeholder="Ex: 65" step="0.1">
-          <div class="form-hint">Laissez vide = même distance que l'aller</div>
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="form-label">Type de retour à vide</label>
+          <div class="chips" id="t-vide-type-chips">
+            <div class="chip active" onclick="selectChip(this,'t-vide-type','maison')">🏠 Maison</div>
+            <div class="chip" onclick="selectChip(this,'t-vide-type','depart')">↩ Point départ</div>
+            <div class="chip" onclick="selectChip(this,'t-vide-type','manuel')">✏️ Manuel</div>
+          </div>
+          <input type="hidden" id="t-vide-type" value="maison">
         </div>
+        <div id="t-km-vide-section" style="display:none">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Km retour à vide (aller)</label>
+            <input type="number" class="form-input" id="t-km-vide" placeholder="Ex: 15" step="0.1">
+          </div>
+        </div>
+        <div class="form-hint" id="t-vide-hint" style="color:var(--text2);margin-top:4px"></div>
       </div>
     </div>
 
     <div id="retour-vide-retour-section" style="display:none">
-      <div class="toggle-row" style="padding:8px 0 14px">
+      <div class="toggle-row" style="padding:8px 0 6px">
         <span style="font-size:0.9rem">Retour à vide après le <b>retour</b></span>
         <label class="toggle"><input type="checkbox" id="t-retour-vide2" onchange="toggleRetourVide2()"><span class="toggle-slider"></span></label>
       </div>
       <div id="retour-vide2-section" style="display:none">
         <div class="return-info">
-          <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">Km retour à vide (retour)</label>
-            <input type="number" class="form-input" id="t-km-vide2" placeholder="Ex: 65" step="0.1">
-            <div class="form-hint">Laissez vide = même distance que l'aller</div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label class="form-label">Type de retour à vide</label>
+            <div class="chips" id="t-vide2-type-chips">
+              <div class="chip active" onclick="selectChip(this,'t-vide2-type','maison')">🏠 Maison</div>
+              <div class="chip" onclick="selectChip(this,'t-vide2-type','depart')">↩ Point départ</div>
+              <div class="chip" onclick="selectChip(this,'t-vide2-type','manuel')">✏️ Manuel</div>
+            </div>
+            <input type="hidden" id="t-vide2-type" value="maison">
           </div>
+          <div id="t-km-vide2-section" style="display:none">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Km retour à vide (retour)</label>
+              <input type="number" class="form-input" id="t-km-vide2" placeholder="Ex: 15" step="0.1">
+            </div>
+          </div>
+          <div class="form-hint" id="t-vide2-hint" style="color:var(--text2);margin-top:4px"></div>
         </div>
       </div>
     </div>
@@ -954,6 +987,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <button class="btn btn-outline btn-full" onclick="closeModal('modal-detail-client')">Fermer</button>
       <button class="btn btn-gold btn-sm" id="dc-edit-btn">Modifier</button>
       <button class="btn btn-red btn-sm" id="dc-delete-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADRESSE MAISON -->
+<div class="modal-overlay" id="modal-home">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Votre adresse maison</div>
+    <div class="form-group">
+      <label class="form-label">Adresse</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" class="form-input" id="home-adresse" placeholder="Tapez votre adresse..." autocomplete="off" oninput="acSearch(this,'ac-home','home')">
+        <input type="hidden" id="home-lat">
+        <input type="hidden" id="home-lon">
+        <div class="autocomplete-dropdown" id="ac-home" style="display:none"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline btn-full" onclick="closeModal('modal-home')">Annuler</button>
+      <button class="btn btn-gold btn-full" onclick="saveHome()">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1440,6 +1494,8 @@ function deleteCarburant(id) {
 
 // ==================== SETTINGS ====================
 function renderSettings() {
+  const home = db.settings.homeAddress;
+  document.getElementById('home-address-display').textContent = home && home.adresse ? home.adresse : 'Non configuré';
   document.getElementById('cout-km-display').textContent = db.settings.coutKm.toFixed(2).replace('.',',') + ' €/km';
   document.getElementById('vip-seuil-display').textContent = `Dès le ${db.settings.vipSeuil}ème trajet → -${db.settings.vipReduc}%`;
 
@@ -1614,8 +1670,19 @@ function updateVipHint() {
   }
 }
 
-function saveTrajet() {
+async function saveTrajet() {
   const editId = document.getElementById('trajet-edit-id').value;
+  const distanceAller = document.getElementById('t-distance').value;
+  const videType = document.getElementById('t-vide-type').value;
+  const vide2Type = document.getElementById('t-vide2-type').value;
+  const retourVide = document.getElementById('t-retour-vide').checked;
+  const retourVide2 = document.getElementById('t-retour-vide2').checked;
+
+  // Calculer km à vide selon le type
+  let kmVide = 0, kmVide2 = 0;
+  if (retourVide) kmVide = await getKmVide(videType, document.getElementById('t-km-vide').value, distanceAller);
+  if (retourVide2) kmVide2 = await getKmVide(vide2Type, document.getElementById('t-km-vide2').value, distanceAller);
+
   const trajet = {
     id: editId || genId(),
     clientId: document.getElementById('t-client').value,
@@ -1627,7 +1694,7 @@ function saveTrajet() {
     service: document.getElementById('t-service').value,
     depart: document.getElementById('t-depart').value,
     arrivee: document.getElementById('t-arrivee').value,
-    distance: document.getElementById('t-distance').value,
+    distance: distanceAller,
     duree: document.getElementById('t-duree').value,
     vol: document.getElementById('t-vol').value.toUpperCase(),
     passagers: document.getElementById('t-passagers').value,
@@ -1638,10 +1705,8 @@ function saveTrajet() {
     peages: document.getElementById('t-peages').value,
     parking: document.getElementById('t-parking').value,
     attente: document.getElementById('t-attente').value,
-    retourVide: document.getElementById('t-retour-vide').checked,
-    kmVide: document.getElementById('t-km-vide').value,
-    retourVide2: document.getElementById('t-retour-vide2').checked,
-    kmVide2: document.getElementById('t-km-vide2').value,
+    retourVide, kmVide, videType,
+    retourVide2, kmVide2, vide2Type,
     notes: document.getElementById('t-notes').value
   };
   if (!trajet.clientId) { alert('Veuillez sélectionner un client'); return; }
@@ -1802,6 +1867,8 @@ function selectChip(el, hiddenId, val) {
       document.getElementById('retour-vide2-section').style.display = 'none';
     }
   }
+  if (hiddenId === 't-vide-type') updateVideHint('t-vide-type', 't-vide-hint', 't-km-vide-section');
+  if (hiddenId === 't-vide2-type') updateVideHint('t-vide2-type', 't-vide2-hint', 't-km-vide2-section');
 }
 function setChips(containerId, val) {
   const container = document.getElementById(containerId);
@@ -1816,23 +1883,78 @@ function setChips(containerId, val) {
 function toggleRetourVide() {
   const checked = document.getElementById('t-retour-vide').checked;
   document.getElementById('retour-vide-section').style.display = checked ? 'block' : 'none';
-  if (checked) {
-    const dist = document.getElementById('t-distance').value;
-    if (dist && !document.getElementById('t-km-vide').value) {
-      document.getElementById('t-km-vide').value = dist;
-    }
-  }
+  if (checked) updateVideHint('t-vide-type', 't-vide-hint', 't-km-vide-section');
 }
 
 function toggleRetourVide2() {
   const checked = document.getElementById('t-retour-vide2').checked;
   document.getElementById('retour-vide2-section').style.display = checked ? 'block' : 'none';
-  if (checked) {
-    const dist = document.getElementById('t-distance').value;
-    if (dist && !document.getElementById('t-km-vide2').value) {
-      document.getElementById('t-km-vide2').value = dist;
+  if (checked) updateVideHint('t-vide2-type', 't-vide2-hint', 't-km-vide2-section');
+}
+
+function updateVideHint(typeId, hintId, kmSectionId) {
+  const type = document.getElementById(typeId).value;
+  const hint = document.getElementById(hintId);
+  const kmSection = document.getElementById(kmSectionId);
+  const home = db.settings.homeAddress;
+
+  if (type === 'maison') {
+    kmSection.style.display = 'none';
+    if (home && home.adresse) {
+      hint.textContent = '🏠 Retour vers ' + home.adresse + (home.kmDefault ? ' (~' + home.kmDefault + ' km)' : ' — distance calculée auto');
+    } else {
+      hint.textContent = '⚠️ Configurez votre adresse maison dans les Paramètres';
+      hint.style.color = 'var(--red)';
     }
+  } else if (type === 'depart') {
+    kmSection.style.display = 'none';
+    hint.textContent = '↩ Même distance que l\'aller';
+    hint.style.color = 'var(--text2)';
+  } else {
+    kmSection.style.display = 'block';
+    hint.textContent = '';
   }
+}
+
+// Calcule km retour à vide selon le type choisi
+async function getKmVide(type, kmManuel, distanceAller, arriveeAdresse) {
+  if (type === 'depart') return parseFloat(distanceAller || 0);
+  if (type === 'manuel') return parseFloat(kmManuel || 0);
+  if (type === 'maison') {
+    const home = db.settings.homeAddress;
+    if (!home || !home.lat) return parseFloat(distanceAller || 0);
+    // Calculer via OSRM si on a les coordonnées d'arrivée
+    if (acCoords.arrivee) {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${acCoords.arrivee.lon},${acCoords.arrivee.lat};${home.lon},${home.lat}?overview=false`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (data.routes && data.routes[0]) {
+          return parseFloat((data.routes[0].distance / 1000).toFixed(1));
+        }
+      } catch(e) {}
+    }
+    return home.kmDefault || parseFloat(distanceAller || 0);
+  }
+  return parseFloat(distanceAller || 0);
+}
+
+function openHomeModal() {
+  const home = db.settings.homeAddress;
+  document.getElementById('home-adresse').value = home ? home.adresse || '' : '';
+  document.getElementById('home-lat').value = home ? home.lat || '' : '';
+  document.getElementById('home-lon').value = home ? home.lon || '' : '';
+  openModal('modal-home');
+}
+
+function saveHome() {
+  const adresse = document.getElementById('home-adresse').value.trim();
+  const lat = document.getElementById('home-lat').value;
+  const lon = document.getElementById('home-lon').value;
+  if (!adresse) { alert('Veuillez entrer une adresse'); return; }
+  db.settings.homeAddress = { adresse, lat: parseFloat(lat), lon: parseFloat(lon) };
+  save(); closeModal('modal-home'); renderSettings();
+  alert('Adresse maison enregistrée !');
 }
 
 // ==================== EXPORT ====================
@@ -1935,7 +2057,13 @@ async function acSearch(input, dropdownId, role) {
 }
 
 function acSelect(role, display, lat, lon) {
-  if (role === 'client-adresse') {
+  if (role === 'home') {
+    document.getElementById('home-adresse').value = display;
+    document.getElementById('home-lat').value = lat;
+    document.getElementById('home-lon').value = lon;
+    document.getElementById('ac-home').style.display = 'none';
+    return;
+  }
     document.getElementById('c-adresse').value = display;
     document.getElementById('c-adresse-lat').value = lat;
     document.getElementById('c-adresse-lon').value = lon;
