@@ -1237,13 +1237,9 @@ async function resStep(dir){
       if(!document.getElementById('r-distance').value){alert('Veuillez entrer la distance');return;}
     }
     if(curStep===4&&!document.getElementById('r-prix').value){alert('Veuillez entrer le prix');return;}
-    const type=document.getElementById('r-type').value;
-    if(curStep===2&&type==='aller'){curStep=4;updResSteps();return;}
-  }else{
-    const type=document.getElementById('r-type').value;
-    if(curStep===4&&type==='aller'){curStep=2;updResSteps();return;}
   }
-  curStep=Math.max(1,Math.min(5,curStep+dir));updResSteps();
+  curStep=Math.max(1,Math.min(5,curStep+dir));
+  updResSteps();
 }
 
 function updResType(){
