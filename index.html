@@ -1865,12 +1865,35 @@ function fmtICSDate(dateStr,timeStr){
   const d=new Date(dateStr+'T'+(timeStr||'08:00')+':00');
   return d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00';
 }
+function getICSEmoji(service){
+  if(service==='depose')return '\uD83D\uDEEB'; // 🛫
+  if(service==='recuperation')return '\uD83D\uDEEC'; // 🛬
+  return '\uD83D\uDE97'; // 🚗
+}
+function getCityFromAddr(addr){
+  if(!addr)return '?';
+  // Prend le dernier segment significatif de l'adresse (ville en général)
+  const parts=addr.split(',').map(s=>s.trim()).filter(Boolean);
+  // On cherche la partie qui ressemble à une ville (pas un numéro, pas un pays court)
+  for(let i=parts.length-1;i>=0;i--){
+    const p=parts[i];
+    if(p.length>2&&!/^\d/.test(p)&&p!=='Belgique'&&p!=='Belgium'&&p!=='France'&&p!=='Nederland')return p;
+  }
+  return parts[0]||addr.substring(0,20);
+}
 function makeICSEvent(r){
   const c=clientObj(r.clientId);
   const veh=getV(r.vehicule);
-  const titre='Navette '+clientName(r.clientId)+' — '+(r.depart||'?')+' → '+(r.arrivee||'?');
+  const nom=clientName(r.clientId);
+  const heure=r.heure||'';
+  const heureR=r.heureRetour||'';
+  const villeArr=getCityFromAddr(r.arrivee);
+  const villeDep=getCityFromAddr(r.depart);
+  const emoji=getICSEmoji(r.service);
+  // Format: 🛫 08:30 - Zaventem - Jean Dupont
+  const titre=emoji+' '+(heure?heure+' - ':'')+villeArr+' - '+nom;
   const tel=c&&c.tel?c.tel:'';
-  const descParts=['Client: '+clientName(r.clientId),(tel?'Tel: '+tel:''),'Prix: '+fmt(r.prix),'Véhicule: '+veh.nom,(r.vol?'Vol: '+r.vol:''),(r.notes?r.notes:'')].filter(Boolean);
+  const descParts=['Client: '+nom,(tel?'Tel: '+tel:''),'Prix: '+fmt(r.prix),'Véhicule: '+veh.nom,(r.vol?'Vol: '+r.vol:''),(r.notes?r.notes:'')].filter(Boolean);
   const desc=descParts.join('\n').replace(/,/g,'\,').replace(/;/g,'\;');
   const start=fmtICSDate(r.dateAller,r.heure);
   const dureeMin=parseInt(r.duree||60);
@@ -1880,12 +1903,13 @@ function makeICSEvent(r){
   const loc=(r.depart||'').replace(/,/g,'\,');
   let events='BEGIN:VEVENT\r\nUID:fm-aller-'+r.id+'@facciolini\r\nSUMMARY:'+titre+'\r\nDESCRIPTION:'+desc+'\r\nDTSTART:'+start+'\r\nDTEND:'+end+'\r\nLOCATION:'+loc+'\r\nEND:VEVENT';
   if(r.type==='ar-diff'&&r.dateRetour){
-    const titreR='RETOUR '+clientName(r.clientId)+' — '+(r.arrivee||'?')+' → '+(r.depart||'?');
+    // Retour = toujours atterrissage 🛬, ville d'arrivée = ville de départ original (ils rentrent)
+    const titreR='\uD83D\uDEEC '+(heureR?heureR+' - ':'')+villeDep+' - '+nom;
     const startR=fmtICSDate(r.dateRetour,r.heureRetour);
     const endDtR=new Date(r.dateRetour+'T'+(r.heureRetour||'08:00')+':00');
     endDtR.setMinutes(endDtR.getMinutes()+dureeMin);
     const endR=endDtR.getFullYear().toString()+String(endDtR.getMonth()+1).padStart(2,'0')+String(endDtR.getDate()).padStart(2,'0')+'T'+String(endDtR.getHours()).padStart(2,'0')+String(endDtR.getMinutes()).padStart(2,'0')+'00';
-    const locR=(r.arrivee||'').replace(/,/g,'\\,');
+    const locR=(r.arrivee||'').replace(/,/g,'\,');
     events+='\r\nBEGIN:VEVENT\r\nUID:fm-retour-'+r.id+'@facciolini\r\nSUMMARY:'+titreR+'\r\nDESCRIPTION:'+desc+'\r\nDTSTART:'+startR+'\r\nDTEND:'+endR+'\r\nLOCATION:'+locR+'\r\nEND:VEVENT';
   }
   return events;
