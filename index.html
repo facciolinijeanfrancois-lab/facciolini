@@ -837,7 +837,17 @@ function clientObj(id){return db.clients.find(c=>c.id===id);}
 function isVip(cid){return db.reservations.filter(r=>r.clientId===cid).length>=db.settings.vip.seuil;}
 function cntRes(cid){return db.reservations.filter(r=>r.clientId===cid).length;}
 function getV(idx){return db.settings.vehicles[idx!=null?idx:db.settings.activeVehicle]||db.settings.vehicles[0];}
-function getMonthRes(m,y){return db.reservations.filter(r=>{const d=new Date(r.dateAller);return d.getMonth()===m&&d.getFullYear()===y;});}
+function getMonthRes(m,y){return db.reservations.filter(r=>{
+  const da=new Date(r.dateAller);
+  const matchAller=da.getMonth()===m&&da.getFullYear()===y;
+  if(matchAller)return true;
+  // Pour les A/R différé : inclure aussi dans le mois du retour
+  if(r.type==='ar-diff'&&r.dateRetour){
+    const dr=new Date(r.dateRetour);
+    if(dr.getMonth()===m&&dr.getFullYear()===y)return true;
+  }
+  return false;
+});}
 function getMonthCarb(m,y){return db.carburant.filter(c=>{const d=new Date(c.date);return d.getMonth()===m&&d.getFullYear()===y;});}
 function getYearKm(y){return db.reservations.filter(r=>new Date(r.dateAller).getFullYear()===y).reduce((s,r)=>s+getTotalKm(r),0);}
 
