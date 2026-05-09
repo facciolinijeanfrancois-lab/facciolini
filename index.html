@@ -567,9 +567,12 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
     <div class="step-panel" id="sp5">
       <div id="res-summary"></div>
       <div style="margin-top:14px">
-        <div style="font-size:0.72rem;color:var(--text2);font-weight:600;margin-bottom:6px;text-transform:uppercase">Message WhatsApp client</div>
+        <div style="font-size:0.72rem;color:var(--text2);font-weight:600;margin-bottom:6px;text-transform:uppercase">Message de confirmation client</div>
         <div class="wa-preview" id="wa-preview"></div>
-        <button class="btn btn-green btn-full" style="margin-top:8px" onclick="sendWA()">📱 Envoyer WhatsApp</button>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-green" style="flex:1" onclick="sendWA()">💬 WhatsApp</button>
+          <button class="btn btn-outline" style="flex:1;border-color:var(--blue2);color:var(--blue2)" onclick="sendSMS()">📱 SMS</button>
+        </div>
       </div>
     </div>
     <div class="step-nav" id="res-step-nav">
@@ -1450,6 +1453,7 @@ function genResSummary(){
   acCoords['wa-msg']=msg;acCoords['wa-tel']=c?.tel||'';
 }
 function sendWA(){const msg=acCoords['wa-msg']||'';const tel=(acCoords['wa-tel']||'').replace(/[^+\d]/g,'');window.open(tel?`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');}
+function sendSMS(){const msg=acCoords['wa-msg']||'';const tel=(acCoords['wa-tel']||'').replace(/[^+\d]/g,'');window.location.href=tel?`sms:${tel}?body=${encodeURIComponent(msg)}`:`sms:?body=${encodeURIComponent(msg)}`;}
 
 function showDetailRes(id){
   const r=db.reservations.find(x=>x.id===id);if(!r)return;
