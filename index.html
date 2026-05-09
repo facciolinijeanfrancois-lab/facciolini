@@ -534,7 +534,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
         <button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="applyDevis()">Appliquer</button>
       </div>
       <div class="fg"><label class="fl">Prix demandé (€)</label>
-        <input type="number" class="fi" id="r-prix" placeholder="Ex: 95" step="0.01" oninput="updBenef();checkPrixBas()">
+        <input type="number" class="fi" id="r-prix" placeholder="Ex: 95" step="0.01" oninput="updBenef();checkPrixBas();updAcompte()">
         <div class="fhint" id="r-vip-hint" style="color:var(--gold)"></div>
       </div>
       <div class="fg"><label class="fl">Mode de paiement</label>
@@ -552,6 +552,11 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
         <div class="fg"><label class="fl">Parking (€)</label><input type="number" class="fi" id="r-parking" value="0" step="0.01" oninput="updBenef()"></div>
       </div>
       <div class="fg"><label class="fl">Temps d'attente (min)</label><input type="number" class="fi" id="r-attente" value="0"></div>
+      <div class="fg">
+        <label class="fl">Acompte reçu (€)</label>
+        <input type="number" class="fi" id="r-acompte" value="0" step="0.01" oninput="updAcompte()">
+        <div id="r-solde-hint" style="display:none;margin-top:6px;background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);border-radius:8px;padding:8px 12px;font-size:0.82rem;color:var(--gold2)"></div>
+      </div>
       <div class="fg"><label class="fl">Notes</label><textarea class="ft" id="r-notes" placeholder="Infos supplémentaires..."></textarea></div>
       <div class="card card-sm" style="background:var(--bg3)">
         <div class="dr"><span class="dr-label">Km total réel</span><span class="dr-val blue" id="prev-km">—</span></div>
@@ -1233,6 +1238,8 @@ function resetResForm(){
   ['r-peages','r-parking','r-attente'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='0';});
   document.getElementById('r-passagers').value=1;
   document.getElementById('r-vmt-recu').checked=false;
+  document.getElementById('r-acompte').value='0';
+  document.getElementById('r-solde-hint').style.display='none';
   document.getElementById('r-vide1').checked=false;document.getElementById('r-vide2').checked=false;
   document.getElementById('r-vide1-opts').style.display='none';document.getElementById('r-vide2-opts').style.display='none';
   document.getElementById('r-camion-alert').style.display='none';
@@ -1318,6 +1325,18 @@ function updVideHint(n){
   updBenef();
 }
 
+function updAcompte(){
+  const prix=parseFloat(document.getElementById('r-prix').value||0);
+  const acompte=parseFloat(document.getElementById('r-acompte').value||0);
+  const hint=document.getElementById('r-solde-hint');
+  if(acompte>0&&prix>0){
+    const solde=prix-acompte;
+    hint.style.display='block';
+    hint.innerHTML=`💳 Acompte : <b>${fmt(acompte)}</b> — Solde restant : <b style="color:var(--gold)">${fmt(solde)}</b>`;
+  } else {
+    hint.style.display='none';
+  }
+}
 function toggleVmt(){const p=document.getElementById('r-paiement').value;document.getElementById('r-vmt-section').style.display=p==='virement'?'block':'none';}
 
 function getKmVideVal(n){
@@ -1377,7 +1396,7 @@ async function saveReservation(){
   const editId=document.getElementById('res-edit-id').value;
   const v1=document.getElementById('r-vide1').checked;const v2=document.getElementById('r-vide2').checked;
   const km1=v1?getKmVideVal(1):0;const km2=v2?getKmVideVal(2):0;
-  const res={id:editId||genId(),clientId:document.getElementById('r-client').value,vehicule:parseInt(document.getElementById('r-vehicule').value||0),passagers:document.getElementById('r-passagers').value,bagages:document.getElementById('r-bagages').value,type:document.getElementById('r-type').value,service:document.getElementById('r-service').value,dateAller:document.getElementById('r-date-aller').value,heure:document.getElementById('r-heure-aller').value,dateRetour:document.getElementById('r-date-retour').value,heureRetour:document.getElementById('r-heure-retour').value,depart:document.getElementById('r-depart').value,arrivee:document.getElementById('r-arrivee').value,distance:document.getElementById('r-distance').value,duree:document.getElementById('r-duree').value,vol:document.getElementById('r-vol').value.toUpperCase(),kmPickup:document.getElementById('r-km-pickup').value||0,vide1:v1,km1,vide2:v2,km2,prix:document.getElementById('r-prix').value,paiement:document.getElementById('r-paiement').value,vmtRecu:document.getElementById('r-vmt-recu').checked,peages:document.getElementById('r-peages').value,parking:document.getElementById('r-parking').value,attente:document.getElementById('r-attente').value,notes:document.getElementById('r-notes').value};
+  const res={id:editId||genId(),clientId:document.getElementById('r-client').value,vehicule:parseInt(document.getElementById('r-vehicule').value||0),passagers:document.getElementById('r-passagers').value,bagages:document.getElementById('r-bagages').value,type:document.getElementById('r-type').value,service:document.getElementById('r-service').value,dateAller:document.getElementById('r-date-aller').value,heure:document.getElementById('r-heure-aller').value,dateRetour:document.getElementById('r-date-retour').value,heureRetour:document.getElementById('r-heure-retour').value,depart:document.getElementById('r-depart').value,arrivee:document.getElementById('r-arrivee').value,distance:document.getElementById('r-distance').value,duree:document.getElementById('r-duree').value,vol:document.getElementById('r-vol').value.toUpperCase(),kmPickup:document.getElementById('r-km-pickup').value||0,vide1:v1,km1,vide2:v2,km2,prix:document.getElementById('r-prix').value,paiement:document.getElementById('r-paiement').value,vmtRecu:document.getElementById('r-vmt-recu').checked,peages:document.getElementById('r-peages').value,parking:document.getElementById('r-parking').value,attente:document.getElementById('r-attente').value,acompte:parseFloat(document.getElementById('r-acompte').value)||0,notes:document.getElementById('r-notes').value};
   if(editId){const i=db.reservations.findIndex(r=>r.id===editId);if(i!==-1)db.reservations[i]=res;}else db.reservations.push(res);
   save();closeModal('m-res');renderAll();
   // Proposer d'ajouter au calendrier Samsung
@@ -1389,26 +1408,44 @@ function genResSummary(){
   const type=document.getElementById('r-type').value;
   const tLabel={aller:'Aller simple','ar-jour':'A/R même jour','ar-diff':'A/R date différente'}[type];
   const d=document.getElementById('r-date-aller').value;const h=document.getElementById('r-heure-aller').value;
+  const dR=document.getElementById('r-date-retour').value;const hR=document.getElementById('r-heure-retour').value;
   const dep=document.getElementById('r-depart').value;const arr=document.getElementById('r-arrivee').value;
-  const prix=document.getElementById('r-prix').value;const dist=document.getElementById('r-distance').value;
+  const prix=parseFloat(document.getElementById('r-prix').value||0);
+  const acompte=parseFloat(document.getElementById('r-acompte').value||0);
+  const solde=prix-acompte;
+  const dist=document.getElementById('r-distance').value;
   document.getElementById('res-summary').innerHTML=`
     <div class="dr"><span class="dr-label">Client</span><span class="dr-val">${c?c.nom:'—'}${isVip(cid)?' ⭐':''}</span></div>
     <div class="dr"><span class="dr-label">Type</span><span class="dr-val">${tLabel}</span></div>
     <div class="dr"><span class="dr-label">Date aller</span><span class="dr-val">${d} ${h}</span></div>
-    ${type==='ar-diff'?`<div class="dr"><span class="dr-label">Date retour</span><span class="dr-val">${document.getElementById('r-date-retour').value} ${document.getElementById('r-heure-retour').value}</span></div>`:''}
+    ${type==='ar-diff'?`<div class="dr"><span class="dr-label">Date retour</span><span class="dr-val">${dR} ${hR}</span></div>`:''}
     <div class="dr"><span class="dr-label">Trajet</span><span class="dr-val">${dep?.substring(0,25)||'—'} → ${arr?.substring(0,25)||'—'}</span></div>
     <div class="dr"><span class="dr-label">Distance</span><span class="dr-val">${dist} km · ${document.getElementById('r-duree').value} min</span></div>
     ${document.getElementById('r-vol').value?`<div class="dr"><span class="dr-label">Vol</span><span class="dr-val">✈ ${document.getElementById('r-vol').value}</span></div>`:''}
-    <div class="dr"><span class="dr-label">Prix</span><span class="dr-val gold">${fmt(parseFloat(prix||0))}</span></div>
+    <div class="dr"><span class="dr-label">Prix total</span><span class="dr-val gold">${fmt(prix)}</span></div>
+    ${acompte>0?`<div class="dr"><span class="dr-label">Acompte reçu</span><span class="dr-val green">- ${fmt(acompte)}</span></div><div class="dr"><span class="dr-label" style="font-weight:700;color:var(--text)">Solde à payer</span><span class="dr-val gold" style="font-size:1rem">${fmt(solde)}</span></div>`:''}
     <div class="dr"><span class="dr-label">Paiement</span><span class="dr-val">${{cash:'💵 Cash',carte:'💳 Carte',virement:'🏦 Virement'}[document.getElementById('r-paiement').value]}</span></div>
     <div class="dr"><span class="dr-label">Km total réel</span><span class="dr-val">${document.getElementById('prev-km').textContent}</span></div>
     <div class="dr" style="border-bottom:none"><span class="dr-label">Bénéfice net</span><span class="dr-val">${document.getElementById('prev-benef').textContent}</span></div>`;
   const dFmt=d?new Date(d).toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'}):'';
+  const dRFmt=dR?new Date(dR).toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'}):'';
   const lang=c?.langue||'fr';
+  const isAR=type==='ar-diff'||type==='ar-jour';
+  const acompteMsg=acompte>0?(lang==='en'?`\n💳 Deposit paid: ${fmt(acompte)} — Balance due: ${fmt(solde)}`:lang==='nl'?`\n💳 Voorschot betaald: ${fmt(acompte)} — Saldo: ${fmt(solde)}`:`\n💳 Acompte reçu : ${fmt(acompte)} — Solde à payer : ${fmt(solde)}`):'';
   let msg='';
-  if(lang==='en')msg=`Hello ${c?.nom||''},\n\nI confirm your transfer:\n📅 ${dFmt} at ${h}\n🚗 From: ${dep}\n✈️ To: ${arr}\n💶 Price: ${fmt(parseFloat(prix||0))}\n\nSee you soon!\nFacciolini Mobility`;
-  else if(lang==='nl')msg=`Hallo ${c?.nom||''},\n\nIk bevestig uw rit:\n📅 ${dFmt} om ${h}\n🚗 Van: ${dep}\n✈️ Naar: ${arr}\n💶 Prijs: ${fmt(parseFloat(prix||0))}\n\nTot binnenkort!\nFacciolini Mobility`;
-  else msg=`Bonjour ${c?.nom||''},\n\nJe confirme votre réservation :\n📅 ${dFmt} à ${h}\n🚗 Départ : ${dep}\n✈️ Arrivée : ${arr}\n💶 Prix : ${fmt(parseFloat(prix||0))}\n\nÀ bientôt !\nFacciolini Mobility`;
+  if(lang==='en'){
+    msg=`Hello ${c?.nom||''},\n\nI confirm your booking:\n\n🛫 OUTBOUND\n📅 ${dFmt} at ${h}\n🚗 From: ${dep}\n✈️ To: ${arr}`;
+    if(isAR)msg+=`\n\n🛬 RETURN\n📅 ${dRFmt||dFmt} at ${hR||'—'}\n🚗 From: ${arr}\n🏠 To: ${dep}`;
+    msg+=`\n\n💶 Total price: ${fmt(prix)}${acompteMsg}\n\nSee you soon!\nFacciolini Mobility\n📞 0471 69 26 50`;
+  } else if(lang==='nl'){
+    msg=`Hallo ${c?.nom||''},\n\nIk bevestig uw boeking:\n\n🛫 HEENREIS\n📅 ${dFmt} om ${h}\n🚗 Van: ${dep}\n✈️ Naar: ${arr}`;
+    if(isAR)msg+=`\n\n🛬 TERUGREIS\n📅 ${dRFmt||dFmt} om ${hR||'—'}\n🚗 Van: ${arr}\n🏠 Naar: ${dep}`;
+    msg+=`\n\n💶 Totaalprijs: ${fmt(prix)}${acompteMsg}\n\nTot binnenkort!\nFacciolini Mobility\n📞 0471 69 26 50`;
+  } else {
+    msg=`Bonjour ${c?.nom||''},\n\nJe confirme votre réservation :\n\n🛫 ALLER\n📅 ${dFmt} à ${h}\n🚗 Départ : ${dep}\n✈️ Arrivée : ${arr}`;
+    if(isAR)msg+=`\n\n🛬 RETOUR\n📅 ${dRFmt||dFmt} à ${hR||'—'}\n🚗 Départ : ${arr}\n🏠 Arrivée : ${dep}`;
+    msg+=`\n\n💶 Prix total : ${fmt(prix)}${acompteMsg}\n\nÀ bientôt !\nFacciolini Mobility\n📞 0471 69 26 50`;
+  }
   document.getElementById('wa-preview').textContent=msg;
   acCoords['wa-msg']=msg;acCoords['wa-tel']=c?.tel||'';
 }
@@ -1433,7 +1470,8 @@ function showDetailRes(id){
     ${r.vide2?`<div class="dr"><span class="dr-label">+ Retour à vide retour</span><span class="dr-val red">+ ${parseFloat(r.km2||0).toFixed(1)} km</span></div>`:''}
     <div class="dr"><span class="dr-label">Km total réel</span><span class="dr-val blue">${km.toFixed(1)} km</span></div>
     ${r.vol?`<div class="dr"><span class="dr-label">Vol</span><span class="dr-val"><a href="https://www.flightradar24.com/data/flights/${r.vol.toLowerCase()}" target="_blank" style="color:var(--blue2)">✈ ${r.vol} →</a></span></div>`:''}
-    <div class="dr"><span class="dr-label">Prix demandé</span><span class="dr-val gold">${fmt(r.prix)}</span></div>
+    <div class="dr"><span class="dr-label">Prix total</span><span class="dr-val gold">${fmt(r.prix)}</span></div>
+    ${parseFloat(r.acompte||0)>0?`<div class="dr"><span class="dr-label">Acompte reçu</span><span class="dr-val green">- ${fmt(r.acompte)}</span></div><div class="dr"><span class="dr-label" style="font-weight:700;color:var(--text)">Solde à payer</span><span class="dr-val gold">${fmt(parseFloat(r.prix||0)-parseFloat(r.acompte||0))}</span></div>`:''}
     <div class="dr"><span class="dr-label">Paiement</span><span class="dr-val">${{cash:'💵 Cash',carte:'💳 Carte',virement:'🏦 Virement'}[r.paiement]||r.paiement}${r.paiement==='virement'?(r.vmtRecu?' ✅':' ⏳'):''}</span>${r.paiement==='virement'&&!r.vmtRecu?`<button class="btn btn-green btn-sm" onclick="markVmt('${r.id}');closeModal('m-detail-res');renderAll()">✓ Marquer reçu</button>`:''}</div>
     ${parseFloat(r.peages||0)>0?`<div class="dr"><span class="dr-label">Péages</span><span class="dr-val red">- ${fmt(r.peages)}</span></div>`:''}
     ${parseFloat(r.parking||0)>0?`<div class="dr"><span class="dr-label">Parking</span><span class="dr-val red">- ${fmt(r.parking)}</span></div>`:''}
@@ -1472,7 +1510,7 @@ function editRes(id){
   setChips('r-paiement-chips','r-paiement',r.paiement||'cash');
   document.getElementById('r-vmt-recu').checked=r.vmtRecu||false;
   document.getElementById('r-peages').value=r.peages||0;document.getElementById('r-parking').value=r.parking||0;
-  document.getElementById('r-attente').value=r.attente||0;document.getElementById('r-notes').value=r.notes||'';
+  document.getElementById('r-attente').value=r.attente||0;document.getElementById('r-acompte').value=r.acompte||0;updAcompte();document.getElementById('r-notes').value=r.notes||'';
   updResType();toggleVmt();curStep=1;updResSteps();openModal('m-res');
 }
 
@@ -1844,6 +1882,7 @@ function duplicateRes(id){
   setChips('r-paiement-chips','r-paiement',r.paiement||'cash');
   document.getElementById('r-peages').value=r.peages||0;
   document.getElementById('r-parking').value=r.parking||0;
+  document.getElementById('r-acompte').value=0;
   document.getElementById('r-notes').value=r.notes||'';
   updResType();updBenef();curStep=1;updResSteps();
   closeModal('m-detail-res');openModal('m-res');
