@@ -236,6 +236,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
       </div>
       <div class="card"><div style="font-size:0.72rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Top clients</div><div id="d-top"></div></div>
       <div id="d-virements"></div>
+      <div id="d-soldes"></div>
+      <div id="d-semaines"></div>
+      <div id="d-diesel-alert"></div>
       <div class="card card-sm" id="d-comparison" style="display:none;margin-bottom:10px"></div>
       <div id="d-templates-dash"></div>
     </div>
@@ -304,6 +307,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
       <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Note de frais mensuelle complète pour votre comptable Adam.</div>
       <div class="sec"><span class="sec-title">Bilan annuel <span style="color:var(--text3)" id="fin-year"></span></span><button class="btn btn-outline btn-sm" onclick="genBilanAnnuel()">📊 Voir</button></div>
       <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Résumé complet de l'année pour votre comptable.</div>
+      <div class="sec"><span class="sec-title">Déclaration INASTI</span><button class="btn btn-gold btn-sm" onclick="genINASTI()">📋 Trimestre</button></div>
+      <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Résumé trimestriel prêt pour votre déclaration INASTI.</div>
       <div class="sec"><span class="sec-title">Modèles de trajets</span><button class="btn btn-outline btn-sm" onclick="openModal('m-templates')">Gérer</button></div>
       <div id="templates-preview"></div>
     </div>
@@ -386,6 +391,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
 <div class="overlay" id="m-note-frais"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="nf-title">Note de frais</div><div id="nf-content"></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-note-frais')">Fermer</button><button class="btn btn-gold btn-full" onclick="exportNoteCSV()">📊 Exporter CSV</button></div></div></div>
 <div class="overlay" id="m-templates"><div class="modal"><div class="modal-handle"></div><div class="modal-title">Modèles de trajets</div><div id="templates-list"></div><div class="divider"></div><div style="font-size:0.82rem;color:var(--text2);margin-bottom:12px">Ajouter un modèle</div><div class="fg"><label class="fl">Nom du modèle</label><input type="text" class="fi" id="tpl-nom" placeholder="Ex: Carnières → Zaventem"></div><div class="fg"><label class="fl">Adresse départ</label><input type="text" class="fi" id="tpl-depart" placeholder="Ex: Rue Saint-Eloi, Carnières"></div><div class="fg"><label class="fl">Adresse arrivée</label><input type="text" class="fi" id="tpl-arrivee" placeholder="Ex: Aéroport de Zaventem"></div><div class="fr"><div class="fg"><label class="fl">Distance (km)</label><input type="number" class="fi" id="tpl-distance" step="0.1"></div><div class="fg"><label class="fl">Prix habituel (€)</label><input type="number" class="fi" id="tpl-prix" step="0.5"></div></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-templates')">Fermer</button><button class="btn btn-gold btn-full" onclick="saveTemplate()">+ Ajouter</button></div></div></div>
 <div class="overlay" id="m-bilan"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="bilan-title">Bilan annuel</div><div id="bilan-content"></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-bilan')">Fermer</button><button class="btn btn-gold btn-full" onclick="exportBilanCSV()">📊 Exporter CSV</button></div></div></div>
+
+<div class="overlay" id="m-inasti"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="inasti-title">📋 Déclaration INASTI</div><div id="inasti-content"></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-inasti')">Fermer</button><button class="btn btn-gold btn-full" onclick="exportINASTICSV()">📊 Exporter CSV</button></div></div></div>
 <div class="overlay" id="m-fav-addr"><div class="modal"><div class="modal-handle"></div><div class="modal-title">Adresses favorites</div><div id="fav-addr-list"></div><div class="divider"></div><div class="fg"><label class="fl">Nom court</label><input type="text" class="fi" id="fav-nom" placeholder="Ex: Zaventem, Charleroi Airport..."></div><div class="fg"><label class="fl">Adresse complète</label><div class="ac-wrap"><input type="text" class="fi" id="fav-adresse" placeholder="Tapez l'adresse..." autocomplete="off" oninput="acSearch(this,'ac-fav','fav-addr')"><input type="hidden" id="fav-lat"><input type="hidden" id="fav-lon"><div class="ac-drop" id="ac-fav"></div></div></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-fav-addr')">Fermer</button><button class="btn btn-gold btn-full" onclick="saveFavAddr()">+ Ajouter</button></div></div></div>
 
 <script>
@@ -416,6 +423,25 @@ function getYearKm(y){return db.reservations.filter(r=>new Date(r.dateAller).get
 function getTotalKm(r){const d=parseFloat(r.distance||0);let km=d;if(r.type==='ar-jour'||r.type==='ar-diff')km+=d;if(r.vide1)km+=parseFloat(r.km1||0);if(r.vide2)km+=parseFloat(r.km2||0);if(r.kmPickup)km+=parseFloat(r.kmPickup||0);return km;}
 function getKmVide(r){let km=0;if(r.vide1)km+=parseFloat(r.km1||0);if(r.vide2)km+=parseFloat(r.km2||0);return km;}
 function getBenef(r){const v=getV(r.vehicule);const prix=parseFloat(r.prix||0);const cout=getTotalKm(r)*v.cout;return prix-cout-parseFloat(r.peages||0)-parseFloat(r.parking||0);}
+
+// Un trajet est considéré "payé" si :
+// - paiement virement → vmtRecu = true
+// - paiement cash/carte → payeConfirme = true (marqué manuellement)
+// - trajet pas encore terminé → on ne demande pas
+function isPaye(r){
+  const today=new Date();today.setHours(0,0,0,0);
+  const dateRef=r.type==='ar-diff'&&r.dateRetour?new Date(r.dateRetour):new Date(r.dateAller);
+  dateRef.setHours(0,0,0,0);
+  if(dateRef>today)return true; // Pas encore terminé — pas de question
+  if(r.paiement==='virement')return r.vmtRecu===true;
+  return r.payeConfirme===true;
+}
+function marquerPaye(id){
+  const r=db.reservations.find(x=>x.id===id);if(!r)return;
+  if(r.paiement==='virement')r.vmtRecu=true;
+  else r.payeConfirme=true;
+  save();renderAll();closeModal('m-detail-res');
+}
 
 // ===== PAIEMENT ÉCHELONNÉ (v3.1) =====
 // Pour un A/R différé, le paiement se fait en 2 fois :
@@ -522,20 +548,39 @@ function renderDash(){
   });
   if(todayRes.length>0){
     const todayEncaisse=todayRes.reduce((s,r)=>s+getEncaisseOnDate(r,today2),0);
-    // Ce qu'on recevra encore aujourd'hui (retour d'un trajet dont l'aller était avant)
     const todayAttendu=todayRes.reduce((s,r)=>{
       if(r.type!=='ar-diff')return s;
       const dr=r.dateRetour?new Date(r.dateRetour):null;
       if(dr&&dr.toDateString()===today2.toDateString()) return s+getEncaisseRetour(r);
       return s;
     },0);
-    let txt=`📅 Encaissé aujourd'hui : <b>${fmt(todayEncaisse)}</b>`;
-    if(todayAttendu>0) txt+=` &nbsp;·&nbsp; <span style="color:var(--gold2)">⏳ Solde à recevoir : <b>${fmt(todayAttendu)}</b></span>`;
-    alerts.push(`<div class="alert alert-green">${txt}</div>`);
+    let txt=`📅 Aujourd'hui : <b>${todayRes.length} trajet${todayRes.length>1?'s':''}</b> · <b>${fmt(todayEncaisse)}</b>`;
+    if(todayAttendu>0) txt+=` · <span style="color:var(--gold2)">⏳ Solde : <b>${fmt(todayAttendu)}</b></span>`;
+    // Trajets du jour avec heure + bouton appel direct
+    const tripsList=todayRes.sort((a,b)=>(a.heure||'').localeCompare(b.heure||'')).map(r=>{
+      const c2=clientObj(r.clientId);
+      const dr=r.type==='ar-diff'&&r.dateRetour?new Date(r.dateRetour):null;
+      const isRetour=dr&&dr.toDateString()===today2.toDateString()&&new Date(r.dateAller).toDateString()!==today2.toDateString();
+      const heure=isRetour?(r.heureRetour||'?'):(r.heure||'?');
+      const label=isRetour?'↩':'→';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-top:1px solid rgba(255,255,255,0.06)">
+        <span style="font-size:0.8rem">${label} <b>${heure}</b> · ${clientName(r.clientId)} · <span style="color:var(--green)">${fmt(getEncaisseOnDate(r,today2))}</span></span>
+        ${c2?.tel?`<a href="tel:${c2.tel}" style="background:var(--green);color:#000;border-radius:6px;padding:3px 8px;font-size:0.72rem;font-weight:700;text-decoration:none">📞</a>`:''}
+      </div>`;
+    }).join('');
+    alerts.push(`<div class="alert alert-green" style="flex-direction:column;align-items:stretch"><div>${txt}</div>${tripsList}</div>`);
   }
 
   const negRes=res.filter(r=>getBenef(r)<0);
-  if(negRes.length>0){alerts.push(`<div class="alert alert-red">⚠️ ${negRes.length} réservation${negRes.length>1?'s':''} avec bénéfice négatif ce mois !</div>`);}
+  if(negRes.length>0){
+    alerts.push(`<div class="alert alert-red">⚠️ ${negRes.length} trajet${negRes.length>1?'s':''} avec bénéfice négatif ce mois — ${negRes.map(r=>clientName(r.clientId)).join(', ')}</div>`);
+  }
+  // Alerte trajets à vide trop coûteux
+  const kmVideTotal=res.reduce((s,r)=>s+getKmVide(r),0);
+  const kmTotal2=res.reduce((s,r)=>s+getTotalKm(r),0);
+  if(kmTotal2>0&&kmVideTotal/kmTotal2>0.30){
+    alerts.push(`<div class="alert alert-gold">🚗 ${Math.round(kmVideTotal/kmTotal2*100)}% de tes km sont à vide ce mois — pense à optimiser tes retours.</div>`);
+  }
 
   // Projection basée sur encaissements jour par jour (pas le total facturé)
   const joursEcoules=today2.getDate();
@@ -555,6 +600,12 @@ function renderDash(){
   db.clients.filter(c=>{const n=cntRes(c.id);return n>0&&n===db.settings.vip.seuil-1&&!isVip(c.id);}).forEach(c=>alerts.push(`<div class="alert alert-gold">⭐ ${c.nom} est à 1 réservation du statut VIP !</div>`));
   const vmts=db.reservations.filter(r=>r.paiement==='virement'&&!r.vmtRecu);
   if(vmts.length)alerts.push(`<div class="alert alert-red">🏦 ${vmts.length} virement${vmts.length>1?'s':''} en attente !</div>`);
+  // Trajets terminés sans confirmation de paiement (cash/carte)
+  const nonPayes=db.reservations.filter(r=>r.paiement!=='virement'&&!isPaye(r));
+  if(nonPayes.length){
+    const totalNonPaye=nonPayes.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+    alerts.push(`<div class="alert alert-red">💸 ${nonPayes.length} trajet${nonPayes.length>1?'s':''} sans confirmation de paiement — ${fmt(totalNonPaye)} à vérifier !</div>`);
+  }
   const today=new Date();
   db.entretien.filter(e=>{if(!e.date)return false;return (new Date(e.date)-today)/(86400000)<30;}).forEach(e=>alerts.push(`<div class="alert alert-red">🔧 Entretien "${e.type}" à prévoir avant le ${new Date(e.date).toLocaleDateString('fr-BE')} !</div>`));
   document.getElementById('d-alerts').innerHTML=alerts.join('');
@@ -569,6 +620,109 @@ function renderDash(){
   document.getElementById('d-virements').innerHTML=vmts.length?`<div class="card"><div style="font-size:0.72rem;color:var(--red2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Virements en attente</div>${vmts.map(r=>`<div class="dr"><span class="dr-label">${clientName(r.clientId)} · ${new Date(r.dateAller).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'})}</span><div style="display:flex;align-items:center;gap:8px"><span class="dr-val gold">${fmt(r.prix)}</span><button class="btn btn-green btn-sm" onclick="markVmt('${r.id}')">✓ Reçu</button></div></div>`).join('')}</div>`:'';
   const comp=getComparison();const compEl=document.getElementById('d-comparison');
   if(comp&&compEl){const sign=comp.pct>=0?'+':'';const color=comp.pct>=0?'var(--green)':'var(--red)';compEl.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:0.82rem;color:var(--text2)">vs mois précédent</span><span style="font-weight:700;color:${color}">${sign}${comp.pct}% (${fmt(comp.cur)} vs ${fmt(comp.prev)})</span></div>`;compEl.style.display='block';}else if(compEl)compEl.style.display='none';
+
+  // ===== SOLDES À ENCAISSER (retours à venir) =====
+  const now2=new Date();now2.setHours(0,0,0,0);
+  const soldesAVenir=db.reservations.filter(r=>{
+    if(r.type!=='ar-diff'||!r.dateRetour)return false;
+    const dr=new Date(r.dateRetour);dr.setHours(0,0,0,0);
+    return dr>=now2&&getEncaisseRetour(r)>0;
+  }).sort((a,b)=>new Date(a.dateRetour)-new Date(b.dateRetour)).slice(0,5);
+  const soldesEl=document.getElementById('d-soldes');
+  if(soldesEl){
+    if(soldesAVenir.length){
+      const totalSoldes=soldesAVenir.reduce((s,r)=>s+getEncaisseRetour(r),0);
+      soldesEl.innerHTML=`<div class="card" style="border-color:rgba(240,165,0,0.3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:0.72rem;color:var(--gold2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">💰 Soldes à encaisser</span>
+          <span style="font-weight:700;color:var(--gold)">${fmt(totalSoldes)}</span>
+        </div>
+        ${soldesAVenir.map(r=>{
+          const dr=new Date(r.dateRetour);dr.setHours(0,0,0,0);
+          const diff=Math.round((dr-now2)/86400000);
+          const diffStr=diff===0?'<span style="color:var(--gold);font-weight:700">Aujourd\'hui</span>':diff===1?'<span style="color:var(--orange)">Demain</span>':`Dans ${diff}j`;
+          const c2=clientObj(r.clientId);
+          return `<div class="dr" style="cursor:pointer" onclick="showDetailRes('${r.id}')">
+            <span class="dr-label">${diffStr} · ${clientName(r.clientId)}${c2?.tel?` <a href="tel:${c2.tel}" onclick="event.stopPropagation()" style="color:var(--blue2);margin-left:6px">📞</a>`:''}</span>
+            <span class="dr-val gold">${fmt(getEncaisseRetour(r))}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }else soldesEl.innerHTML='';
+  }
+
+  // ===== SEMAINES CREUSES (4 prochaines semaines) =====
+  const semainesEl=document.getElementById('d-semaines');
+  if(semainesEl){
+    const lundi=new Date();lundi.setHours(0,0,0,0);
+    const jourSemaine=lundi.getDay();
+    const decalage=jourSemaine===0?-6:1-jourSemaine;
+    lundi.setDate(lundi.getDate()+decalage);
+    const semaines=[];
+    for(let s=0;s<4;s++){
+      const debut=new Date(lundi);debut.setDate(lundi.getDate()+s*7);
+      const fin=new Date(debut);fin.setDate(debut.getDate()+6);
+      const trajets=db.reservations.filter(r=>{
+        const da=new Date(r.dateAller);da.setHours(0,0,0,0);
+        const dr=r.type==='ar-diff'&&r.dateRetour?new Date(r.dateRetour):null;if(dr)dr.setHours(0,0,0,0);
+        return(da>=debut&&da<=fin)||(dr&&dr>=debut&&dr<=fin);
+      });
+      const enc=trajets.reduce((sum,r)=>{
+        let e=0;
+        const da=new Date(r.dateAller);da.setHours(0,0,0,0);
+        const dr=r.type==='ar-diff'&&r.dateRetour?new Date(r.dateRetour):null;if(dr)dr.setHours(0,0,0,0);
+        if(da>=debut&&da<=fin)e+=getEncaisseAller(r);
+        if(dr&&dr>=debut&&dr<=fin)e+=getEncaisseRetour(r);
+        return sum+e;
+      },0);
+      semaines.push({debut,fin,nb:trajets.length,enc,isCurrent:s===0});
+    }
+    const maxEnc=Math.max(...semaines.map(s=>s.enc),1);
+    const dateShort=d=>d.toLocaleDateString('fr-BE',{day:'2-digit',month:'short'});
+    semainesEl.innerHTML=`<div class="card">
+      <div style="font-size:0.72rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">📅 4 prochaines semaines</div>
+      ${semaines.map(s=>{
+        const pct=Math.round(s.enc/maxEnc*100);
+        const isEmpty=s.nb===0;
+        const color=isEmpty?'var(--red)':s.enc<db.settings.objectif/4?'var(--orange)':'var(--green)';
+        const label=isEmpty?'⚠️ Aucun trajet':s.nb+' trajet'+(s.nb>1?'s':'')+' · '+fmt(s.enc);
+        return `<div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:0.78rem;font-weight:600;color:${s.isCurrent?'var(--gold)':'var(--text)'}">${s.isCurrent?'🔥 Cette semaine':dateShort(s.debut)+' – '+dateShort(s.fin)}</span>
+            <span style="font-size:0.78rem;font-weight:700;color:${color}">${label}</span>
+          </div>
+          <div style="background:var(--bg3);border-radius:99px;height:5px;overflow:hidden">
+            <div style="height:100%;border-radius:99px;background:${color};width:${Math.max(isEmpty?0:3,pct)}%;transition:width 0.4s"></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // ===== ALERTE DIESEL =====
+  const dieselEl=document.getElementById('d-diesel-alert');
+  if(dieselEl){
+    // Calcul coût diesel réel au km sur les 3 derniers mois
+    let tot3Km2=0,tot3Diesel2=0;
+    for(let i=0;i<3;i++){let m2=curMonth-i,y2=curYear;if(m2<0){m2+=12;y2--;}tot3Km2+=getMonthRes(m2,y2).reduce((s,r)=>s+getTotalKm(r),0);tot3Diesel2+=getMonthCarb(m2,y2).reduce((s,c2)=>s+parseFloat(c2.prix||0),0);}
+    const coutDieselKm=tot3Km2>0?tot3Diesel2/3/(tot3Km2/3):0;
+    // Prix moyen diesel actuel
+    const dernierCarb=[...db.carburant].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
+    const prixLitre=dernierCarb.length>0?dernierCarb.reduce((s,c2)=>s+(parseFloat(c2.prix||0)/parseFloat(c2.litres||1)),0)/dernierCarb.length:0;
+    // Seuil d'alerte : si le diesel représente plus de 35% des recettes du mois
+    const pctDiesel=recettes>0?diesel/recettes*100:0;
+    let dieselHtml='';
+    if(pctDiesel>35&&diesel>0){
+      dieselHtml=`<div class="alert alert-red">⛽ Le diesel représente <b>${Math.round(pctDiesel)}%</b> de tes recettes ce mois ! Pense à revoir tes tarifs.</div>`;
+    } else if(pctDiesel>25&&diesel>0){
+      dieselHtml=`<div class="alert alert-gold">⛽ Diesel à <b>${Math.round(pctDiesel)}%</b> des recettes — surveille ça.</div>`;
+    }
+    if(prixLitre>2.0&&dernierCarb.length>0){
+      dieselHtml+=`<div class="alert alert-gold">⛽ Prix diesel élevé : <b>${prixLitre.toFixed(3).replace('.',',')} €/L</b> — impact sur ta marge.</div>`;
+    }
+    dieselEl.innerHTML=dieselHtml;
+  }
+
   renderTemplates();
 }
 function markVmt(id){const r=db.reservations.find(r=>r.id===id);if(r){r.vmtRecu=true;save();renderAll();}}
@@ -618,6 +772,7 @@ function renderRes(){
         ${r.vol?`<span class="badge bg">✈ ${r.vol}</span>`:''}
         ${soldeLabel}
         ${r.paiement==='virement'&&!r.vmtRecu?`<div class="res-virement">💸 Virement en attente</div>`:''}
+        ${!isPaye(r)&&r.paiement!=='virement'?`<div class="res-virement" style="background:rgba(230,57,70,0.1);border-color:rgba(230,57,70,0.3);color:var(--red2)">💸 Paiement non confirmé</div>`:''}
         ${c?.tel?`<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();callClient('${c.tel}')" style="padding:3px 8px;font-size:0.67rem">📞</button>`:''}
       </div>
     </div>`;
@@ -838,7 +993,7 @@ function showDetailRes(id){
       <span style="font-size:0.82rem;color:var(--gold2)">${r.dateRetour&&new Date(r.dateRetour)>new Date()?'⏳ À encaisser':'✅ Encaissé'} au retour (${r.dateRetour?new Date(r.dateRetour).toLocaleDateString('fr-BE',{day:'2-digit',month:'short'}):''}) </span>
       <span style="font-weight:700;color:var(--gold)">${fmt(encRetour)}</span>
     </div>`:''}
-    <div class="dr"><span class="dr-label">Paiement</span><span class="dr-val">${{cash:'💵 Cash',carte:'💳 Carte',virement:'🏦 Virement'}[r.paiement]||r.paiement}${r.paiement==='virement'?(r.vmtRecu?' ✅':' ⏳'):''}</span>${r.paiement==='virement'&&!r.vmtRecu?`<button class="btn btn-green btn-sm" onclick="markVmt('${r.id}');closeModal('m-detail-res');renderAll()">✓ Marquer reçu</button>`:''}</div>
+    <div class="dr"><span class="dr-label">Paiement</span><span class="dr-val">${{cash:'💵 Cash',carte:'💳 Carte',virement:'🏦 Virement'}[r.paiement]||r.paiement}${r.paiement==='virement'?(r.vmtRecu?' ✅':' ⏳'):(r.payeConfirme?' ✅':' ⏳')}</span>${!isPaye(r)?`<button class="btn btn-green btn-sm" onclick="marquerPaye('${r.id}')">✓ Marquer payé</button>`:''}</div>
     ${parseFloat(r.peages||0)>0?`<div class="dr"><span class="dr-label">Péages</span><span class="dr-val red">- ${fmt(r.peages)}</span></div>`:''}
     ${parseFloat(r.parking||0)>0?`<div class="dr"><span class="dr-label">Parking</span><span class="dr-val red">- ${fmt(r.parking)}</span></div>`:''}
     <div class="dr"><span class="dr-label">Coût km (${km.toFixed(1)}km × ${v.cout.toFixed(2)}€)</span><span class="dr-val red">- ${fmt(km*v.cout)}</span></div>
@@ -928,6 +1083,81 @@ function genBilanAnnuel(){const year=curYear;document.getElementById('bilan-titl
 document.getElementById('bilan-content').innerHTML=`<div class="sg3" style="margin-bottom:12px"><div class="stat"><div class="stat-label">Facturé total</div><div class="stat-val gold">${fmt(totalRec)}</div></div><div class="stat"><div class="stat-label">Bénéfice net</div><div class="stat-val ${totalBenef>=0?'green':'red'}">${fmt(totalBenef)}</div></div><div class="stat"><div class="stat-label">Km totaux</div><div class="stat-val blue">${fmtKm(totalKm)}</div></div></div>${bestMonth>=0?`<div class="alert alert-gold">🏆 Meilleur mois : ${MONTHS[bestMonth]} avec ${fmt(bestGains)} encaissés</div>`:''}<div class="divider"></div>${rows.map(r=>`<div class="annual-month ${r.m===bestMonth?'best':''}"><div><div style="font-weight:600;font-size:0.85rem">${MONTHS[r.m]}${r.m===bestMonth?' 🏆':''}</div><div style="font-size:0.72rem;color:var(--text2)">${r.nb} rés. · ${fmtKm(r.km)}</div></div><div style="text-align:right"><div style="font-weight:700;color:var(--gold)">${fmt(r.enc)} <span style="font-size:0.65rem;color:var(--text3)">encaissé</span></div><div style="font-size:0.72rem;color:${r.benef>=0?'var(--green)':'var(--red)'}">${fmt(r.benef)} net</div></div></div>`).join('')}`;openModal('m-bilan');}
 
 function exportBilanCSV(){let csv='Mois;Réservations;Facturé;Encaissé;Bénéfice;Km\n';for(let m=0;m<12;m++){const res=getMonthRes(m,curYear);const carbs=getMonthCarb(m,curYear);const v=getV();const rec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);const enc=getEncaisseMois(m,curYear);const km=res.reduce((s,r)=>s+getTotalKm(r),0);const diesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);const charges=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0);const benef=rec-km*v.cout-charges-diesel;csv+=`${MONTHS[m]};${res.length};${rec.toFixed(2)};${enc.toFixed(2)};${benef.toFixed(2)};${km.toFixed(1)}\n`;}const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`facciolini_bilan_${curYear}.csv`;a.click();}
+
+function getTrimestreActuel(){
+  const m=new Date().getMonth();
+  if(m<=2)return{num:1,mois:[0,1,2],label:'T1 (Jan–Mar)'};
+  if(m<=5)return{num:2,mois:[3,4,5],label:'T2 (Avr–Jun)'};
+  if(m<=8)return{num:3,mois:[6,7,8],label:'T3 (Jul–Sep)'};
+  return{num:4,mois:[9,10,11],label:'T4 (Oct–Déc)'};
+}
+
+function genINASTI(){
+  const t=getTrimestreActuel();
+  const year=new Date().getFullYear();
+  const v=getV();
+  let totalRec=0,totalEnc=0,totalKm=0,totalDiesel=0,totalPeages=0,totalPark=0,totalNbRes=0;
+  const charges=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0)*3; // 3 mois
+  const detailMois=t.mois.map(m=>{
+    const res=getMonthRes(m,year);
+    const carbs=getMonthCarb(m,year);
+    const rec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+    const enc=getEncaisseMois(m,year);
+    const km=res.reduce((s,r)=>s+getTotalKm(r),0);
+    const diesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);
+    const peages=res.reduce((s,r)=>s+parseFloat(r.peages||0),0);
+    const park=res.reduce((s,r)=>s+parseFloat(r.parking||0),0);
+    totalRec+=rec;totalEnc+=enc;totalKm+=km;totalDiesel+=diesel;totalPeages+=peages;totalPark+=park;totalNbRes+=res.length;
+    return{m,rec,enc,km,diesel,nb:res.length};
+  });
+  const totalCharges=charges;
+  const totalCoutKm=totalKm*v.cout;
+  const totalDepenses=totalCoutKm+totalDiesel+totalPeages+totalPark+totalCharges;
+  const benefNet=totalRec-totalDepenses;
+  // Cotisation INASTI approximative indépendant principal (21% sur revenu net)
+  const cotisationEstimee=Math.max(0,benefNet*0.205);
+
+  document.getElementById('inasti-title').textContent=`📋 INASTI — ${t.label} ${year}`;
+  document.getElementById('inasti-content').innerHTML=`
+    <div class="alert alert-gold" style="margin-bottom:12px">⚠️ Ces chiffres sont indicatifs. Confirmez toujours avec votre comptable Adam avant de déclarer.</div>
+    <div style="font-size:0.72rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">RECETTES</div>
+    ${detailMois.map(d=>`<div class="dr"><span class="dr-label">${MONTHS[d.m]}</span><span class="dr-val">${d.nb} trajets · <span style="color:var(--gold)">${fmt(d.rec)}</span></span></div>`).join('')}
+    <div class="dr" style="background:var(--bg3);border-radius:8px;padding:8px 10px"><span class="dr-label" style="font-weight:700;color:var(--text)">Total facturé</span><span class="dr-val gold" style="font-size:1rem">${fmt(totalRec)}</span></div>
+    <div class="dr"><span class="dr-label">Total encaissé</span><span class="dr-val green">${fmt(totalEnc)}</span></div>
+    <div class="divider"></div>
+    <div style="font-size:0.72rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">DÉPENSES DÉDUCTIBLES</div>
+    <div class="dr"><span class="dr-label">Carburant</span><span class="dr-val red">- ${fmt(totalDiesel)}</span></div>
+    <div class="dr"><span class="dr-label">Péages + Parkings</span><span class="dr-val red">- ${fmt(totalPeages+totalPark)}</span></div>
+    <div class="dr"><span class="dr-label">Charges fixes (3 mois)</span><span class="dr-val red">- ${fmt(totalCharges)}</span></div>
+    <div class="dr"><span class="dr-label">Amortissement véhicule (${totalKm.toFixed(0)} km × ${v.cout.toFixed(2)}€)</span><span class="dr-val red">- ${fmt(totalCoutKm)}</span></div>
+    <div class="dr" style="background:var(--bg3);border-radius:8px;padding:8px 10px"><span class="dr-label" style="font-weight:700;color:var(--text)">Total dépenses</span><span class="dr-val red">- ${fmt(totalDepenses)}</span></div>
+    <div class="divider"></div>
+    <div style="font-size:0.72rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">RÉSULTAT</div>
+    <div class="dr" style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:6px"><span class="dr-label" style="font-weight:700;color:var(--text);font-size:1rem">Bénéfice net trimestriel</span><span class="dr-val ${benefNet>=0?'green':'red'}" style="font-size:1.2rem">${fmt(benefNet)}</span></div>
+    <div class="dr" style="background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);border-radius:8px;padding:10px"><span class="dr-label" style="font-weight:700;color:var(--gold2)">💡 Cotisation INASTI estimée (~20,5%)</span><span class="dr-val gold" style="font-size:1.1rem">${fmt(cotisationEstimee)}</span></div>
+    <div style="font-size:0.72rem;color:var(--text3);margin-top:10px;line-height:1.5">Réservations : <b>${totalNbRes}</b> · Km parcourus : <b>${totalKm.toFixed(0)} km</b> · Période : <b>${MONTHS[t.mois[0]]} – ${MONTHS[t.mois[2]]} ${year}</b></div>`;
+  openModal('m-inasti');
+}
+
+function exportINASTICSV(){
+  const t=getTrimestreActuel();const year=new Date().getFullYear();const v=getV();
+  let csv='Mois;Réservations;Facturé;Encaissé;Km;Diesel;Péages;Parkings;Charges;Bénéfice\n';
+  t.mois.forEach(m=>{
+    const res=getMonthRes(m,year);const carbs=getMonthCarb(m,year);
+    const rec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+    const enc=getEncaisseMois(m,year);
+    const km=res.reduce((s,r)=>s+getTotalKm(r),0);
+    const diesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);
+    const peages=res.reduce((s,r)=>s+parseFloat(r.peages||0),0);
+    const park=res.reduce((s,r)=>s+parseFloat(r.parking||0),0);
+    const charges=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0);
+    const benef=rec-km*v.cout-diesel-peages-park-charges;
+    csv+=`${MONTHS[m]};${res.length};${rec.toFixed(2)};${enc.toFixed(2)};${km.toFixed(1)};${diesel.toFixed(2)};${peages.toFixed(2)};${park.toFixed(2)};${charges.toFixed(2)};${benef.toFixed(2)}\n`;
+  });
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+  a.download=`facciolini_INASTI_T${t.num}_${year}.csv`;a.click();
+}
 
 function getComparison(){let pm=curMonth-1,py=curYear;if(pm<0){pm=11;py--;}const cur=getEncaisseMois(curMonth,curYear);const prev=getEncaisseMois(pm,py);if(prev===0)return null;const pct=Math.round((cur-prev)/prev*100);return{cur,prev,pct};}
 
