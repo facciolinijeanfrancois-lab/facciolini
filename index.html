@@ -940,7 +940,86 @@ function callClient(tel){if(tel)window.location.href='tel:'+tel;}
 function fmtICSDate(dateStr,timeStr){if(!dateStr)return '';const d=new Date(dateStr+'T'+(timeStr||'08:00')+':00');return d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00';}
 function getICSEmoji(service){if(service==='depose')return '\uD83D\uDEEB';if(service==='recuperation')return '\uD83D\uDEEC';return '\uD83D\uDE97';}
 function getCityFromAddr(addr){if(!addr)return '?';const parts=addr.split(',').map(s=>s.trim()).filter(Boolean);for(let i=parts.length-1;i>=0;i--){const p=parts[i];if(p.length>2&&!/^\d/.test(p)&&p!=='Belgique'&&p!=='Belgium'&&p!=='France'&&p!=='Nederland')return p;}return parts[0]||addr.substring(0,20);}
-function makeICSEvent(r){const c=clientObj(r.clientId);const veh=getV(r.vehicule);const nom=clientName(r.clientId);const heure=r.heure||'';const heureR=r.heureRetour||'';const villeArr=getCityFromAddr(r.arrivee);const villeDep=getCityFromAddr(r.depart);const emoji=getICSEmoji(r.service);const titre=emoji+' '+(heure?heure+' - ':'')+villeArr+' - '+nom;const tel=c&&c.tel?c.tel:'';const descParts=['Client: '+nom,(tel?'Tel: '+tel:''),'Prix: '+fmt(r.prix),'Véhicule: '+veh.nom,(r.vol?'Vol: '+r.vol:''),(r.notes?r.notes:'')].filter(Boolean);const desc=descParts.join('\n').replace(/,/g,'\,').replace(/;/g,'\;');const start=fmtICSDate(r.dateAller,r.heure);const dureeMin=parseInt(r.duree||60);const endDt=new Date(r.dateAller+'T'+(r.heure||'08:00')+':00');endDt.setMinutes(endDt.getMinutes()+dureeMin);const end=endDt.getFullYear().toString()+String(endDt.getMonth()+1).padStart(2,'0')+String(endDt.getDate()).padStart(2,'0')+'T'+String(endDt.getHours()).padStart(2,'0')+String(endDt.getMinutes()).padStart(2,'0')+'00';const loc=(r.depart||'').replace(/,/g,'\,');let events='BEGIN:VEVENT\r\nUID:fm-aller-'+r.id+'@facciolini\r\nSUMMARY:'+titre+'\r\nDESCRIPTION:'+desc+'\r\nDTSTART:'+start+'\r\nDTEND:'+end+'\r\nLOCATION:'+loc+'\r\nEND:VEVENT';if(r.type==='ar-diff'&&r.dateRetour){const titreR='\uD83D\uDEEC '+(heureR?heureR+' - ':'')+villeDep+' - '+nom;const startR=fmtICSDate(r.dateRetour,r.heureRetour);const endDtR=new Date(r.dateRetour+'T'+(r.heureRetour||'08:00')+':00');endDtR.setMinutes(endDtR.getMinutes()+dureeMin);const endR=endDtR.getFullYear().toString()+String(endDtR.getMonth()+1).padStart(2,'0')+String(endDtR.getDate()).padStart(2,'0')+'T'+String(endDtR.getHours()).padStart(2,'0')+String(endDtR.getMinutes()).padStart(2,'0')+'00';const locR=(r.arrivee||'').replace(/,/g,'\,');events+='\r\nBEGIN:VEVENT\r\nUID:fm-retour-'+r.id+'@facciolini\r\nSUMMARY:'+titreR+'\r\nDESCRIPTION:'+desc+'\r\nDTSTART:'+startR+'\r\nDTEND:'+endR+'\r\nLOCATION:'+locR+'\r\nEND:VEVENT';}return events;}
+function makeICSEvent(r){
+  const c=clientObj(r.clientId);const veh=getV(r.vehicule);const nom=clientName(r.clientId);
+  const heure=r.heure||'';const heureR=r.heureRetour||'';
+  const villeArr=getCityFromAddr(r.arrivee);const villeDep=getCityFromAddr(r.depart);
+  const emoji=getICSEmoji(r.service);
+  const titre=emoji+' '+(heure?heure+' - ':'')+villeArr+' - '+nom;
+  const tel=c&&c.tel?c.tel:'';
+  const paiementLabel={cash:'Cash',carte:'Carte',virement:'Virement'}[r.paiement]||r.paiement;
+  const encAller=getEncaisseAller(r);const encRetour=getEncaisseRetour(r);
+  const dureeMin=parseInt(r.duree||60);
+  const dureeStr=dureeMin>=60?(Math.floor(dureeMin/60)+'h'+(dureeMin%60>0?String(dureeMin%60).padStart(2,'0'):'')):dureeMin+' min';
+  const icsEsc=s=>String(s||'').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');
+  // Description aller complète
+  const dA=[
+    '== CLIENT ==',
+    nom,
+    tel?'Tel : '+tel:'',
+    c?.adresse?'Domicile : '+c.adresse:'',
+    '',
+    '== TRAJET ALLER ==',
+    'Heure depart : '+(heure||'?'),
+    'Depart : '+(r.depart||'—'),
+    'Arrivee : '+(r.arrivee||'—'),
+    r.distance?'Distance : '+r.distance+' km':'',
+    dureeStr?'Duree : '+dureeStr:'',
+    r.type==='ar-diff'&&r.dateRetour?'Retour prevu : '+new Date(r.dateRetour).toLocaleDateString('fr-BE',{weekday:'long',day:'2-digit',month:'long'})+' a '+(heureR||'?'):'',
+    '',
+    '== PAIEMENT ==',
+    'Prix total : '+fmt(r.prix),
+    r.type==='ar-diff'?'A encaisser maintenant (aller) : '+fmt(encAller):'',
+    r.type==='ar-diff'?'Solde au retour : '+fmt(encRetour):'',
+    'Mode : '+paiementLabel,
+    '',
+    r.passagers>1?'Passagers : '+r.passagers:'',
+    r.bagages&&r.bagages!=='non'?'Bagages : '+r.bagages:'',
+    r.vol?'Vol : '+r.vol:'',
+    'Vehicule : '+veh.nom,
+    r.notes?'Notes : '+r.notes:'',
+  ].filter(Boolean);
+  const desc=icsEsc(dA.join('\n'));
+  const start=fmtICSDate(r.dateAller,r.heure);
+  const endDt=new Date(r.dateAller+'T'+(r.heure||'08:00')+':00');
+  endDt.setMinutes(endDt.getMinutes()+dureeMin);
+  const end=endDt.getFullYear().toString()+String(endDt.getMonth()+1).padStart(2,'0')+String(endDt.getDate()).padStart(2,'0')+'T'+String(endDt.getHours()).padStart(2,'0')+String(endDt.getMinutes()).padStart(2,'0')+'00';
+  const loc=icsEsc(r.depart||'');
+  let events='BEGIN:VEVENT\r\nUID:fm-aller-'+r.id+'@facciolini\r\nSUMMARY:'+titre+'\r\nDESCRIPTION:'+desc+'\r\nDTSTART:'+start+'\r\nDTEND:'+end+'\r\nLOCATION:'+loc+'\r\nEND:VEVENT';
+  if(r.type==='ar-diff'&&r.dateRetour){
+    const titreR='\uD83D\uDEEC '+(heureR?heureR+' - ':'')+villeDep+' - '+nom;
+    // Description retour complète
+    const dR=[
+      '== CLIENT ==',
+      nom,
+      tel?'Tel : '+tel:'',
+      c?.adresse?'Domicile : '+c.adresse:'',
+      '',
+      '== TRAJET RETOUR ==',
+      'Heure depart : '+(heureR||'?'),
+      'Depart : '+(r.arrivee||'—'),
+      'Arrivee : '+(r.depart||'—'),
+      r.distance?'Distance : '+r.distance+' km':'',
+      dureeStr?'Duree : '+dureeStr:'',
+      '',
+      '== PAIEMENT ==',
+      'Solde a encaisser : '+fmt(encRetour),
+      'Mode : '+paiementLabel,
+      '',
+      r.vol?'Vol : '+r.vol:'',
+      'Vehicule : '+veh.nom,
+      r.notes?'Notes : '+r.notes:'',
+    ].filter(Boolean);
+    const descR=icsEsc(dR.join('\n'));
+    const startR=fmtICSDate(r.dateRetour,r.heureRetour);
+    const endDtR=new Date(r.dateRetour+'T'+(r.heureRetour||'08:00')+':00');
+    endDtR.setMinutes(endDtR.getMinutes()+dureeMin);
+    const endR=endDtR.getFullYear().toString()+String(endDtR.getMonth()+1).padStart(2,'0')+String(endDtR.getDate()).padStart(2,'0')+'T'+String(endDtR.getHours()).padStart(2,'0')+String(endDtR.getMinutes()).padStart(2,'0')+'00';
+    const locR=icsEsc(r.arrivee||'');
+    events+='\r\nBEGIN:VEVENT\r\nUID:fm-retour-'+r.id+'@facciolini\r\nSUMMARY:'+titreR+'\r\nDESCRIPTION:'+descR+'\r\nDTSTART:'+startR+'\r\nDTEND:'+endR+'\r\nLOCATION:'+locR+'\r\nEND:VEVENT';
+  }
+  return events;
+}
 function downloadICS(icsContent,filename){const full='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Facciolini Mobility//FR\r\nCALSCALE:GREGORIAN\r\n'+icsContent+'\r\nEND:VCALENDAR';const blob=new Blob([full],{type:'text/calendar;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function offerICS(r){if(confirm('Ajouter cette réservation dans votre calendrier Samsung ?\n\nAppuyez OK puis ouvrez le fichier .ics téléchargé.')){downloadICS(makeICSEvent(r),'navette_'+r.dateAller+'.ics');}}
 function exportMonthICS(){const res=getMonthRes(curMonth,curYear);if(!res.length){alert('Aucune réservation ce mois');return;}const events=res.map(r=>makeICSEvent(r)).join('\r\n');downloadICS(events,'facciolini_'+MONTHS[curMonth]+'_'+curYear+'.ics');alert(res.length+' réservation(s) exportée(s) !\nOuvrez le fichier .ics téléchargé pour les ajouter dans Samsung Calendrier.');}
