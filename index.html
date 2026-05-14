@@ -309,6 +309,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
       <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Résumé complet de l'année pour votre comptable.</div>
       <div class="sec"><span class="sec-title">Déclaration INASTI</span><button class="btn btn-gold btn-sm" onclick="genINASTI()">📋 Trimestre</button></div>
       <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Résumé trimestriel prêt pour votre déclaration INASTI.</div>
+      <div class="sec"><span class="sec-title">Carnet de bord fiscal</span><button class="btn btn-outline btn-sm" onclick="genCarnetBord()">📒 Générer</button></div>
+      <div class="card card-sm" style="font-size:0.8rem;color:var(--text2)">Document officiel pour déduction frais véhicule — export CSV pour Adam.</div>
       <div class="sec"><span class="sec-title">Modèles de trajets</span><button class="btn btn-outline btn-sm" onclick="openModal('m-templates')">Gérer</button></div>
       <div id="templates-preview"></div>
     </div>
@@ -393,6 +395,17 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font
 <div class="overlay" id="m-bilan"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="bilan-title">Bilan annuel</div><div id="bilan-content"></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-bilan')">Fermer</button><button class="btn btn-gold btn-full" onclick="exportBilanCSV()">📊 Exporter CSV</button></div></div></div>
 
 <div class="overlay" id="m-inasti"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="inasti-title">📋 Déclaration INASTI</div><div id="inasti-content"></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-inasti')">Fermer</button><button class="btn btn-gold btn-full" onclick="exportINASTICSV()">📊 Exporter CSV</button></div></div></div>
+
+<div class="overlay" id="m-carnet"><div class="modal"><div class="modal-handle"></div><div class="modal-title">📒 Carnet de bord fiscal</div>
+  <div class="fg"><label class="fl">Année</label>
+    <select class="fs" id="carnet-year"></select>
+  </div>
+  <div id="carnet-preview"></div>
+  <div class="modal-actions">
+    <button class="btn btn-outline btn-full" onclick="closeModal('m-carnet')">Fermer</button>
+    <button class="btn btn-gold btn-full" onclick="exportCarnetCSV()">📊 Exporter CSV</button>
+  </div>
+</div></div>
 <div class="overlay" id="m-fav-addr"><div class="modal"><div class="modal-handle"></div><div class="modal-title">Adresses favorites</div><div id="fav-addr-list"></div><div class="divider"></div><div class="fg"><label class="fl">Nom court</label><input type="text" class="fi" id="fav-nom" placeholder="Ex: Zaventem, Charleroi Airport..."></div><div class="fg"><label class="fl">Adresse complète</label><div class="ac-wrap"><input type="text" class="fi" id="fav-adresse" placeholder="Tapez l'adresse..." autocomplete="off" oninput="acSearch(this,'ac-fav','fav-addr')"><input type="hidden" id="fav-lat"><input type="hidden" id="fav-lon"><div class="ac-drop" id="ac-fav"></div></div></div><div class="modal-actions"><button class="btn btn-outline btn-full" onclick="closeModal('m-fav-addr')">Fermer</button><button class="btn btn-gold btn-full" onclick="saveFavAddr()">+ Ajouter</button></div></div></div>
 
 <script>
@@ -1007,7 +1020,7 @@ function showDetailRes(id){
 
 function editRes(id){const r=db.reservations.find(x=>x.id===id);if(!r)return;document.getElementById('res-edit-id').value=id;document.getElementById('res-modal-title').textContent='Modifier réservation';resetResForm();document.getElementById('r-client').value=r.clientId;onClientChange();setChips('r-vehicule-chips','r-vehicule',String(r.vehicule||0));document.getElementById('r-passagers').value=r.passagers||1;setChips('r-type-chips','r-type',r.type||'aller');setChips('r-service-chips','r-service',r.service||'depose');document.getElementById('r-date-aller').value=r.dateAller||'';document.getElementById('r-heure-aller').value=r.heure||'';document.getElementById('r-depart').value=r.depart||'';document.getElementById('r-arrivee').value=r.arrivee||'';document.getElementById('r-distance').value=r.distance||'';document.getElementById('r-duree').value=r.duree||'';document.getElementById('r-km-pickup').value=r.kmPickup||'';document.getElementById('r-vol').value=r.vol||'';document.getElementById('r-date-retour').value=r.dateRetour||'';document.getElementById('r-heure-retour').value=r.heureRetour||'';document.getElementById('r-vide1').checked=r.vide1||false;if(r.vide1)document.getElementById('r-vide1-opts').style.display='block';document.getElementById('r-vide2').checked=r.vide2||false;if(r.vide2)document.getElementById('r-vide2-opts').style.display='block';document.getElementById('r-prix').value=r.prix||'';setChips('r-paiement-chips','r-paiement',r.paiement||'cash');document.getElementById('r-vmt-recu').checked=r.vmtRecu||false;document.getElementById('r-peages').value=r.peages||0;document.getElementById('r-parking').value=r.parking||0;document.getElementById('r-attente').value=r.attente||0;document.getElementById('r-acompte').value=r.acompte||0;updAcompte();document.getElementById('r-notes').value=r.notes||'';updResType();toggleVmt();curStep=1;updResSteps();openModal('m-res');}
 
-function showDetailClient(id){const c=db.clients.find(x=>x.id===id);if(!c)return;const n=cntRes(id);const vip=isVip(id);const gains=db.reservations.filter(r=>r.clientId===id).reduce((s,r)=>s+parseFloat(r.prix||0),0);const last=db.reservations.filter(r=>r.clientId===id).sort((a,b)=>new Date(b.dateAller)-new Date(a.dateAller)).slice(0,3);document.getElementById('dc-title').textContent=c.nom+(vip?' ⭐':'')+(c.blacklist?' ⛔':'');document.getElementById('dc-content').innerHTML=`${c.blacklist?`<div class="alert alert-red">⛔ Client blacklisté${c.blRaison?' — '+c.blRaison:''}</div>`:''}<div class="dr"><span class="dr-label">Téléphone</span><span class="dr-val">${c.tel?`<a href="tel:${c.tel}" style="color:var(--blue2)">${c.tel}</a>`:'—'}</span></div>${c.email?`<div class="dr"><span class="dr-label">Email</span><span class="dr-val">${c.email}</span></div>`:''}${c.adresse?`<div class="dr"><span class="dr-label">Adresse</span><span class="dr-val">${c.adresse}</span></div>`:''}<div class="dr"><span class="dr-label">Statut</span><span class="dr-val ${vip?'gold':''}">${vip?`⭐ VIP (-${db.settings.vip.reduc}%)`:'Normal'}</span></div><div class="dr"><span class="dr-label">Réservations</span><span class="dr-val">${n}</span></div><div class="dr"><span class="dr-label">Gains totaux</span><span class="dr-val gold">${fmt(gains)}</span></div>${!vip&&n>0?`<div class="dr"><span class="dr-label">Vers VIP</span><span class="dr-val">${db.settings.vip.seuil-n} rés. restante(s)</span></div>`:''}${c.notes?`<div class="dr"><span class="dr-label">Notes</span><span class="dr-val">${c.notes}</span></div>`:''}${last.length?`<div class="divider"></div><div style="font-size:0.72rem;color:var(--text3);margin-bottom:8px;font-weight:600">DERNIÈRES RÉSERVATIONS</div>${last.map(r=>`<div class="dr"><span class="dr-label">${new Date(r.dateAller).toLocaleDateString('fr-BE')} · ${r.depart?.substring(0,18)||'—'} → ${r.arrivee?.substring(0,18)||'—'}</span><span class="dr-val gold">${fmt(r.prix)}</span></div>`).join('')}`:''}`;document.getElementById('dc-edit-btn').onclick=()=>{closeModal('m-detail-client');openClientModal(id);};document.getElementById('dc-del-btn').onclick=()=>{if(confirm('Supprimer ce client ?')){db.clients=db.clients.filter(x=>x.id!==id);save();closeModal('m-detail-client');renderAll();}};openModal('m-detail-client');}
+function showDetailClient(id){const c=db.clients.find(x=>x.id===id);if(!c)return;const n=cntRes(id);const vip=isVip(id);const gains=db.reservations.filter(r=>r.clientId===id).reduce((s,r)=>s+parseFloat(r.prix||0),0);const last=db.reservations.filter(r=>r.clientId===id).sort((a,b)=>new Date(b.dateAller)-new Date(a.dateAller)).slice(0,3);document.getElementById('dc-title').textContent=c.nom+(vip?' ⭐':'')+(c.blacklist?' ⛔':'');document.getElementById('dc-content').innerHTML=`${c.blacklist?`<div class="alert alert-red">⛔ Client blacklisté${c.blRaison?' — '+c.blRaison:''}</div>`:''}<div class="dr"><span class="dr-label">Téléphone</span><span class="dr-val">${c.tel?`<a href="tel:${c.tel}" style="color:var(--blue2)">${c.tel}</a>`:'—'}</span></div>${c.email?`<div class="dr"><span class="dr-label">Email</span><span class="dr-val">${c.email}</span></div>`:''}${c.adresse?`<div class="dr"><span class="dr-label">Adresse</span><span class="dr-val">${c.adresse}</span></div>`:''}<div class="dr"><span class="dr-label">Statut</span><span class="dr-val ${vip?'gold':''}">${vip?`⭐ VIP (-${db.settings.vip.reduc}%)`:'Normal'}</span></div><div class="dr"><span class="dr-label">Réservations</span><span class="dr-val">${n}</span></div><div class="dr"><span class="dr-label">Gains totaux</span><span class="dr-val gold">${fmt(gains)}</span></div>${!vip&&n>0?`<div class="dr"><span class="dr-label">Vers VIP</span><span class="dr-val">${db.settings.vip.seuil-n} rés. restante(s)</span></div>`:''}${c.notes?`<div class="dr"><span class="dr-label">Notes</span><span class="dr-val">${c.notes}</span></div>`:''}${last.length?`<div class="divider"></div><div style="font-size:0.72rem;color:var(--text3);margin-bottom:8px;font-weight:600">DERNIÈRES RÉSERVATIONS</div>${last.map(r=>`<div class="dr"><span class="dr-label">${new Date(r.dateAller).toLocaleDateString('fr-BE')} · ${r.depart?.substring(0,18)||'—'} → ${r.arrivee?.substring(0,18)||'—'}</span><span class="dr-val gold">${fmt(r.prix)}</span></div>`).join('')}`:''}${getHistoPrixClient(id)}`;document.getElementById('dc-edit-btn').onclick=()=>{closeModal('m-detail-client');openClientModal(id);};document.getElementById('dc-del-btn').onclick=()=>{if(confirm('Supprimer ce client ?')){db.clients=db.clients.filter(x=>x.id!==id);save();closeModal('m-detail-client');renderAll();}};openModal('m-detail-client');}
 
 function openClientModal(editId){const c=editId?db.clients.find(x=>x.id===editId):null;document.getElementById('client-modal-title').textContent=c?'Modifier client':'Nouveau client';document.getElementById('c-edit-id').value=editId||'';document.getElementById('c-nom').value=c?.nom||'';document.getElementById('c-tel').value=c?.tel||'';document.getElementById('c-email').value=c?.email||'';document.getElementById('c-adresse').value=c?.adresse||'';document.getElementById('c-langue').value=c?.langue||'fr';document.getElementById('c-recommande').value=c?.recommande||'';document.getElementById('c-blacklist').checked=c?.blacklist||false;document.getElementById('c-bl-raison').value=c?.blRaison||'';document.getElementById('c-bl-fg').style.display=c?.blacklist?'block':'none';document.getElementById('c-notes').value=c?.notes||'';if(c?.lat)acCoords['c-adresse']={lat:c.lat,lon:c.lon};openModal('m-client');}
 function saveClient(){const editId=document.getElementById('c-edit-id').value;const bl=document.getElementById('c-blacklist').checked;const c={id:editId||genId(),nom:document.getElementById('c-nom').value.trim(),tel:document.getElementById('c-tel').value.trim(),email:document.getElementById('c-email').value.trim(),adresse:document.getElementById('c-adresse').value.trim(),lat:parseFloat(document.getElementById('c-lat').value)||null,lon:parseFloat(document.getElementById('c-lon').value)||null,langue:document.getElementById('c-langue').value,recommande:document.getElementById('c-recommande').value.trim(),blacklist:bl,blRaison:bl?document.getElementById('c-bl-raison').value.trim():'',notes:document.getElementById('c-notes').value.trim()};if(!c.nom){alert('Veuillez entrer un nom');return;}if(editId){const i=db.clients.findIndex(x=>x.id===editId);if(i!==-1)db.clients[i]=c;}else db.clients.push(c);save();closeModal('m-client');renderAll();}
@@ -1157,6 +1170,165 @@ function exportINASTICSV(){
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
   a.download=`facciolini_INASTI_T${t.num}_${year}.csv`;a.click();
+}
+
+// ===== CARNET DE BORD FISCAL =====
+function genCarnetBord(){
+  // Remplir le sélecteur d'années disponibles
+  const years=[...new Set(db.reservations.map(r=>new Date(r.dateAller).getFullYear()))].sort((a,b)=>b-a);
+  if(!years.length)years.push(new Date().getFullYear());
+  const sel=document.getElementById('carnet-year');
+  sel.innerHTML=years.map(y=>`<option value="${y}" ${y===new Date().getFullYear()?'selected':''}>${y}</option>`).join('');
+  sel.onchange=renderCarnetPreview;
+  renderCarnetPreview();
+  openModal('m-carnet');
+}
+
+function renderCarnetPreview(){
+  const year=parseInt(document.getElementById('carnet-year').value||new Date().getFullYear());
+  const res=[...db.reservations].filter(r=>new Date(r.dateAller).getFullYear()===year).sort((a,b)=>new Date(a.dateAller)-new Date(b.dateAller));
+  const carbs=[...db.carburant].filter(c=>new Date(c.date).getFullYear()===year).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const totalKm=res.reduce((s,r)=>s+getTotalKm(r),0);
+  const totalRec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+  const totalDiesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);
+  const totalLitres=carbs.reduce((s,c)=>s+parseFloat(c.litres||0),0);
+  const totalCharges=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0)*12;
+  const totalPeages=res.reduce((s,r)=>s+parseFloat(r.peages||0)+parseFloat(r.parking||0),0);
+  const totalDepenses=totalDiesel+totalCharges+totalPeages;
+  const el=document.getElementById('carnet-preview');
+  el.innerHTML=`
+    <div class="card card-sm" style="margin-bottom:8px">
+      <div style="font-size:0.7rem;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:8px">Recettes ${year}</div>
+      <div class="dr"><span class="dr-label">Trajets</span><span class="dr-val">${res.length}</span></div>
+      <div class="dr"><span class="dr-label">Km professionnels</span><span class="dr-val blue">${totalKm.toFixed(1)} km</span></div>
+      <div class="dr" style="border-bottom:none"><span class="dr-label">Recettes totales</span><span class="dr-val gold">${fmt(totalRec)}</span></div>
+    </div>
+    <div class="card card-sm" style="margin-bottom:8px">
+      <div style="font-size:0.7rem;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:8px">Dépenses ${year}</div>
+      <div class="dr"><span class="dr-label">Carburant (${carbs.length} pleins · ${totalLitres.toFixed(1)}L)</span><span class="dr-val red">- ${fmt(totalDiesel)}</span></div>
+      <div class="dr"><span class="dr-label">Péages + Parkings</span><span class="dr-val red">- ${fmt(totalPeages)}</span></div>
+      <div class="dr"><span class="dr-label">Charges fixes annuelles</span><span class="dr-val red">- ${fmt(totalCharges)}</span></div>
+      <div class="dr" style="border-bottom:none;background:var(--bg3);border-radius:8px;padding:8px"><span class="dr-label" style="font-weight:700;color:var(--text)">Total dépenses</span><span class="dr-val red">- ${fmt(totalDepenses)}</span></div>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text3);margin-bottom:4px">Le CSV contient 3 onglets : Trajets · Carburant · Charges — prêt pour Adam ✅</div>`;
+}
+
+function exportCarnetCSV(){
+  const year=parseInt(document.getElementById('carnet-year').value||new Date().getFullYear());
+  const res=[...db.reservations].filter(r=>new Date(r.dateAller).getFullYear()===year).sort((a,b)=>new Date(a.dateAller)-new Date(b.dateAller));
+  const carbs=[...db.carburant].filter(c=>new Date(c.date).getFullYear()===year).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const esc=v2=>`"${String(v2||'').replace(/"/g,'""')}"`;
+
+  // ===== SECTION 1 : EN-TÊTE =====
+  let csv=`"CARNET DE BORD FISCAL — FACCIOLINI MOBILITY — ${year}"\n`;
+  csv+=`"Généré le : ${new Date().toLocaleDateString('fr-BE')} à ${new Date().toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'})}"\n`;
+  csv+=`"Activité : Transport rémunéré de personnes — Indépendant principal"\n\n`;
+
+  // ===== SECTION 2 : RÉCAPITULATIF =====
+  const totalKm=res.reduce((s,r)=>s+getTotalKm(r),0);
+  const totalRec=res.reduce((s,r)=>s+parseFloat(r.prix||0),0);
+  const totalDiesel=carbs.reduce((s,c)=>s+parseFloat(c.prix||0),0);
+  const totalLitres=carbs.reduce((s,c)=>s+parseFloat(c.litres||0),0);
+  const totalPeages=res.reduce((s,r)=>s+parseFloat(r.peages||0),0);
+  const totalPark=res.reduce((s,r)=>s+parseFloat(r.parking||0),0);
+  const totalChargesAnnuel=db.charges.reduce((s,c)=>s+parseFloat(c.montant||0),0)*12;
+  const totalBenef=res.reduce((s,r)=>s+getBenef(r),0);
+  csv+=`"=== RÉCAPITULATIF ANNUEL ==="\n`;
+  csv+=`"Nombre de trajets";"${res.length}"\n`;
+  csv+=`"Km professionnels totaux";"${totalKm.toFixed(1)} km"\n`;
+  csv+=`"Recettes totales";"${totalRec.toFixed(2)} €"\n`;
+  csv+=`"Carburant total";"${totalDiesel.toFixed(2)} €";"${totalLitres.toFixed(1)} litres"\n`;
+  csv+=`"Péages total";"${totalPeages.toFixed(2)} €"\n`;
+  csv+=`"Parkings total";"${totalPark.toFixed(2)} €"\n`;
+  csv+=`"Charges fixes annuelles";"${totalChargesAnnuel.toFixed(2)} €"\n`;
+  csv+=`"Bénéfice net estimé";"${totalBenef.toFixed(2)} €"\n\n`;
+
+  // ===== SECTION 3 : TRAJETS =====
+  csv+=`"=== DÉTAIL DES TRAJETS ==="\n`;
+  csv+=`"Date";"Heure";"Client";"Départ";"Arrivée";"Type";"Km chargés";"Km à vide";"Km total";"Véhicule";"Prix €";"Péages €";"Parking €";"Bénéfice €";"Payé";"Motif"\n`;
+  res.forEach(r=>{
+    const kmTraj=parseFloat(r.distance||0)*(r.type!=='aller'?2:1);
+    csv+=[
+      new Date(r.dateAller).toLocaleDateString('fr-BE'),
+      r.heure||'',
+      clientName(r.clientId),
+      r.depart||'',
+      r.arrivee||'',
+      {aller:'Aller simple','ar-jour':'A/R jour','ar-diff':'A/R différé'}[r.type]||r.type,
+      kmTraj.toFixed(1),
+      getKmVide(r).toFixed(1),
+      getTotalKm(r).toFixed(1),
+      getV(r.vehicule).nom,
+      parseFloat(r.prix||0).toFixed(2),
+      parseFloat(r.peages||0).toFixed(2),
+      parseFloat(r.parking||0).toFixed(2),
+      getBenef(r).toFixed(2),
+      isPaye(r)?'OUI':'NON',
+      'Transport rémunéré de personnes'
+    ].map(esc).join(';')+'\n';
+  });
+  csv+=`${esc('TOTAL TRAJETS')};"";"";"";"";"";"${totalKm.toFixed(1)}";"";"";"";${esc(totalRec.toFixed(2))};${esc(totalPeages.toFixed(2))};${esc(totalPark.toFixed(2))};${esc(totalBenef.toFixed(2))};"";""\n\n`;
+
+  // ===== SECTION 4 : CARBURANT =====
+  csv+=`"=== DÉTAIL CARBURANT ==="\n`;
+  csv+=`"Date";"Véhicule";"Station";"Km compteur";"Litres";"Prix €";"Prix/litre €"\n`;
+  carbs.forEach(c=>{
+    const pxL=parseFloat(c.litres||0)>0?(parseFloat(c.prix||0)/parseFloat(c.litres||1)).toFixed(3):'';
+    csv+=[
+      new Date(c.date).toLocaleDateString('fr-BE'),
+      db.settings.vehicles[c.vehicule||0]?.nom||'Voiture',
+      c.station||'',
+      c.km||'',
+      parseFloat(c.litres||0).toFixed(2),
+      parseFloat(c.prix||0).toFixed(2),
+      pxL
+    ].map(esc).join(';')+'\n';
+  });
+  csv+=`${esc('TOTAL CARBURANT')};"";"";"";"${totalLitres.toFixed(2)}";${esc(totalDiesel.toFixed(2))};"";\n\n`;
+
+  // ===== SECTION 5 : CHARGES FIXES =====
+  csv+=`"=== CHARGES FIXES MENSUELLES ==="\n`;
+  csv+=`"Nom";"Montant mensuel €";"Montant annuel €"\n`;
+  db.charges.forEach(c=>{
+    const ann=parseFloat(c.montant||0)*12;
+    csv+=[c.nom,parseFloat(c.montant||0).toFixed(2),ann.toFixed(2)].map(esc).join(';')+'\n';
+  });
+  csv+=`${esc('TOTAL CHARGES')};${esc((totalChargesAnnuel/12).toFixed(2))};${esc(totalChargesAnnuel.toFixed(2))}\n`;
+
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=`facciolini_carnet_bord_${year}.csv`;a.click();
+}
+
+// ===== HISTORIQUE PRIX PAR CLIENT (dans showDetailClient) =====
+function getHistoPrixClient(cid){
+  const trajets=[...db.reservations]
+    .filter(r=>r.clientId===cid)
+    .sort((a,b)=>new Date(b.dateAller)-new Date(a.dateAller))
+    .slice(0,10);
+  if(!trajets.length)return '';
+  // Grouper par trajet (départ-arrivée) pour voir les prix habituels
+  const parRoute={};
+  trajets.forEach(r=>{
+    const dep=(r.depart||'').split(',')[0].trim().substring(0,20);
+    const arr=(r.arrivee||'').split(',')[0].trim().substring(0,20);
+    const key=dep+' → '+arr;
+    if(!parRoute[key])parRoute[key]={prix:[],trajets:[]};
+    parRoute[key].prix.push(parseFloat(r.prix||0));
+    parRoute[key].trajets.push(r);
+  });
+  const lignes=Object.entries(parRoute).map(([route,data])=>{
+    const prixMoy=data.prix.reduce((s,p)=>s+p,0)/data.prix.length;
+    const prixMin=Math.min(...data.prix);const prixMax=Math.max(...data.prix);
+    const varStr=prixMin!==prixMax?` (${fmt(prixMin)} – ${fmt(prixMax)})`:'';
+    return `<div class="dr">
+      <span class="dr-label" style="font-size:0.75rem">${route}<br><span style="color:var(--text3)">${data.prix.length} fois</span></span>
+      <span class="dr-val gold" style="font-size:0.82rem">${fmt(prixMoy)}${varStr}</span>
+    </div>`;
+  }).join('');
+  return `<div class="divider"></div>
+    <div style="font-size:0.72rem;color:var(--text3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">💶 Historique des prix</div>
+    ${lignes}`;
 }
 
 function getComparison(){let pm=curMonth-1,py=curYear;if(pm<0){pm=11;py--;}const cur=getEncaisseMois(curMonth,curYear);const prev=getEncaisseMois(pm,py);if(prev===0)return null;const pct=Math.round((cur-prev)/prev*100);return{cur,prev,pct};}
