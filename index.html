@@ -359,10 +359,10 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <!-- Type de course -->
         <div class="calc-field" style="grid-column:1/-1">
           <label>Type de course</label>
-          <div class="calc-type-grid">
-            <button class="calc-type-btn active" onclick="setCalcType('aller',this)">→ Aller simple</button>
-            <button class="calc-type-btn" onclick="setCalcType('ar-jour',this)">⇄ Aller-retour même jour</button>
-            <button class="calc-type-btn" onclick="setCalcType('ar-diff',this)">⇄ Aller-retour date différente</button>
+          <div class="calc-type-grid" id="calc-type-grid">
+            <button class="calc-type-btn active" data-val="aller">&#x2192; Aller simple</button>
+            <button class="calc-type-btn" data-val="ar-jour">&#x21c4; Aller-retour m&#xea;me jour</button>
+            <button class="calc-type-btn" data-val="ar-diff">&#x21c4; Aller-retour date diff&#xe9;rente</button>
           </div>
           <input type="hidden" id="calc-type" value="aller">
         </div>
@@ -391,8 +391,8 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <div class="calc-field">
           <label>Véhicule</label>
           <div class="calc-type-grid" id="calc-veh-chips">
-            <button class="calc-type-btn active" onclick="setCalcVeh('seat',this)">🚗 Berline (1-3 pers.)</button>
-            <button class="calc-type-btn" onclick="setCalcVeh('talento',this)">🚐 Minivan (+20€, ≤7 pers.)</button>
+            <button class="calc-type-btn active" data-val="seat">&#x1f697; Berline (1-3 pers.)</button>
+            <button class="calc-type-btn" data-val="talento">&#x1f690; Minivan (+20€, ≤7 pers.)</button>
           </div>
           <input type="hidden" id="calc-veh" value="seat">
           <div id="calc-veh-hint" style="font-size:0.8rem;color:var(--or);margin-top:6px;min-height:18px"></div>
@@ -633,9 +633,9 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           </div>
           <div class="fg">
             <label class="fl">Type de course</label>
-            <div class="form-type-row">
-              <button type="button" class="form-type-btn active" onclick="setFormType('aller',this)">→ Aller simple</button>
-              <button type="button" class="form-type-btn" onclick="setFormType('ar',this)">⇄ Aller-retour</button>
+            <div class="form-type-row" id="form-type-row">
+              <button type="button" class="form-type-btn active" data-val="aller">&#x2192; Aller simple</button>
+              <button type="button" class="form-type-btn" data-val="ar">&#x21c4; Aller-retour</button>
             </div>
             <input type="hidden" name="type" id="f-type" value="aller">
           </div>
@@ -771,20 +771,24 @@ const TARIF_COURT=1.40,TARIF_LONG=1.50,RAYON=30,MIN=50,ARRONDI=5,SUP_CAMION=20;
 let calcCoords={dep:null,arr:null};
 let acTimers={};
 
-function setCalcType(v,btn){
+function setCalcType(v){
   document.getElementById('calc-type').value=v;
-  if(btn&&btn.parentElement){
-    btn.parentElement.querySelectorAll('.calc-type-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }
+  document.querySelectorAll('#calc-type-grid .calc-type-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.val===v);
+  });
 }
-
-function setCalcVeh(v,btn){
+function setCalcVeh(v){
   document.getElementById('calc-veh').value=v;
-  if(btn&&btn.parentElement){
-    btn.parentElement.querySelectorAll('.calc-type-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }
+  document.querySelectorAll('#calc-veh-chips .calc-type-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.val===v);
+  });
+}
+function setFormType(v){
+  document.getElementById('f-type').value=v;
+  document.querySelectorAll('#form-type-row .form-type-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.val===v);
+  });
+  document.getElementById('f-retour-bloc').style.display=v==='ar'?'block':'none';
 }
 
 function roundTo(n,r){return Math.ceil(n/r)*r;}
@@ -853,22 +857,13 @@ async function calcDistanceAuto(){
 
 function updPassagersVeh(){
   const pass=parseInt(document.getElementById('calc-passagers').value||1);
-  // Suggestion auto véhicule selon passagers
-  const vehBtns=document.querySelectorAll('#calc-veh-chips .calc-type-btn');
+  const hint=document.getElementById('calc-veh-hint');
   if(pass>=4){
-    document.getElementById('calc-veh').value='talento';
-    vehBtns.forEach(b=>{
-      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('talento'))b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    document.getElementById('calc-veh-hint').textContent='🚐 Minivan recommandé pour '+pass+' passagers (+20€)';
+    setCalcVeh('talento');
+    if(hint)hint.textContent='🚐 Minivan recommandé pour '+pass+' passagers (+20€)';
   } else {
-    document.getElementById('calc-veh').value='seat';
-    vehBtns.forEach(b=>{
-      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('seat'))b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    document.getElementById('calc-veh-hint').textContent='';
+    setCalcVeh('seat');
+    if(hint)hint.textContent='';
   }
 }
 
@@ -1005,6 +1000,36 @@ function submitForm(e){
   form.style.display='none';
   document.getElementById('form-success').classList.add('show');
 }
+
+// ===== EVENT LISTENERS BOUTONS =====
+document.addEventListener('DOMContentLoaded', function(){
+  // Boutons type course calculateur
+  document.querySelectorAll('#calc-type-grid .calc-type-btn').forEach(btn=>{
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      setCalcType(this.dataset.val);
+    });
+  });
+  // Boutons véhicule calculateur
+  document.querySelectorAll('#calc-veh-chips .calc-type-btn').forEach(btn=>{
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      setCalcVeh(this.dataset.val);
+    });
+  });
+  // Boutons type formulaire
+  document.querySelectorAll('#form-type-row .form-type-btn').forEach(btn=>{
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      setFormType(this.dataset.val);
+    });
+  });
+  // Passagers → véhicule auto
+  const passSelect=document.getElementById('calc-passagers');
+  if(passSelect){
+    passSelect.addEventListener('change', updPassagersVeh);
+  }
+});
 
 // ===== ANIMATIONS SCROLL =====
 const observer=new IntersectionObserver((entries)=>{
