@@ -818,19 +818,24 @@ async function acCalc(input,dropId,role){
       var data=await resp.json();
       var results=data.features||[];
       if(!results.length){drop.style.display='none';return;}
-      drop.innerHTML=results.map(function(r){
+      drop.innerHTML='';
+      results.forEach(function(r){
         var p=r.properties,coords=r.geometry.coordinates;
         var main=[p.name,p.street?(p.housenumber?p.street+' '+p.housenumber:p.street):null].filter(Boolean).join(', ')||p.name||'';
         var city=p.city||p.town||p.village||'',country=p.country||'';
         var full=[main,city,country].filter(Boolean).join(', ');
-        var lat=coords[1],lon=coords[0];
-        var safeDisplay=full.replace(/"/g,'&quot;');
-        return '<div class="ac-item-calc" data-display="'+safeDisplay+'" data-lat="'+lat+'" data-lon="'+lon+'" onclick="acSelCalc(''+role+'',this)"><div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+', '+country+'</div>':'')+'</div>';
-      }).join('');
+        var div=document.createElement('div');
+        div.className='ac-item-calc';
+        div.innerHTML='<div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+', '+country+'</div>':'');
+        div.dataset.display=full;
+        div.dataset.lat=coords[1];
+        div.dataset.lon=coords[0];
+        div.dataset.role=role;
+        div.addEventListener('click',function(){acSelCalc(this.dataset.role,this);});
+        drop.appendChild(div);
+      });
       drop.style.display='block';
-    }catch(e){
-      drop.style.display='none';
-    }
+    }catch(e){drop.style.display='none';}
   },350);
 }
 function acSelCalc(role,el){
@@ -858,47 +863,34 @@ document.addEventListener('click',e=>{
 });
 
 async function calcDistanceAuto(){
-  const dep=calcCoords.dep,arr=calcCoords.arr;
+  var dep=calcCoords.dep,arr=calcCoords.arr;
   if(!dep||!arr)return;
-  const info=document.getElementById('calc-dist-info');
-  info.textContent='⏳ Calcul de la distance...';
+  var info=document.getElementById('calc-dist-info');
+  if(info)info.textContent='⏳ Calcul de la distance...';
   try{
-    const r=await fetch('https://router.project-osrm.org/route/v1/driving/'+dep.lon+','+dep.lat+';'+arr.lon+','+arr.lat+'?overview=false');
-    const d=await r.json();
+    var url='https://router.project-osrm.org/route/v1/driving/'+dep.lon+','+dep.lat+';'+arr.lon+','+arr.lat+'?overview=false';
+    var resp=await fetch(url);
+    var d=await resp.json();
     if(d.routes&&d.routes[0]){
-      const km=Math.round(d.routes[0].distance/1000);
-      const mins=Math.round(d.routes[0].duration/60);
-      const h=Math.floor(mins/60),m=mins%60;
-      const durStr=h>0?h+'h'+(m<10?'0':'')+m+' min':m+' min';
-      info.textContent='📍 Distance : '+km+' km · Durée estimée : '+durStr;
+      var km=Math.round(d.routes[0].distance/1000);
+      var mins=Math.round(d.routes[0].duration/60);
+      var h=Math.floor(mins/60),m=mins%60;
+      var durStr=h>0?h+'h'+(m<10?'0':'')+m+' min':m+' min';
+      if(info)info.textContent='📍 Distance : '+km+' km · Durée estimée : '+durStr;
       window._calcKm=km;
       window._calcDur=d.routes[0].duration;
     }
-  }catch(e){info.textContent='';}
+  }catch(e){if(info)info.textContent='';}
 }
-
-
-function updPassagersVeh(){
-  const pass=parseInt(document.getElementById('calc-passagers').value||1);
-  const hint=document.getElementById('calc-veh-hint');
-  if(pass>=4){
-    setCalcVeh('talento');
-    if(hint)hint.textContent='🚐 Minivan recommandé pour '+pass+' passagers (+20€)';
-  } else {
-    setCalcVeh('seat');
-    if(hint)hint.textContent='';
-  }
-}
-
 async function calculerPrix(){
   const btn=document.getElementById('calc-btn'),load=document.getElementById('calc-loading');
   const result=document.getElementById('calc-result');
   const dep=calcCoords.dep,arr=calcCoords.arr;
   if(!document.getElementById('calc-depart').value||!document.getElementById('calc-arrivee').value){
-    alert('Veuillez entrer les adresses de départ et d'arrivée.');return;
+    alert("Veuillez entrer les adresses de départ et d\'arrivée.");return;
   }
   if(!dep||!arr){
-    alert('Veuillez sélectionner les adresses dans la liste déroulante.');return;
+    alert("Veuillez sélectionner les adresses dans la liste déroulante.");return;
   }
   btn.style.display='none';load.style.display='block';
   try{
@@ -926,13 +918,13 @@ async function calculerPrix(){
     if(isTalento)detail+=' + '+SUP_CAMION+'€ (Minivan)';
     detail+=' = '+base.toFixed(0)+'€ → arrondi '+prix+'€';
     detail+='<br><strong>Note :</strong> Péages et parking non inclus (facturation réelle).';
-    if(type==='ar-diff')detail+='<br><strong>A/R date différente :</strong> Acompte à l'aller, solde au retour.';
+    if(type==='ar-diff')detail+='<br><strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.';
     document.getElementById('calc-detail').innerHTML=detail;
     window._calcResult={prix,type,km,dep:document.getElementById('calc-depart').value,arr:document.getElementById('calc-arrivee').value};
     result.classList.add('show');
     result.scrollIntoView({behavior:'smooth',block:'center'});
   }catch(e){
-    alert('Impossible de calculer la distance. Vérifiez les adresses ou contactez-nous directement au 0471 69 26 50.');
+    alert("Impossible de calculer la distance. Vérifiez les adresses ou contactez-nous au 0471 69 26 50.");
   }
   btn.style.display='inline-flex';load.style.display='none';
 }
