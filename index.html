@@ -808,66 +808,64 @@ function setFormType(v){
 function roundTo(n,r){return Math.ceil(n/r)*r;}
 
 async function acCalc(input,dropId,role){
-  const q=input.value.trim(),drop=document.getElementById(dropId);
+  var q=input.value.trim();
+  var drop=document.getElementById(dropId);
+  if(!drop)return;
   clearTimeout(acTimers[role]);
   if(q.length<2){drop.style.display='none';return;}
-  acTimers[role]=setTimeout(async()=>{
+  // Afficher "recherche..." immédiatement
+  drop.innerHTML='<div class="ac-item-calc" style="color:var(--gris);font-size:0.82rem">&#x23f3; Recherche...</div>';
+  drop.style.display='block';
+  acTimers[role]=setTimeout(async function(){
     try{
-      // Essayer Nominatim OpenStreetMap (fiable, gratuit, pas de CORS)
-      const url='https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q+' belgique')+'&format=json&limit=6&countrycodes=be,fr,lu,de,nl&accept-language=fr&addressdetails=1';
-      const resp=await fetch(url,{headers:{'User-Agent':'FaccioliniMobility/1.0 contact@facciolinimobility.be'}});
-      if(!resp.ok)throw new Error('Nominatim '+resp.status);
-      const results=await resp.json();
-      if(!results||!results.length){
-        // Fallback: Photon
-        const url2='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=5&lang=fr&bbox=2.3,49.4,6.5,51.5';
-        const resp2=await fetch(url2);
-        const data2=await resp2.json();
-        const r2=data2.features||[];
-        if(!r2.length){drop.style.display='none';return;}
-        drop.innerHTML=r2.map(r=>{
-          const p=r.properties,coords=r.geometry.coordinates;
-          const main=[p.name,p.street?(p.housenumber?p.street+' '+p.housenumber:p.street):null].filter(Boolean).join(', ')||p.name||'';
-          const city=p.city||p.town||p.village||'';
-          const full=[main,city,p.country].filter(Boolean).join(', ');
-          const safe=full.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-          return '<div class="ac-item-calc" onclick="acSelCalc(\''+role+'\',\''+safe+'\','+coords[1]+','+coords[0]+')"><div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+'</div>':'')+'</div>';
-        }).join('');
-        drop.style.display='block';
+      // Photon API - fonctionne depuis les navigateurs
+      var url='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=6&lang=fr&bbox=2.3,49.4,6.5,51.5';
+      var resp=await fetch(url);
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      var data=await resp.json();
+      var results=data.features||[];
+      if(!results.length){
+        drop.innerHTML='<div class="ac-item-calc" style="color:var(--gris);font-size:0.82rem;cursor:default">Aucun r&#xe9;sultat — tapez l'adresse compl&#xe8;te</div>';
         return;
       }
-      // Afficher résultats Nominatim
-      drop.innerHTML=results.map(r=>{
-        const addr=r.address||{};
-        const road=addr.road||'';
-        const num=addr.house_number||'';
-        const ville=addr.city||addr.town||addr.village||addr.municipality||'';
-        const main=(num&&road)?(road+' '+num):road||r.name||ville;
-        const sub=[ville,addr.country].filter(Boolean).join(', ');
-        const full=(main?main+', ':'')+sub;
-        const safe=full.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return '<div class="ac-item-calc" onclick="acSelCalc(\''+role+'\',\''+safe+'\','+r.lat+','+r.lon+')"><div class="ac-main-calc">'+(main||ville)+'</div><div class="ac-sub-calc">'+sub+'</div></div>';
+      drop.innerHTML=results.map(function(r){
+        var p=r.properties, coords=r.geometry.coordinates;
+        var road=p.street||'';
+        var num=p.housenumber||'';
+        var main=p.name||(num&&road?(num+' '+road):road)||'';
+        var city=p.city||p.town||p.village||p.municipality||'';
+        var country=p.country||'';
+        var display=[main,city,country].filter(Boolean).join(', ');
+        // Encoder pour onclick
+        var lat=coords[1], lon=coords[0];
+        var safeDisplay=display.replace(/"/g,'&quot;');
+        return '<div class="ac-item-calc" onclick="acSelCalc(''+role+'',this)" data-display="'+safeDisplay+'" data-lat="'+lat+'" data-lon="'+lon+'"><div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+(country?', '+country:'')+'</div>':'')+'</div>';
       }).join('');
       drop.style.display='block';
     }catch(e){
-      // Si les deux APIs échouent, afficher message manuel
-      drop.innerHTML='<div class="ac-item-calc" style="color:var(--gris);font-size:0.8rem;cursor:default">Saisissez l\'adresse complète manuellement</div>';
-      drop.style.display='block';
-      console.error('Geocoding error:',e);
+      console.error('Autocomplete error:',e);
+      drop.innerHTML='<div class="ac-item-calc" style="color:var(--gris);font-size:0.82rem;cursor:default">Service indisponible — tapez l'adresse manuellement</div>';
     }
-  },300);
+  },250);
 }
-function acSelCalc(role,display,lat,lon){
-  calcCoords[role]={lat:parseFloat(lat),lon:parseFloat(lon)};
-  const map={dep:['calc-depart','calc-dep-lat','calc-dep-lon','ac-calc-dep'],arr:['calc-arrivee','calc-arr-lat','calc-arr-lon','ac-calc-arr']};
-  const m=map[role];
-  document.getElementById(m[0]).value=display;
-  document.getElementById(m[1]).value=lat;
-  document.getElementById(m[2]).value=lon;
-  document.getElementById(m[3]).style.display='none';
+function acSelCalc(role,el){
+  var display=el.getAttribute('data-display');
+  var lat=parseFloat(el.getAttribute('data-lat'));
+  var lon=parseFloat(el.getAttribute('data-lon'));
+  calcCoords[role]={lat:lat,lon:lon};
+  var map={
+    dep:['calc-depart','ac-calc-dep'],
+    arr:['calc-arrivee','ac-calc-arr']
+  };
+  var m=map[role];
+  if(m){
+    var inp=document.getElementById(m[0]);
+    if(inp)inp.value=display;
+    var drp=document.getElementById(m[1]);
+    if(drp)drp.style.display='none';
+  }
   if(calcCoords.dep&&calcCoords.arr)calcDistanceAuto();
 }
-
 document.addEventListener('click',e=>{
   if(!e.target.closest('.ac-wrap-calc')){
     document.querySelectorAll('.ac-drop-calc').forEach(d=>d.style.display='none');
@@ -1042,34 +1040,45 @@ function submitForm(e){
 }
 
 // ===== EVENT LISTENERS BOUTONS =====
-document.addEventListener('DOMContentLoaded', function(){
-  // Boutons type course calculateur
-  document.querySelectorAll('#calc-type-grid .calc-type-btn').forEach(btn=>{
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      setCalcType(this.dataset.val);
+
+// ===== INIT IMMÉDIATE (script en bas de page, DOM déjà chargé) =====
+(function init(){
+  // --- Boutons type course calculateur ---
+  var typeGrid = document.getElementById('calc-type-grid');
+  if(typeGrid){
+    typeGrid.querySelectorAll('.calc-type-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        setCalcType(this.getAttribute('data-val'));
+      });
     });
-  });
-  // Boutons véhicule calculateur
-  document.querySelectorAll('#calc-veh-chips .calc-type-btn').forEach(btn=>{
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      setCalcVeh(this.dataset.val);
-    });
-  });
-  // Boutons type formulaire
-  document.querySelectorAll('#form-type-row .form-type-btn').forEach(btn=>{
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      setFormType(this.dataset.val);
-    });
-  });
-  // Passagers → véhicule auto
-  const passSelect=document.getElementById('calc-passagers');
-  if(passSelect){
-    passSelect.addEventListener('change', updPassagersVeh);
   }
-});
+
+  // --- Boutons véhicule calculateur ---
+  var vehGrid = document.getElementById('calc-veh-chips');
+  if(vehGrid){
+    vehGrid.querySelectorAll('.calc-type-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        setCalcVeh(this.getAttribute('data-val'));
+      });
+    });
+  }
+
+  // --- Boutons type formulaire ---
+  var formRow = document.getElementById('form-type-row');
+  if(formRow){
+    formRow.querySelectorAll('.form-type-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        setFormType(this.getAttribute('data-val'));
+      });
+    });
+  }
+
+  // --- Select passagers ---
+  var passEl = document.getElementById('calc-passagers');
+  if(passEl){
+    passEl.addEventListener('change', updPassagersVeh);
+  }
+})();
 
 // ===== ANIMATIONS SCROLL =====
 const observer=new IntersectionObserver((entries)=>{
