@@ -405,10 +405,10 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             <option value="1" style="color:#f8f4ee;background:#131720">1 passager — Seat Leon</option>
             <option value="2" style="color:#f8f4ee;background:#131720">2 passagers — Seat Leon</option>
             <option value="3" style="color:#f8f4ee;background:#131720">3 passagers — Seat Leon</option>
-            <option value="4" style="color:#f8f4ee;background:#131720">4 passagers — Talento (+20€)</option>
-            <option value="5" style="color:#f8f4ee;background:#131720">5 passagers — Talento (+20€)</option>
-            <option value="6" style="color:#f8f4ee;background:#131720">6 passagers — Talento (+20€)</option>
-            <option value="7" style="color:#f8f4ee;background:#131720">7 passagers — Talento (+20€)</option>
+            <option value="4" style="color:#f8f4ee;background:#131720">4 passagers — Minivan (+20€)</option>
+            <option value="5" style="color:#f8f4ee;background:#131720">5 passagers — Minivan (+20€)</option>
+            <option value="6" style="color:#f8f4ee;background:#131720">6 passagers — Minivan (+20€)</option>
+            <option value="7" style="color:#f8f4ee;background:#131720">7 passagers — Minivan (+20€)</option>
             
           </select>
         </div>
@@ -473,7 +473,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
       <div class="service-card">
         <div class="service-icon">🚐</div>
         <h3>Groupes & familles</h3>
-        <p>Notre Fiat Talento 8 places accueille jusqu'à 7 passagers avec leurs bagages. Idéal pour les voyages en famille ou les équipes.</p>
+        <p>Notre Minivan 8 places accueille jusqu'à 7 passagers avec leurs bagages. Idéal pour les voyages en famille ou les équipes.</p>
       </div>
     </div>
   </div>
@@ -659,9 +659,9 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="2">2 passagers</option>
                 <option value="3">3 passagers</option>
                 <option value="4">4 passagers</option>
-                <option value="5">5+ (minivan)</option>
-                <option value="6">6 (minivan)</option>
-                <option value="7">7 (minivan)</option>
+                <option value="5">5+ (Minivan)</option>
+                <option value="6">6 (Minivan)</option>
+                <option value="7">7 (Minivan)</option>
                 
               </select>
             </div>
@@ -861,7 +861,7 @@ async function calculerPrix(){
     document.getElementById('calc-price-label').textContent=typeLabel+' · Prix fixe TTC';
     let detail='<strong>Détail :</strong> '+km+' km × '+tarif.toFixed(2)+'€/km';
     if(type!=='aller')detail+=' × 2 (A/R)';
-    if(isTalento)detail+=' + '+SUP_CAMION+'€ (minivan)';
+    if(isTalento)detail+=' + '+SUP_CAMION+'€ (Minivan)';
     detail+=' = '+base.toFixed(0)+'€ → arrondi '+prix+'€';
     detail+='<br><strong>Note :</strong> Péages et parking non inclus (facturation réelle).';
     if(type==='ar-diff')detail+='<br><strong>A/R date différente :</strong> Acompte à l'aller, solde au retour.';
