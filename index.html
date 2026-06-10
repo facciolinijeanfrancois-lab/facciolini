@@ -1149,14 +1149,55 @@ function submitForm(e){
     'Heure_depart_Carrieres':heureDepStr||'Non calcule',
     'Prise_en_charge':heurePickupStr||'Non calcule'
   };
-  fetch('https://formspree.io/f/maqdzbpl',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify(formspreeData)
-  }).then(function(r){
-    if(r.ok){console.log('✅ Email Formspree envoye');}
-    else{r.json().then(function(d){console.warn('Formspree erreur:',d);});}
-  }).catch(function(e){console.warn('Formspree fetch error:',e);});
+  // Soumettre via form HTML caché - contourne les restrictions CORS
+  var hiddenForm=document.createElement('form');
+  hiddenForm.method='POST';
+  hiddenForm.action='https://formspree.io/f/maqdzbpl';
+  hiddenForm.target='formspree-iframe';
+  hiddenForm.style.display='none';
+  var fields={
+    '_subject':'Reservation '+prenom+' '+nom+' - '+date,
+    '_replyto':data.get('email')||tel,
+    'Nom':prenom+' '+nom,
+    'Telephone':tel,
+    'Email':data.get('email')||'Non renseigne',
+    'Type':(type==='ar'?'Aller-retour':'Aller simple'),
+    'Date_heure':date+' a '+heure,
+    'Heure_depart_Carrieres':heureDepStr||'',
+    'Prise_en_charge':heurePickupStr||'',
+    'Depart':depart,
+    'Arrivee':arrivee,
+    'Vol':vol||'',
+    'Passagers':passagers,
+    'Bagages':bagLabels[bagages]||'',
+    'Siege_enfant':bebeLabels[siegesBebe]||'',
+    'Retour':type==='ar'&&dateR?dateR+(heureR?' a '+heureR:''):'',
+    'Notes':notes||'',
+    'Tarif':window._calcResult?window._calcResult.prix+'EUR - '+window._calcResult.km+' km':''
+  };
+  Object.keys(fields).forEach(function(key){
+    if(fields[key]){
+      var input=document.createElement('input');
+      input.type='hidden';
+      input.name=key;
+      input.value=fields[key];
+      hiddenForm.appendChild(input);
+    }
+  });
+  // iframe caché pour recevoir la réponse sans quitter la page
+  var iframe=document.getElementById('formspree-iframe');
+  if(!iframe){
+    iframe=document.createElement('iframe');
+    iframe.name='formspree-iframe';
+    iframe.style.display='none';
+    document.body.appendChild(iframe);
+  }
+  document.body.appendChild(hiddenForm);
+  hiddenForm.submit();
+  setTimeout(function(){
+    if(hiddenForm.parentNode)hiddenForm.parentNode.removeChild(hiddenForm);
+  },3000);
+  console.log('✅ Formulaire Formspree soumis');
 
     window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
   form.style.display='none';
