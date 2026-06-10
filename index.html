@@ -414,6 +414,39 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         </div>
 
         <!-- Distance info -->
+        <!-- Bloc retour même jour -->
+        <div class="calc-field" id="calc-retour-bloc" style="grid-column:1/-1;display:none">
+          <div style="border-top:1px solid rgba(201,168,76,0.15);padding-top:16px;margin-top:4px">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:12px">&#x21a9; Retour m&#xea;me jour</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="calc-field">
+                <label>Heure de retour</label>
+                <input type="time" class="calc-input" id="calc-heure-retour">
+              </div>
+              <div class="calc-field">
+                <label>Distance retour (km)</label>
+                <input type="number" class="calc-input" id="calc-dist-retour" placeholder="= aller si vide" step="1" min="1">
+                <div style="font-size:0.72rem;color:var(--gris);margin-top:4px">Laissez vide si identique &#xe0; l'aller</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Bloc A/R date différente -->
+        <div class="calc-field" id="calc-retour-diff-bloc" style="grid-column:1/-1;display:none">
+          <div style="border-top:1px solid rgba(201,168,76,0.15);padding-top:16px;margin-top:4px">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:12px">&#x21a9; Trajet retour</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="calc-field">
+                <label>Date de retour</label>
+                <input type="date" class="calc-input" id="calc-date-retour">
+              </div>
+              <div class="calc-field">
+                <label>Heure de retour</label>
+                <input type="time" class="calc-input" id="calc-heure-retour-diff">
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="calc-field" style="grid-column:1/-1">
           <div class="calc-dist-info" id="calc-dist-info"></div>
         </div>
@@ -790,6 +823,10 @@ function setCalcType(v){
   document.querySelectorAll('#calc-type-grid .calc-type-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.val===v);
   });
+  var bJ=document.getElementById('calc-retour-bloc');
+  var bD=document.getElementById('calc-retour-diff-bloc');
+  if(bJ)bJ.style.display=v==='ar-jour'?'block':'none';
+  if(bD)bD.style.display=v==='ar-diff'?'block':'none';
 }
 function setCalcVeh(v){
   document.getElementById('calc-veh').value=v;
@@ -905,8 +942,12 @@ async function calculerPrix(){
     const veh=document.getElementById('calc-veh').value;
     const isTalento=veh==='talento';
     const tarif=km>RAYON?TARIF_LONG:TARIF_COURT;
+    // Distance retour (si différente)
+    const distRetourInput=document.getElementById('calc-dist-retour');
+    const kmRetour=(type==='ar-jour'&&distRetourInput&&distRetourInput.value)?parseFloat(distRetourInput.value):km;
     let base=km*tarif;
-    if(type==='ar-jour'||type==='ar-diff')base=km*2*tarif;
+    if(type==='ar-jour')base=(km+kmRetour)*tarif;
+    else if(type==='ar-diff')base=km*2*tarif;
     // Appliquer le minimum AVANT le supplément minivan
     let prix=Math.max(MIN,roundTo(base,ARRONDI));
     if(isTalento)prix=roundTo(prix+SUP_CAMION,ARRONDI);
@@ -996,6 +1037,8 @@ function submitForm(e){
   if(vol)msg+='\u2708 Vol: '+vol+'\n';
   msg+='\ud83d\udc65 Passagers: '+passagers+'\n';
   if(heurePickupStr)msg+='\ud83d\udd50 Prise en charge: '+heurePickupStr+' ('+marge+'min avant vol)\n';
+  var hRetour=document.getElementById('calc-heure-retour');
+  if(type==='ar'&&hRetour&&hRetour.value)msg+='\u21a9 Heure retour: '+hRetour.value+'\n';
   const bagLabels={'aucun':'Aucun','cabine':'Cabine seulement','1grande':'1 grande valise','2grandes':'2 grandes valises','3grandes':'3 grandes valises','4plus':'4+ valises','ski':'Matériel ski/sport','velo':'Vélo'};
   if(bagages&&bagages!=='aucun')msg+='\ud83e\uddf3 Bagages: '+(bagLabels[bagages]||bagages)+'\n';
   const bebeLabels={'non':'','1bebe':'1 siège bébé (0-13kg)','2bebes':'2 sièges bébé','1enfant':'1 siège enfant','2enfants':'2 sièges enfants','1rehausseur':'1 réhausseur','mix':'Combinaison sièges'};
