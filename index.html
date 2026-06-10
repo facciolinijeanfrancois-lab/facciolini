@@ -351,35 +351,45 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
 <section class="calc-section" id="calculateur">
   <div class="container">
     <span class="section-eyebrow">Tarification transparente</span>
-    <h2 class="section-title serif" style="margin-bottom:8px">Calculez votre tarif <em style="color:var(--or2)">en temps réel</em></h2>
-    <p class="section-desc" style="margin-bottom:40px">Entrez vos adresses et obtenez un prix exact immédiatement. Aucune surprise à l'arrivée.</p>
-
+    <h2 class="section-title serif" style="margin-bottom:8px">Calculez votre tarif <em style="color:var(--or2)">en temps r&#xe9;el</em></h2>
+    <p class="section-desc" style="margin-bottom:40px">Entrez vos adresses et obtenez un prix exact imm&#xe9;diatement. Aucune surprise &#xe0; l'arriv&#xe9;e.</p>
     <div class="calc-wrap">
       <div class="calc-grid">
+
         <!-- Type de course -->
         <div class="calc-field" style="grid-column:1/-1">
           <label>Type de course</label>
           <div class="calc-type-grid" id="calc-type-grid">
             <button class="calc-type-btn active" data-val="aller">&#x2192; Aller simple</button>
-            <button class="calc-type-btn" data-val="ar-jour">&#x21c4; Aller-retour m&#xea;me jour</button>
-            <button class="calc-type-btn" data-val="ar-diff">&#x21c4; Aller-retour date diff&#xe9;rente</button>
+            <button class="calc-type-btn" data-val="ar-jour">&#x21c4; A/R m&#xea;me jour</button>
+            <button class="calc-type-btn" data-val="ar-diff">&#x21c4; A/R date diff&#xe9;rente</button>
           </div>
           <input type="hidden" id="calc-type" value="aller">
         </div>
 
-        <!-- Départ -->
+        <!-- Date et heure aller -->
         <div class="calc-field">
-          <label>Adresse de départ</label>
+          <label>Date</label>
+          <input type="date" class="calc-input" id="calc-date-aller">
+        </div>
+        <div class="calc-field">
+          <label>Heure de d&#xe9;collage</label>
+          <input type="time" class="calc-input" id="calc-heure-aller">
+        </div>
+
+        <!-- Départ -->
+        <div class="calc-field" style="grid-column:1/-1">
+          <label>Adresse de d&#xe9;part</label>
           <div class="ac-wrap-calc">
-            <input type="text" class="calc-input" id="calc-depart" placeholder="Ex: Rue Saint-Éloi, Carnières..." autocomplete="off" oninput="acCalc(this,'ac-calc-dep','dep')">
+            <input type="text" class="calc-input" id="calc-depart" placeholder="Ex: Rue Saint-&#xc9;loi, Carni&#xe8;res..." autocomplete="off">
             <input type="hidden" id="calc-dep-lat"><input type="hidden" id="calc-dep-lon">
             <div class="ac-drop-calc" id="ac-calc-dep"></div>
           </div>
         </div>
 
         <!-- Arrivée -->
-        <div class="calc-field">
-          <label>Adresse d'arrivée</label>
+        <div class="calc-field" style="grid-column:1/-1">
+          <label>Adresse d'arriv&#xe9;e</label>
           <div class="ac-wrap-calc">
             <input type="text" class="calc-input" id="calc-arrivee" placeholder="Ex: Brussels Airport, Zaventem..." autocomplete="off">
             <input type="hidden" id="calc-arr-lat"><input type="hidden" id="calc-arr-lon">
@@ -387,76 +397,113 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           </div>
         </div>
 
-        <!-- Véhicule -->
-        <div class="calc-field">
-          <label>Véhicule</label>
-          <div class="calc-type-grid" id="calc-veh-chips">
-            <button class="calc-type-btn active" data-val="seat">&#x1f697; Berline (1-3 pers.)</button>
-            <button class="calc-type-btn" data-val="talento">&#x1f690; Minivan (+20€, ≤7 pers.)</button>
-          </div>
-          <input type="hidden" id="calc-veh" value="seat">
-          <div id="calc-veh-hint" style="font-size:0.8rem;color:var(--or);margin-top:6px;min-height:18px"></div>
-        </div>
-
-        <!-- Passagers -->
-        <div class="calc-field">
-          <label>Nombre de passagers</label>
-          <select class="calc-input" id="calc-passagers" style="cursor:pointer;color:#f8f4ee;background:#131720" oninput="updPassagersVeh()" onchange="updPassagersVeh()">
-            <option value="1" style="color:#f8f4ee;background:#131720">1 passager — Seat Leon</option>
-            <option value="2" style="color:#f8f4ee;background:#131720">2 passagers — Seat Leon</option>
-            <option value="3" style="color:#f8f4ee;background:#131720">3 passagers — Seat Leon</option>
-            <option value="4" style="color:#f8f4ee;background:#131720">4 passagers — Minivan (+20€)</option>
-            <option value="5" style="color:#f8f4ee;background:#131720">5 passagers — Minivan (+20€)</option>
-            <option value="6" style="color:#f8f4ee;background:#131720">6 passagers — Minivan (+20€)</option>
-            <option value="7" style="color:#f8f4ee;background:#131720">7 passagers — Minivan (+20€)</option>
-            
-          </select>
-        </div>
-
-        <!-- Distance info -->
-        <!-- Bloc retour même jour -->
-        <div class="calc-field" id="calc-retour-bloc" style="grid-column:1/-1;display:none">
-          <div style="border-top:1px solid rgba(201,168,76,0.15);padding-top:16px;margin-top:4px">
-            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:12px">&#x21a9; Retour m&#xea;me jour</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <!-- BLOC A/R MÊME JOUR -->
+        <div id="calc-bloc-jour" style="display:none;grid-column:1/-1">
+          <div style="border-top:1px solid var(--border);padding-top:18px;margin-top:4px">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:14px">&#x21a9; Retour m&#xea;me jour</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
               <div class="calc-field">
                 <label>Heure de retour</label>
-                <input type="time" class="calc-input" id="calc-heure-retour">
+                <input type="time" class="calc-input" id="calc-heure-retour-jour">
               </div>
               <div class="calc-field">
                 <label>Distance retour (km)</label>
-                <input type="number" class="calc-input" id="calc-dist-retour" placeholder="= aller si vide" step="1" min="1">
-                <div style="font-size:0.72rem;color:var(--gris);margin-top:4px">Laissez vide si identique &#xe0; l'aller</div>
+                <input type="number" class="calc-input" id="calc-dist-retour-jour" placeholder="= aller si vide" min="1" step="1">
+                <div style="font-size:0.72rem;color:var(--gris);margin-top:4px">Vide = m&#xea;me distance qu'&#xe0; l'aller</div>
+              </div>
+            </div>
+            <!-- Adresse retour même jour -->
+            <div style="display:flex;gap:10px;margin-bottom:12px" id="calc-retour-jour-type">
+              <button class="calc-type-btn active" data-val="meme" style="flex:1;font-size:0.78rem">&#x1f3e0; M&#xeame adresses (invers&#xe9;es)</button>
+              <button class="calc-type-btn" data-val="diff" style="flex:1;font-size:0.78rem">&#x270f;&#xfe0f; Adresses diff&#xe9;rentes</button>
+            </div>
+            <div id="calc-retour-jour-adr" style="display:none">
+              <div class="calc-field" style="grid-column:1/-1">
+                <label>Lieu de r&#xe9;cup&#xe9;ration (retour)</label>
+                <div class="ac-wrap-calc">
+                  <input type="text" class="calc-input" id="calc-dep-retour-jour" placeholder="Ex: Brussels Airport..." autocomplete="off">
+                  <input type="hidden" id="calc-dep-ret-jour-lat"><input type="hidden" id="calc-dep-ret-jour-lon">
+                  <div class="ac-drop-calc" id="ac-calc-dep-ret-jour"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- Bloc A/R date différente -->
-        <div class="calc-field" id="calc-retour-diff-bloc" style="grid-column:1/-1;display:none">
-          <div style="border-top:1px solid rgba(201,168,76,0.15);padding-top:16px;margin-top:4px">
-            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:12px">&#x21a9; Trajet retour</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+
+        <!-- BLOC A/R DATE DIFFÉRENTE -->
+        <div id="calc-bloc-diff" style="display:none;grid-column:1/-1">
+          <div style="border-top:1px solid var(--border);padding-top:18px;margin-top:4px">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:14px">&#x21a9; Trajet retour</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
               <div class="calc-field">
                 <label>Date de retour</label>
-                <input type="date" class="calc-input" id="calc-date-retour">
+                <input type="date" class="calc-input" id="calc-date-retour-diff">
               </div>
               <div class="calc-field">
                 <label>Heure de retour</label>
                 <input type="time" class="calc-input" id="calc-heure-retour-diff">
               </div>
             </div>
+            <!-- Adresse retour diff -->
+            <div style="display:flex;gap:10px;margin-bottom:12px" id="calc-retour-diff-type">
+              <button class="calc-type-btn active" data-val="meme" style="flex:1;font-size:0.78rem">&#x1f501; M&#xeames adresses (invers&#xe9;es)</button>
+              <button class="calc-type-btn" data-val="diff" style="flex:1;font-size:0.78rem">&#x270f;&#xfe0f; Adresses diff&#xe9;rentes</button>
+            </div>
+            <div id="calc-retour-diff-adr" style="display:none">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <div class="calc-field">
+                  <label>D&#xe9;part retour</label>
+                  <div class="ac-wrap-calc">
+                    <input type="text" class="calc-input" id="calc-dep-retour-diff" placeholder="Ex: Brussels Airport..." autocomplete="off">
+                    <input type="hidden" id="calc-dep-ret-diff-lat"><input type="hidden" id="calc-dep-ret-diff-lon">
+                    <div class="ac-drop-calc" id="ac-calc-dep-ret-diff"></div>
+                  </div>
+                </div>
+                <div class="calc-field">
+                  <label>Arriv&#xe9;e retour</label>
+                  <div class="ac-wrap-calc">
+                    <input type="text" class="calc-input" id="calc-arr-retour-diff" placeholder="Ex: Carni&#xe8;res, Mons..." autocomplete="off">
+                    <input type="hidden" id="calc-arr-ret-diff-lat"><input type="hidden" id="calc-arr-ret-diff-lon">
+                    <div class="ac-drop-calc" id="ac-calc-arr-ret-diff"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Véhicule et passagers -->
+        <div class="calc-field">
+          <label>V&#xe9;hicule</label>
+          <div class="calc-type-grid" id="calc-veh-chips">
+            <button class="calc-type-btn active" data-val="seat">&#x1f697; Berline (1-3 pers.)</button>
+            <button class="calc-type-btn" data-val="talento">&#x1f690; Minivan (+20&#x20ac;, 4-7 pers.)</button>
+          </div>
+          <input type="hidden" id="calc-veh" value="seat">
+          <div id="calc-veh-hint" style="font-size:0.8rem;color:var(--or);margin-top:6px;min-height:18px"></div>
+        </div>
+        <div class="calc-field">
+          <label>Passagers</label>
+          <select class="calc-input" id="calc-passagers" style="cursor:pointer;color:#f8f4ee;background:#131720">
+            <option value="1" style="color:#f8f4ee;background:#131720">1 passager</option>
+            <option value="2" style="color:#f8f4ee;background:#131720">2 passagers</option>
+            <option value="3" style="color:#f8f4ee;background:#131720">3 passagers</option>
+            <option value="4" style="color:#f8f4ee;background:#131720">4 passagers — Minivan (+20&#x20ac;)</option>
+            <option value="5" style="color:#f8f4ee;background:#131720">5 passagers — Minivan (+20&#x20ac;)</option>
+            <option value="6" style="color:#f8f4ee;background:#131720">6 passagers — Minivan (+20&#x20ac;)</option>
+            <option value="7" style="color:#f8f4ee;background:#131720">7 passagers — Minivan (+20&#x20ac;)</option>
+          </select>
+        </div>
+
+        <!-- Info distance -->
         <div class="calc-field" style="grid-column:1/-1">
           <div class="calc-dist-info" id="calc-dist-info"></div>
         </div>
 
-        <!-- Bouton -->
+        <!-- Bouton calcul -->
         <div class="calc-btn-row">
-          <button class="btn btn-gold" onclick="calculerPrix()" id="calc-btn">
-            Calculer le prix
-          </button>
-          <span id="calc-loading" style="color:var(--gris);font-size:0.88rem;display:none">⏳ Calcul en cours...</span>
+          <button class="btn btn-gold" onclick="calculerPrix()" id="calc-btn">Calculer le prix</button>
+          <span id="calc-loading" style="color:var(--gris);font-size:0.88rem;display:none">&#x23f3; Calcul en cours...</span>
         </div>
 
         <!-- Résultat -->
@@ -464,18 +511,18 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:20px">
             <div>
               <div style="font-size:0.78rem;color:var(--gris);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Votre tarif</div>
-              <div class="calc-price" id="calc-price-val">—</div>
+              <div class="calc-price" id="calc-price-val">&#x2014;</div>
               <div class="calc-price-label" id="calc-price-label">Prix fixe, toutes taxes comprises</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px">
-              <a href="#reservation" class="btn btn-gold" onclick="prefillForm()" style="white-space:nowrap">Réserver ce trajet →</a>
-              <a href="https://wa.me/32471692650" target="_blank" class="btn btn-wa" style="white-space:nowrap">💬 Confirmer sur WhatsApp</a>
+              <a href="#reservation" class="btn btn-gold" onclick="prefillForm()" style="white-space:nowrap">R&#xe9;server ce trajet &#x2192;</a>
+              <a href="https://wa.me/32471692650" target="_blank" class="btn btn-wa" style="white-space:nowrap">&#x1f4ac; Confirmer sur WhatsApp</a>
             </div>
           </div>
           <div class="calc-detail" id="calc-detail"></div>
         </div>
 
-        <div class="calc-note">Tarifs fixes · Pas de compteur · Prix identique nuit et week-end · Parking et péages en sus si applicable</div>
+        <div class="calc-note">Tarifs fixes &middot; Prix identique nuit et week-end &middot; P&#xe9;ages et parking en sus si applicable</div>
       </div>
     </div>
   </div>
@@ -820,14 +867,15 @@ let acTimers={};
 
 function setCalcType(v){
   document.getElementById('calc-type').value=v;
-  document.querySelectorAll('#calc-type-grid .calc-type-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.val===v);
+  document.querySelectorAll('#calc-type-grid .calc-type-btn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.val===v);
   });
-  var bJ=document.getElementById('calc-retour-bloc');
-  var bD=document.getElementById('calc-retour-diff-bloc');
+  var bJ=document.getElementById('calc-bloc-jour');
+  var bD=document.getElementById('calc-bloc-diff');
   if(bJ)bJ.style.display=v==='ar-jour'?'block':'none';
   if(bD)bD.style.display=v==='ar-diff'?'block':'none';
 }
+
 function setCalcVeh(v){
   document.getElementById('calc-veh').value=v;
   document.querySelectorAll('#calc-veh-chips .calc-type-btn').forEach(b=>{
@@ -882,7 +930,10 @@ function acSelCalc(role,el){
   calcCoords[role]={lat:lat,lon:lon};
   var map={
     dep:['calc-depart','ac-calc-dep'],
-    arr:['calc-arrivee','ac-calc-arr']
+    arr:['calc-arrivee','ac-calc-arr'],
+    'dep-ret-jour':['calc-dep-retour-jour','ac-calc-dep-ret-jour'],
+    'dep-ret-diff':['calc-dep-retour-diff','ac-calc-dep-ret-diff'],
+    'arr-ret-diff':['calc-arr-retour-diff','ac-calc-arr-ret-diff'],
   };
   var m=map[role];
   if(m){
@@ -1120,9 +1171,44 @@ function submitForm(e){
 
   // --- Select passagers ---
   var passEl = document.getElementById('calc-passagers');
-  if(passEl){
-    passEl.addEventListener('change', updPassagersVeh);
+  if(passEl)passEl.addEventListener('change', updPassagersVeh);
+
+  // --- Boutons adresse retour même jour ---
+  var retJourTypeDiv = document.getElementById('calc-retour-jour-type');
+  if(retJourTypeDiv){
+    retJourTypeDiv.querySelectorAll('.calc-type-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        retJourTypeDiv.querySelectorAll('.calc-type-btn').forEach(function(b){b.classList.remove('active');});
+        this.classList.add('active');
+        var adrBloc=document.getElementById('calc-retour-jour-adr');
+        if(adrBloc)adrBloc.style.display=this.dataset.val==='diff'?'block':'none';
+      });
+    });
   }
+
+  // --- Boutons adresse retour diff ---
+  var retDiffTypeDiv = document.getElementById('calc-retour-diff-type');
+  if(retDiffTypeDiv){
+    retDiffTypeDiv.querySelectorAll('.calc-type-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        retDiffTypeDiv.querySelectorAll('.calc-type-btn').forEach(function(b){b.classList.remove('active');});
+        this.classList.add('active');
+        var adrBloc=document.getElementById('calc-retour-diff-adr');
+        if(adrBloc)adrBloc.style.display=this.dataset.val==='diff'?'block':'none';
+      });
+    });
+  }
+
+  // --- Autocomplete nouveaux champs retour ---
+  var newAcFields=[
+    ['calc-dep-retour-jour','ac-calc-dep-ret-jour','dep-ret-jour'],
+    ['calc-dep-retour-diff','ac-calc-dep-ret-diff','dep-ret-diff'],
+    ['calc-arr-retour-diff','ac-calc-arr-ret-diff','arr-ret-diff'],
+  ];
+  newAcFields.forEach(function(f){
+    var el=document.getElementById(f[0]);
+    if(el)el.addEventListener('input',function(){acCalc(this,f[1],f[2]);});
+  });
 })();
 
 // ===== ANIMATIONS SCROLL =====
