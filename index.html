@@ -796,27 +796,53 @@ function roundTo(n,r){return Math.ceil(n/r)*r;}
 async function acCalc(input,dropId,role){
   const q=input.value.trim(),drop=document.getElementById(dropId);
   clearTimeout(acTimers[role]);
-  if(q.length<3){drop.style.display='none';return;}
+  if(q.length<2){drop.style.display='none';return;}
   acTimers[role]=setTimeout(async()=>{
     try{
-      const url='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=5&lang=fr&bbox=2.3,49.4,6.5,51.5';
-      const resp=await fetch(url);
-      const data=await resp.json();
-      const results=data.features||[];
-      if(!results.length){drop.style.display='none';return;}
+      // Essayer Nominatim OpenStreetMap (fiable, gratuit, pas de CORS)
+      const url='https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q+' belgique')+'&format=json&limit=6&countrycodes=be,fr,lu,de,nl&accept-language=fr&addressdetails=1';
+      const resp=await fetch(url,{headers:{'User-Agent':'FaccioliniMobility/1.0 contact@facciolinimobility.be'}});
+      if(!resp.ok)throw new Error('Nominatim '+resp.status);
+      const results=await resp.json();
+      if(!results||!results.length){
+        // Fallback: Photon
+        const url2='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=5&lang=fr&bbox=2.3,49.4,6.5,51.5';
+        const resp2=await fetch(url2);
+        const data2=await resp2.json();
+        const r2=data2.features||[];
+        if(!r2.length){drop.style.display='none';return;}
+        drop.innerHTML=r2.map(r=>{
+          const p=r.properties,coords=r.geometry.coordinates;
+          const main=[p.name,p.street?(p.housenumber?p.street+' '+p.housenumber:p.street):null].filter(Boolean).join(', ')||p.name||'';
+          const city=p.city||p.town||p.village||'';
+          const full=[main,city,p.country].filter(Boolean).join(', ');
+          const safe=full.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          return '<div class="ac-item-calc" onclick="acSelCalc(\''+role+'\',\''+safe+'\','+coords[1]+','+coords[0]+')"><div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+'</div>':'')+'</div>';
+        }).join('');
+        drop.style.display='block';
+        return;
+      }
+      // Afficher résultats Nominatim
       drop.innerHTML=results.map(r=>{
-        const p=r.properties,coords=r.geometry.coordinates;
-        const main=[p.name,p.street?(p.housenumber?p.street+' '+p.housenumber:p.street):null].filter(Boolean).join(', ')||p.name||'';
-        const city=p.city||p.town||p.village||'';
-        const full=[main,city,p.country].filter(Boolean).join(', ');
+        const addr=r.address||{};
+        const road=addr.road||'';
+        const num=addr.house_number||'';
+        const ville=addr.city||addr.town||addr.village||addr.municipality||'';
+        const main=(num&&road)?(road+' '+num):road||r.name||ville;
+        const sub=[ville,addr.country].filter(Boolean).join(', ');
+        const full=(main?main+', ':'')+sub;
         const safe=full.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return '<div class="ac-item-calc" onclick="acSelCalc(\''+role+'\',\''+safe+'\','+coords[1]+','+coords[0]+')"><div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+', '+p.country+'</div>':'')+'</div>';
+        return '<div class="ac-item-calc" onclick="acSelCalc(\''+role+'\',\''+safe+'\','+r.lat+','+r.lon+')"><div class="ac-main-calc">'+(main||ville)+'</div><div class="ac-sub-calc">'+sub+'</div></div>';
       }).join('');
       drop.style.display='block';
-    }catch(e){drop.style.display='none';}
-  },350);
+    }catch(e){
+      // Si les deux APIs échouent, afficher message manuel
+      drop.innerHTML='<div class="ac-item-calc" style="color:var(--gris);font-size:0.8rem;cursor:default">Saisissez l\'adresse complète manuellement</div>';
+      drop.style.display='block';
+      console.error('Geocoding error:',e);
+    }
+  },300);
 }
-
 function acSelCalc(role,display,lat,lon){
   calcCoords[role]={lat:parseFloat(lat),lon:parseFloat(lon)};
   const map={dep:['calc-depart','calc-dep-lat','calc-dep-lon','ac-calc-dep'],arr:['calc-arrivee','calc-arr-lat','calc-arr-lon','ac-calc-arr']};
