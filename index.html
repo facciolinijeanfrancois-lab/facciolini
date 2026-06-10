@@ -643,7 +643,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           <div class="fg"><label class="fl">Adresse d'arrivée *</label><input type="text" class="fi" name="arrivee" id="f-arrivee" placeholder="Aéroport, gare..." required></div>
           <div class="form-row">
             <div class="fg"><label class="fl">Date *</label><input type="date" class="fi" name="date" id="f-date" required></div>
-            <div class="fg"><label class="fl">Heure du vol *</label><input type="time" class="fi" name="heure" id="f-heure" required></div>
+            <div class="fg"><label class="fl">Heure de d&#xe9;collage *</label><input type="time" class="fi" name="heure" id="f-heure" required></div>
           </div>
           <div id="f-retour-bloc" style="display:none">
             <div class="form-row" style="margin-top:0">
@@ -652,21 +652,64 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             </div>
           </div>
           <div class="form-row">
-            <div class="fg"><label class="fl">Numéro de vol</label><input type="text" class="fi" name="vol" id="f-vol" placeholder="Ex: SN3724" style="text-transform:uppercase"></div>
+            <div class="fg">
+              <label class="fl">Marge souhait&#xe9;e avant vol</label>
+              <select class="fi" name="marge" id="f-marge">
+                <option value="90">1h30 — Vols court-courriers</option>
+                <option value="120" selected>2h00 — Standard recommand&#xe9;</option>
+                <option value="150">2h30 — Vols long-courriers</option>
+                <option value="180">3h00 — Grande pr&#xe9;caution</option>
+              </select>
+              <span style="font-size:0.72rem;color:var(--gris);margin-top:5px;display:block">&#x26a0;&#xfe0f; Pr&#xe9;voyez plus de temps aux heures de pointe</span>
+            </div>
+            <div class="fg"><label class="fl">Num&#xe9;ro de vol</label><input type="text" class="fi" name="vol" id="f-vol" placeholder="Ex: SN3724" style="text-transform:uppercase"></div>
+          </div>
+          <div class="form-row">
             <div class="fg"><label class="fl">Passagers *</label>
               <select class="fi" name="passagers" required>
                 <option value="1">1 passager</option>
                 <option value="2">2 passagers</option>
                 <option value="3">3 passagers</option>
-                <option value="4">4 passagers</option>
-                <option value="5">5+ (Minivan)</option>
-                <option value="6">6 (Minivan)</option>
-                <option value="7">7 (Minivan)</option>
-                
+                <option value="4">4 passagers — Minivan (+20&#x20ac;)</option>
+                <option value="5">5 passagers — Minivan (+20&#x20ac;)</option>
+                <option value="6">6 passagers — Minivan (+20&#x20ac;)</option>
+                <option value="7">7 passagers — Minivan (+20&#x20ac;)</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">Bagages</label>
+              <select class="fi" name="bagages">
+                <option value="aucun">Aucun bagage</option>
+                <option value="cabine">Cabine uniquement</option>
+                <option value="1grande">1 grande valise</option>
+                <option value="2grandes">2 grandes valises</option>
+                <option value="3grandes">3 grandes valises</option>
+                <option value="4plus">4+ valises (pr&#xe9;cisez)</option>
+                <option value="ski">Mat&#xe9;riel ski / sport</option>
+                <option value="velo">V&#xe9;lo</option>
               </select>
             </div>
           </div>
-          <div class="fg"><label class="fl">Notes / demandes spéciales</label><textarea class="ft" name="notes" placeholder="Siège bébé, bagages volumineux, heure d'arrivée à l'aéroport..."></textarea></div>
+          <div class="form-row">
+            <div class="fg"><label class="fl">Si&#xe8;ge b&#xe9;b&#xe9; / enfant</label>
+              <select class="fi" name="sieges_bebe">
+                <option value="non">Pas besoin</option>
+                <option value="1bebe">1 si&#xe8;ge b&#xe9;b&#xe9; (0-13 kg)</option>
+                <option value="2bebes">2 si&#xe8;ges b&#xe9;b&#xe9;</option>
+                <option value="1enfant">1 si&#xe8;ge enfant (15-36 kg)</option>
+                <option value="2enfants">2 si&#xe8;ges enfants</option>
+                <option value="1rehausseur">1 r&#xe9;hausseur (22-36 kg)</option>
+                <option value="mix">Combinaison (pr&#xe9;cisez en notes)</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">V&#xe9;hicule pr&#xe9;f&#xe9;r&#xe9;</label>
+              <select class="fi" name="vehicule_pref">
+                <option value="auto">Automatique selon passagers</option>
+                <option value="berline">Berline — max 3 passagers</option>
+                <option value="minivan">Minivan (+20&#x20ac;) — max 7 passagers</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label class="fl">Notes suppl&#xe9;mentaires</label><textarea class="ft" name="notes" placeholder="Informations compl&#xe9;mentaires, demandes sp&#xe9;ciales..."></textarea></div>
           <button type="submit" class="form-submit">Envoyer ma demande de réservation →</button>
           <p class="form-note">Nous vous répondons par téléphone ou WhatsApp dans les plus brefs délais pour confirmer et communiquer le prix exact.</p>
         </form>
@@ -903,16 +946,31 @@ function submitForm(e){
   const notes=data.get('notes')||'';
   const dateR=data.get('date_retour')||'',heureR=data.get('heure_retour')||'';
   // Construire message WhatsApp
-  // Calculer heure départ recommandée
-  let heureDepStr='';
+  // Calculer heure de prise en charge
+  // = heure décollage - marge souhaitée - temps de trajet
+  const marge=parseInt(data.get('marge')||120); // minutes avant vol
+  const bagages=data.get('bagages')||'aucun';
+  const siegesBebe=data.get('sieges_bebe')||'non';
+  const vehiculePref=data.get('vehicule_pref')||'auto';
+  let heurePickupStr='',heureDepStr='';
   if(heure&&window._calcResult&&window._calcResult.km){
     const dist=window._calcResult.km;
-    const totalMin=Math.ceil(dist/90*60)+30;
+    const tempsTrajet=Math.ceil(dist/90*60); // temps de route estimé
     const parts2=heure.split(':');
-    const heureRdv=parseInt(parts2[0])*60+parseInt(parts2[1]);
-    let heureDep=heureRdv-totalMin;
-    if(heureDep<0)heureDep+=1440;
-    const hD=Math.floor(heureDep/60),mD=heureDep%60;
+    const heureVol=parseInt(parts2[0])*60+parseInt(parts2[1]);
+    // Heure arrivée aéroport = heure vol - marge
+    const heureAeroport=heureVol-marge;
+    // Heure départ de chez le client = heure aéroport - temps trajet
+    let heurePickup=heureAeroport-tempsTrajet;
+    if(heurePickup<0)heurePickup+=1440;
+    const hP=Math.floor(heurePickup/60),mP=heurePickup%60;
+    heurePickupStr=(hP<10?'0':'')+hP+'h'+(mP<10?'0':'')+mP;
+    // Heure départ Carnières = heure pickup - km pickup/90
+    const kmPickup=window._calcResult.kmPickup||0;
+    const tempsPickup=Math.ceil(kmPickup/90*60)||0;
+    let heureDep2=heurePickup-tempsPickup;
+    if(heureDep2<0)heureDep2+=1440;
+    const hD=Math.floor(heureDep2/60),mD=heureDep2%60;
     heureDepStr=(hD<10?'0':'')+hD+'h'+(mD<10?'0':'')+mD;
   }
   let msg='\ud83d\ude97 NOUVELLE R\u00c9SERVATION \u2014 Facciolini Mobility\n';
@@ -927,6 +985,12 @@ function submitForm(e){
   msg+='\ud83d\udccd Arriv\u00e9e: '+arrivee+'\n';
   if(vol)msg+='\u2708 Vol: '+vol+'\n';
   msg+='\ud83d\udc65 Passagers: '+passagers+'\n';
+  if(heurePickupStr)msg+='\ud83d\udd50 Prise en charge: '+heurePickupStr+' ('+marge+'min avant vol)\n';
+  const bagLabels={'aucun':'Aucun','cabine':'Cabine seulement','1grande':'1 grande valise','2grandes':'2 grandes valises','3grandes':'3 grandes valises','4plus':'4+ valises','ski':'Matériel ski/sport','velo':'Vélo'};
+  if(bagages&&bagages!=='aucun')msg+='\ud83e\uddf3 Bagages: '+(bagLabels[bagages]||bagages)+'\n';
+  const bebeLabels={'non':'','1bebe':'1 siège bébé (0-13kg)','2bebes':'2 sièges bébé','1enfant':'1 siège enfant','2enfants':'2 sièges enfants','1rehausseur':'1 réhausseur','mix':'Combinaison sièges'};
+  if(siegesBebe&&siegesBebe!=='non')msg+='\ud83d\udc76 Siège enfant: '+(bebeLabels[siegesBebe]||siegesBebe)+'\n';
+  if(vehiculePref&&vehiculePref!=='auto')msg+='\ud83d\ude97 Véhicule demandé: '+(vehiculePref==='berline'?'Berline':'Minivan (+20€)')+'\n';
   if(type==='ar'&&dateR)msg+='\u21a9 Retour: '+dateR+(heureR?' \u00e0 '+heureR:'')+'\n';
   if(notes)msg+='\n\ud83d\udcac Notes: '+notes+'\n';
   if(window._calcResult){
