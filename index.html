@@ -961,7 +961,13 @@ async function calculerPrix(){
     detail+='<br><strong>Note :</strong> Péages et parking non inclus (facturation réelle).';
     if(type==='ar-diff')detail+='<br><strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.';
     document.getElementById('calc-detail').innerHTML=detail;
-    window._calcResult={prix,type,km,dep:document.getElementById('calc-depart').value,arr:document.getElementById('calc-arrivee').value};
+    const heureRetourJour=document.getElementById('calc-heure-retour')?.value||'';
+    const dateRetourDiff=document.getElementById('calc-date-retour')?.value||'';
+    const heureRetourDiff=document.getElementById('calc-heure-retour-diff')?.value||'';
+    window._calcResult={prix,type,km,
+      dep:document.getElementById('calc-depart').value,
+      arr:document.getElementById('calc-arrivee').value,
+      heureRetourJour,dateRetourDiff,heureRetourDiff};
     result.classList.add('show');
     result.scrollIntoView({behavior:'smooth',block:'center'});
   }catch(e){
@@ -972,10 +978,23 @@ async function calculerPrix(){
 
 function prefillForm(){
   if(!window._calcResult)return;
-  const r=window._calcResult;
-  const fd=document.getElementById('f-depart');if(fd)fd.value=r.dep;
-  const fa=document.getElementById('f-arrivee');if(fa)fa.value=r.arr;
-  const fd2=document.getElementById('f-date');if(fd2&&!fd2.value)fd2.value=new Date().toISOString().split('T')[0];
+  var r=window._calcResult;
+  // Pré-remplir adresses
+  var fd=document.getElementById('f-depart');if(fd)fd.value=r.dep;
+  var fa=document.getElementById('f-arrivee');if(fa)fa.value=r.arr;
+  var fd2=document.getElementById('f-date');if(fd2&&!fd2.value)fd2.value=new Date().toISOString().split('T')[0];
+  // Pré-remplir type de course
+  if(r.type==='ar-jour'||r.type==='ar-diff'){
+    var arBtn=document.querySelector('#form-type-row .form-type-btn[data-val="ar"]');
+    if(arBtn)setFormType('ar',arBtn);
+    if(r.type==='ar-diff'&&r.dateRetourDiff){
+      var fdr=document.getElementById('f-date-retour');if(fdr)fdr.value=r.dateRetourDiff;
+      var fhr=document.getElementById('f-heure-retour');if(fhr)fhr.value=r.heureRetourDiff;
+    }
+  }
+  // Scroller vers le formulaire
+  var section=document.getElementById('reservation');
+  if(section)section.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ===== FORMULAIRE =====
