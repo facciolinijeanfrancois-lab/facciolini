@@ -854,8 +854,9 @@ async function calculerPrix(){
     const tarif=km>RAYON?TARIF_LONG:TARIF_COURT;
     let base=km*tarif;
     if(type==='ar-jour'||type==='ar-diff')base=km*2*tarif;
-    if(isTalento)base+=SUP_CAMION;
-    const prix=Math.max(MIN,roundTo(base,ARRONDI));
+    // Appliquer le minimum AVANT le supplément minivan
+    let prix=Math.max(MIN,roundTo(base,ARRONDI));
+    if(isTalento)prix=roundTo(prix+SUP_CAMION,ARRONDI);
     const typeLabel={aller:'Aller simple','ar-jour':'Aller-retour même jour','ar-diff':'Aller-retour date différente'}[type];
     document.getElementById('calc-price-val').textContent=prix+' €';
     document.getElementById('calc-price-label').textContent=typeLabel+' · Prix fixe TTC';
