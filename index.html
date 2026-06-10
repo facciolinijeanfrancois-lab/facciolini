@@ -390,25 +390,26 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <!-- Véhicule -->
         <div class="calc-field">
           <label>Véhicule</label>
-          <div class="calc-type-grid">
-            <button class="calc-type-btn active" onclick="setCalcVeh('seat',this)">🚗 Berline (≤4 pers.)</button>
-            <button class="calc-type-btn" onclick="setCalcVeh('talento',this)">🚐 Minivan (+20€, ≤8 pers.)</button>
+          <div class="calc-type-grid" id="calc-veh-chips">
+            <button class="calc-type-btn active" onclick="setCalcVeh('seat',this)">🚗 Berline (1-3 pers.)</button>
+            <button class="calc-type-btn" onclick="setCalcVeh('talento',this)">🚐 Minivan (+20€, ≤7 pers.)</button>
           </div>
           <input type="hidden" id="calc-veh" value="seat">
+          <div id="calc-veh-hint" style="font-size:0.8rem;color:var(--or);margin-top:6px;min-height:18px"></div>
         </div>
 
         <!-- Passagers -->
         <div class="calc-field">
           <label>Nombre de passagers</label>
-          <select class="calc-input" id="calc-passagers" style="cursor:pointer">
-            <option value="1">1 passager</option>
-            <option value="2">2 passagers</option>
-            <option value="3">3 passagers</option>
-            <option value="4">4 passagers</option>
-            <option value="5">5 passagers (minivan)</option>
-            <option value="6">6 passagers (minivan)</option>
-            <option value="7">7 passagers (minivan)</option>
-            <option value="8">8 passagers (minivan)</option>
+          <select class="calc-input" id="calc-passagers" style="cursor:pointer;color:#f8f4ee;background:#131720" oninput="updPassagersVeh()" onchange="updPassagersVeh()">
+            <option value="1" style="color:#f8f4ee;background:#131720">1 passager — Seat Leon</option>
+            <option value="2" style="color:#f8f4ee;background:#131720">2 passagers — Seat Leon</option>
+            <option value="3" style="color:#f8f4ee;background:#131720">3 passagers — Seat Leon</option>
+            <option value="4" style="color:#f8f4ee;background:#131720">4 passagers — Talento (+20€)</option>
+            <option value="5" style="color:#f8f4ee;background:#131720">5 passagers — Talento (+20€)</option>
+            <option value="6" style="color:#f8f4ee;background:#131720">6 passagers — Talento (+20€)</option>
+            <option value="7" style="color:#f8f4ee;background:#131720">7 passagers — Talento (+20€)</option>
+            
           </select>
         </div>
 
@@ -661,7 +662,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="5">5+ (minivan)</option>
                 <option value="6">6 (minivan)</option>
                 <option value="7">7 (minivan)</option>
-                <option value="8">8 (minivan)</option>
+                
               </select>
             </div>
           </div>
@@ -729,16 +730,18 @@ let acTimers={};
 
 function setCalcType(v,btn){
   document.getElementById('calc-type').value=v;
-  document.querySelectorAll('.calc-type-btn').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+v+"'"))b.classList.add('active');
-    else if(b.parentElement===btn.parentElement)b.classList.remove('active');
-  });
+  if(btn&&btn.parentElement){
+    btn.parentElement.querySelectorAll('.calc-type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
 }
 
 function setCalcVeh(v,btn){
   document.getElementById('calc-veh').value=v;
-  btn.parentElement.querySelectorAll('.calc-type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn&&btn.parentElement){
+    btn.parentElement.querySelectorAll('.calc-type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
 }
 
 function roundTo(n,r){return Math.ceil(n/r)*r;}
@@ -802,6 +805,28 @@ async function calcDistanceAuto(){
       window._calcDur=d.routes[0].duration;
     }
   }catch(e){info.textContent='';}
+}
+
+
+function updPassagersVeh(){
+  const pass=parseInt(document.getElementById('calc-passagers').value||1);
+  // Suggestion auto véhicule selon passagers
+  const vehBtns=document.querySelectorAll('#calc-veh-chips .calc-type-btn');
+  if(pass>=4){
+    document.getElementById('calc-veh').value='talento';
+    vehBtns.forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('talento'))b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    document.getElementById('calc-veh-hint').textContent='🚐 Minivan recommandé pour '+pass+' passagers (+20€)';
+  } else {
+    document.getElementById('calc-veh').value='seat';
+    vehBtns.forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('seat'))b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    document.getElementById('calc-veh-hint').textContent='';
+  }
 }
 
 async function calculerPrix(){
