@@ -1128,12 +1128,37 @@ function submitForm(e){
   if(type==='ar'&&dateR)fd.append('Retour',dateR+(heureR?' a '+heureR:''));
   if(notes)fd.append('Notes',notes);
   if(window._calcResult)fd.append('Tarif',window._calcResult.prix+'EUR - '+window._calcResult.km+' km');
+  // Email via Formspree - utiliser JSON pour éviter les problèmes CORS
+  var formspreeData={
+    '_subject':'Reservation '+prenom+' '+nom+' - '+date,
+    '_replyto':data.get('email')||tel,
+    'Nom':prenom+' '+nom,
+    'Telephone':tel,
+    'Email':data.get('email')||'Non renseigne',
+    'Type':(type==='ar'?'Aller-retour':'Aller simple'),
+    'Date':date+' a '+heure,
+    'Depart':depart,
+    'Arrivee':arrivee,
+    'Vol':vol||'Non renseigne',
+    'Passagers':passagers,
+    'Bagages':bagLabels[bagages]||bagages,
+    'Siege_enfant':bebeLabels[siegesBebe]||siegesBebe,
+    'Retour':type==='ar'&&dateR?dateR+(heureR?' a '+heureR:''):'',
+    'Notes':notes||'',
+    'Tarif':window._calcResult?window._calcResult.prix+'EUR - '+window._calcResult.km+' km':'Non calcule',
+    'Heure_depart_Carrieres':heureDepStr||'Non calcule',
+    'Prise_en_charge':heurePickupStr||'Non calcule'
+  };
   fetch('https://formspree.io/f/maqdzbpl',{
-    method:'POST',body:fd,headers:{Accept:'application/json'}
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify(formspreeData)
   }).then(function(r){
-    console.log(r.ok?'Email envoye':'Formspree erreur '+r.status);
-  }).catch(function(err){console.warn('Formspree:',err);});
-  window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
+    if(r.ok){console.log('✅ Email Formspree envoye');}
+    else{r.json().then(function(d){console.warn('Formspree erreur:',d);});}
+  }).catch(function(e){console.warn('Formspree fetch error:',e);});
+
+    window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
   form.style.display='none';
   document.getElementById('form-success').classList.add('show');
 }
