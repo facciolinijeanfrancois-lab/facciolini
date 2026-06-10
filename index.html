@@ -381,7 +381,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <div class="calc-field">
           <label>Adresse d'arrivée</label>
           <div class="ac-wrap-calc">
-            <input type="text" class="calc-input" id="calc-arrivee" placeholder="Ex: Brussels Airport, Zaventem, Gare de Mons..." autocomplete="off">
+            <input type="text" class="calc-input" id="calc-arrivee" placeholder="Ex: Brussels Airport, Zaventem..." autocomplete="off">
             <input type="hidden" id="calc-arr-lat"><input type="hidden" id="calc-arr-lon">
             <div class="ac-drop-calc" id="ac-calc-arr"></div>
           </div>
@@ -807,62 +807,31 @@ function setFormType(v){
 
 function roundTo(n,r){return Math.ceil(n/r)*r;}
 
-function acCalc(input,dropId,role){
-  var q=input.value.trim().toLowerCase();
-  var drop=document.getElementById(dropId);
-  if(!drop)return;
-  if(q.length<2){drop.style.display='none';return;}
-
-  // Base de données locale des lieux courants en Belgique
-  var lieux=[
-    {n:'Brussels Airport',v:'Brussels Airport, Zaventem',lat:50.9010,lon:4.4844},
-    {n:'Zaventem BRU',v:'Brussels Airport, Zaventem',lat:50.9010,lon:4.4844},
-    {n:'Charleroi Airport CRL',v:'Brussels South Charleroi Airport, Gosselies',lat:50.4592,lon:4.4538},
-    {n:'Brussels South Charleroi',v:'Brussels South Charleroi Airport, Gosselies',lat:50.4592,lon:4.4538},
-    {n:'Liège Airport LGG',v:'Liège Airport, Grâce-Hollogne',lat:50.6374,lon:5.4432},
-    {n:'Gare du Midi Bruxelles',v:'Gare du Midi, Rue de France, Bruxelles',lat:50.8354,lon:4.3360},
-    {n:'Gare Centrale Bruxelles',v:'Gare Centrale, Carrefour de l'Europe, Bruxelles',lat:50.8454,lon:4.3569},
-    {n:'Gare de Mons',v:'Gare de Mons, Place Léopold, Mons',lat:50.4542,lon:3.9563},
-    {n:'Gare de Charleroi',v:'Gare de Charleroi-Central, Boulevard Tirou, Charleroi',lat:50.4108,lon:4.4446},
-    {n:'Gare de La Louvière',v:'Gare de La Louvière-Centre, La Louvière',lat:50.4786,lon:4.1903},
-    {n:'Carnières',v:'Carnières, Morlanwelz',lat:50.4089,lon:4.1756},
-    {n:'Morlanwelz',v:'Morlanwelz, Hainaut',lat:50.4589,lon:4.2303},
-    {n:'Bois-d'Haine',v:'Bois-d'Haine, Manage',lat:50.4956,lon:4.2278},
-    {n:'Manage',v:'Manage, Hainaut',lat:50.5019,lon:4.2394},
-    {n:'Mons',v:'Mons, Hainaut',lat:50.4542,lon:3.9563},
-    {n:'Binche',v:'Binche, Hainaut',lat:50.4100,lon:4.1664},
-    {n:'La Louvière',v:'La Louvière, Hainaut',lat:50.4786,lon:4.1903},
-    {n:'Seneffe',v:'Seneffe, Hainaut',lat:50.5222,lon:4.2719},
-    {n:'Ecaussinnes',v:'Ecaussinnes, Hainaut',lat:50.5714,lon:4.1769},
-    {n:'Thuin',v:'Thuin, Hainaut',lat:50.3386,lon:4.2836},
-    {n:'Charleroi',v:'Charleroi, Hainaut',lat:50.4108,lon:4.4446},
-    {n:'Baudour',v:'Baudour, Saint-Ghislain',lat:50.4819,lon:3.8553},
-    {n:'Saint-Ghislain',v:'Saint-Ghislain, Hainaut',lat:50.4519,lon:3.8197},
-    {n:'Soignies',v:'Soignies, Hainaut',lat:50.5756,lon:4.0706},
-    {n:'Nivelles',v:'Nivelles, Brabant Wallon',lat:50.5986,lon:4.3267},
-    {n:'Tournai',v:'Tournai, Hainaut',lat:50.6067,lon:3.3886},
-    {n:'Bruxelles',v:'Bruxelles, Belgique',lat:50.8503,lon:4.3517},
-    {n:'Namur',v:'Namur, Belgique',lat:50.4669,lon:4.8674},
-    {n:'Liège',v:'Liège, Belgique',lat:50.6326,lon:5.5797},
-    {n:'Amsterdam Schiphol',v:'Amsterdam Airport Schiphol, Pays-Bas',lat:52.3086,lon:4.7639},
-    {n:'Paris CDG',v:'Aéroport Paris Charles de Gaulle, France',lat:49.0097,lon:2.5479},
-  ];
-
-  var results=lieux.filter(function(l){
-    return l.n.toLowerCase().includes(q)||l.v.toLowerCase().includes(q);
-  }).slice(0,6);
-
-  if(!results.length){
-    drop.innerHTML='<div class="ac-item-calc" style="cursor:default;color:var(--gris);font-size:0.82rem">Tapez votre adresse compl&#xe8;te</div>';
-    drop.style.display='block';
-    return;
-  }
-
-  drop.innerHTML=results.map(function(r){
-    var safe=r.v.replace(/"/g,'&quot;');
-    return '<div class="ac-item-calc" data-display="'+safe+'" data-lat="'+r.lat+'" data-lon="'+r.lon+'" onclick="acSelCalc(''+role+'',this)"><div class="ac-main-calc">'+r.n+'</div><div class="ac-sub-calc">'+r.v+'</div></div>';
-  }).join('');
-  drop.style.display='block';
+async function acCalc(input,dropId,role){
+  var q=input.value.trim(),drop=document.getElementById(dropId);
+  clearTimeout(acTimers[role]);
+  if(q.length<3){drop.style.display='none';return;}
+  acTimers[role]=setTimeout(async function(){
+    try{
+      var url='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=6&lang=fr&bbox=2.3,49.4,6.5,51.5';
+      var resp=await fetch(url);
+      var data=await resp.json();
+      var results=data.features||[];
+      if(!results.length){drop.style.display='none';return;}
+      drop.innerHTML=results.map(function(r){
+        var p=r.properties,coords=r.geometry.coordinates;
+        var main=[p.name,p.street?(p.housenumber?p.street+' '+p.housenumber:p.street):null].filter(Boolean).join(', ')||p.name||'';
+        var city=p.city||p.town||p.village||'',country=p.country||'';
+        var full=[main,city,country].filter(Boolean).join(', ');
+        var lat=coords[1],lon=coords[0];
+        var safeDisplay=full.replace(/"/g,'&quot;');
+        return '<div class="ac-item-calc" data-display="'+safeDisplay+'" data-lat="'+lat+'" data-lon="'+lon+'" onclick="acSelCalc(''+role+'',this)"><div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+', '+country+'</div>':'')+'</div>';
+      }).join('');
+      drop.style.display='block';
+    }catch(e){
+      drop.style.display='none';
+    }
+  },350);
 }
 function acSelCalc(role,el){
   var display=el.getAttribute('data-display');
