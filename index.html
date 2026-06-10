@@ -1149,55 +1149,38 @@ function submitForm(e){
     'Heure_depart_Carrieres':heureDepStr||'Non calcule',
     'Prise_en_charge':heurePickupStr||'Non calcule'
   };
-  // Soumettre via form HTML caché - contourne les restrictions CORS
-  var hiddenForm=document.createElement('form');
-  hiddenForm.method='POST';
-  hiddenForm.action='https://formspree.io/f/maqdzbpl';
-  hiddenForm.target='formspree-iframe';
-  hiddenForm.style.display='none';
-  var fields={
-    '_subject':'Reservation '+prenom+' '+nom+' - '+date,
-    '_replyto':data.get('email')||tel,
-    'Nom':prenom+' '+nom,
-    'Telephone':tel,
-    'Email':data.get('email')||'Non renseigne',
-    'Type':(type==='ar'?'Aller-retour':'Aller simple'),
-    'Date_heure':date+' a '+heure,
-    'Heure_depart_Carrieres':heureDepStr||'',
-    'Prise_en_charge':heurePickupStr||'',
-    'Depart':depart,
-    'Arrivee':arrivee,
-    'Vol':vol||'',
-    'Passagers':passagers,
-    'Bagages':bagLabels[bagages]||'',
-    'Siege_enfant':bebeLabels[siegesBebe]||'',
-    'Retour':type==='ar'&&dateR?dateR+(heureR?' a '+heureR:''):'',
-    'Notes':notes||'',
-    'Tarif':window._calcResult?window._calcResult.prix+'EUR - '+window._calcResult.km+' km':''
+  // Email via Web3Forms - fonctionne sans restriction CORS
+  var w3fData={
+    'access_key':'1d46a126-9dab-4f6e-a0f1-bffec0073d89',
+    'subject':'Reservation '+prenom+' '+nom+' - '+date,
+    'from_name':'Facciolini Mobility - Site Web',
+    'replyto':data.get('email')||'',
+    'name':prenom+' '+nom,
+    'email':data.get('email')||tel+'@noemail.be',
+    'phone':tel,
+    'message':
+      'TYPE: '+(type==='ar'?'Aller-retour':'Aller simple')+'\n'+
+      'DATE: '+date+' a '+heure+'\n'+
+      (heureDepStr?'DEPART CARRIERES: '+heureDepStr+'\n':'')+
+      (heurePickupStr?'PRISE EN CHARGE: '+heurePickupStr+'\n':'')+
+      'DEPART: '+depart+'\n'+
+      'ARRIVEE: '+arrivee+'\n'+
+      (vol?'VOL: '+vol+'\n':'')+
+      'PASSAGERS: '+passagers+'\n'+
+      (bagages&&bagages!=='aucun'?'BAGAGES: '+(bagLabels[bagages]||bagages)+'\n':'')+
+      (siegesBebe&&siegesBebe!=='non'?'SIEGE ENFANT: '+(bebeLabels[siegesBebe]||siegesBebe)+'\n':'')+
+      (type==='ar'&&dateR?'RETOUR: '+dateR+(heureR?' a '+heureR:'')+'\n':'')+
+      (notes?'NOTES: '+notes+'\n':'')+
+      (window._calcResult?'TARIF ESTIME: '+window._calcResult.prix+'EUR - '+window._calcResult.km+' km':'')
   };
-  Object.keys(fields).forEach(function(key){
-    if(fields[key]){
-      var input=document.createElement('input');
-      input.type='hidden';
-      input.name=key;
-      input.value=fields[key];
-      hiddenForm.appendChild(input);
-    }
-  });
-  // iframe caché pour recevoir la réponse sans quitter la page
-  var iframe=document.getElementById('formspree-iframe');
-  if(!iframe){
-    iframe=document.createElement('iframe');
-    iframe.name='formspree-iframe';
-    iframe.style.display='none';
-    document.body.appendChild(iframe);
-  }
-  document.body.appendChild(hiddenForm);
-  hiddenForm.submit();
-  setTimeout(function(){
-    if(hiddenForm.parentNode)hiddenForm.parentNode.removeChild(hiddenForm);
-  },3000);
-  console.log('✅ Formulaire Formspree soumis');
+  fetch('https://api.web3forms.com/submit',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify(w3fData)
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.success){console.log('✅ Email Web3Forms envoye');}
+    else{console.warn('Web3Forms erreur:',d.message);}
+  }).catch(function(e){console.warn('Web3Forms fetch error:',e);});
 
     window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
   form.style.display='none';
