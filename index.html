@@ -1058,73 +1058,82 @@ function setFormType(v,btn){
 
 function submitForm(e){
   e.preventDefault();
-  const form=document.getElementById('resa-form');
-  const data=new FormData(form);
-  const prenom=data.get('prenom'),nom=data.get('nom'),tel=data.get('tel');
-  const depart=data.get('depart'),arrivee=data.get('arrivee');
-  const date=data.get('date'),heure=data.get('heure');
-  const type=data.get('type'),vol=data.get('vol')||'',passagers=data.get('passagers');
-  const notes=data.get('notes')||'';
-  const dateR=data.get('date_retour')||'',heureR=data.get('heure_retour')||'';
-  // Construire message WhatsApp
-  // Calculer heure de prise en charge
-  // = heure décollage - marge souhaitée - temps de trajet
-  const marge=parseInt(data.get('marge')||120); // minutes avant vol
-  const bagages=data.get('bagages')||'aucun';
-  const siegesBebe=data.get('sieges_bebe')||'non';
-  const vehiculePref=data.get('vehicule_pref')||'auto';
-  let heurePickupStr='',heureDepStr='';
+  var form=document.getElementById('resa-form');
+  var data=new FormData(form);
+  var prenom=data.get('prenom')||'',nom=data.get('nom')||'',tel=data.get('tel')||'';
+  var depart=data.get('depart')||'',arrivee=data.get('arrivee')||'';
+  var date=data.get('date')||'',heure=data.get('heure')||'';
+  var type=data.get('type')||'aller',vol=data.get('vol')||'',passagers=data.get('passagers')||'1';
+  var notes=data.get('notes')||'';
+  var dateR=data.get('date_retour')||'',heureR=data.get('heure_retour')||'';
+  var marge=parseInt(data.get('marge')||120);
+  var bagages=data.get('bagages')||'aucun';
+  var siegesBebe=data.get('sieges_bebe')||'non';
+  var vehiculePref=data.get('vehicule_pref')||'auto';
+  var heurePickupStr='',heureDepStr='';
   if(heure&&window._calcResult&&window._calcResult.km){
-    const dist=window._calcResult.km;
-    const tempsTrajet=Math.ceil(dist/90*60); // temps de route estimé
-    const parts2=heure.split(':');
-    const heureVol=parseInt(parts2[0])*60+parseInt(parts2[1]);
-    // Heure arrivée aéroport = heure vol - marge
-    const heureAeroport=heureVol-marge;
-    // Heure départ de chez le client = heure aéroport - temps trajet
-    let heurePickup=heureAeroport-tempsTrajet;
+    var dist=window._calcResult.km;
+    var tempsTrajet=Math.ceil(dist/90*60);
+    var parts2=heure.split(':');
+    var heureVol=parseInt(parts2[0])*60+parseInt(parts2[1]);
+    var heurePickup=heureVol-marge-tempsTrajet;
     if(heurePickup<0)heurePickup+=1440;
-    const hP=Math.floor(heurePickup/60),mP=heurePickup%60;
+    var hP=Math.floor(heurePickup/60),mP=heurePickup%60;
     heurePickupStr=(hP<10?'0':'')+hP+'h'+(mP<10?'0':'')+mP;
-    // Heure départ Carnières = heure pickup - km pickup/90
-    const kmPickup=window._calcResult.kmPickup||0;
-    const tempsPickup=Math.ceil(kmPickup/90*60)||0;
-    let heureDep2=heurePickup-tempsPickup;
-    if(heureDep2<0)heureDep2+=1440;
-    const hD=Math.floor(heureDep2/60),mD=heureDep2%60;
-    heureDepStr=(hD<10?'0':'')+hD+'h'+(mD<10?'0':'')+mD;
+    var hDep=heurePickup-5;if(hDep<0)hDep+=1440;
+    var hD2=Math.floor(hDep/60),mD2=hDep%60;
+    heureDepStr=(hD2<10?'0':'')+hD2+'h'+(mD2<10?'0':'')+mD2;
   }
-  let msg='\ud83d\ude97 NOUVELLE R\u00c9SERVATION \u2014 Facciolini Mobility\n';
-  msg+='\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n';
-  msg+='\ud83d\udc64 '+prenom+' '+nom+'\n';
-  msg+='\ud83d\udcde '+tel+'\n';
-  if(data.get('email'))msg+='\u2709 '+data.get('email')+'\n';
-  msg+='\n\ud83d\udccb '+(type==='ar'?'Aller-retour':'Aller simple')+'\n';
-  msg+='\ud83d\udcc5 '+date+' \u00e0 '+heure+'\n';
-  if(heureDepStr)msg+='\ud83d\udd50 Partir de Carni\u00e8res \u00e0 '+heureDepStr+'\n';
-  msg+='\ud83d\ude97 D\u00e9part: '+depart+'\n';
-  msg+='\ud83d\udccd Arriv\u00e9e: '+arrivee+'\n';
-  if(vol)msg+='\u2708 Vol: '+vol+'\n';
-  msg+='\ud83d\udc65 Passagers: '+passagers+'\n';
-  if(heurePickupStr)msg+='\ud83d\udd50 Prise en charge: '+heurePickupStr+' ('+marge+'min avant vol)\n';
-  var hRetour=document.getElementById('calc-heure-retour');
-  if(type==='ar'&&hRetour&&hRetour.value)msg+='\u21a9 Heure retour: '+hRetour.value+'\n';
-  const bagLabels={'aucun':'Aucun','cabine':'Cabine seulement','1grande':'1 grande valise','2grandes':'2 grandes valises','3grandes':'3 grandes valises','4plus':'4+ valises','ski':'Matériel ski/sport','velo':'Vélo'};
-  if(bagages&&bagages!=='aucun')msg+='\ud83e\uddf3 Bagages: '+(bagLabels[bagages]||bagages)+'\n';
-  const bebeLabels={'non':'','1bebe':'1 siège bébé (0-13kg)','2bebes':'2 sièges bébé','1enfant':'1 siège enfant','2enfants':'2 sièges enfants','1rehausseur':'1 réhausseur','mix':'Combinaison sièges'};
-  if(siegesBebe&&siegesBebe!=='non')msg+='\ud83d\udc76 Siège enfant: '+(bebeLabels[siegesBebe]||siegesBebe)+'\n';
-  if(vehiculePref&&vehiculePref!=='auto')msg+='\ud83d\ude97 Véhicule demandé: '+(vehiculePref==='berline'?'Berline':'Minivan (+20€)')+'\n';
-  if(type==='ar'&&dateR)msg+='\u21a9 Retour: '+dateR+(heureR?' \u00e0 '+heureR:'')+'\n';
-  if(notes)msg+='\n\ud83d\udcac Notes: '+notes+'\n';
+  var bagLabels={'aucun':'Aucun','cabine':'Cabine','1grande':'1 grande valise','2grandes':'2 grandes valises','3grandes':'3 grandes valises','4plus':'4+ valises','ski':'Materiel ski','velo':'Velo'};
+  var bebeLabels={'non':'','1bebe':'1 siege bebe (0-13kg)','2bebes':'2 sieges bebe','1enfant':'1 siege enfant','2enfants':'2 sieges enfants','1rehausseur':'1 rehausseur','mix':'Combinaison sieges'};
+  var nl='\n';
+  var msg='NOUVELLE RESERVATION - Facciolini Mobility'+nl;
+  msg+='━━━━━━━━━━━━━━━━━━━━━━━'+nl+nl;
+  msg+=prenom+' '+nom+' | '+tel+nl;
+  if(data.get('email'))msg+=data.get('email')+nl;
+  msg+=nl+(type==='ar'?'Aller-retour':'Aller simple')+nl;
+  msg+=date+' a '+heure+nl;
+  if(heureDepStr)msg+='Partir Carrieres a '+heureDepStr+nl;
+  if(heurePickupStr)msg+='Prise en charge: '+heurePickupStr+' ('+marge+'min avant vol)'+nl;
+  msg+='Depart: '+depart+nl;
+  msg+='Arrivee: '+arrivee+nl;
+  if(vol)msg+='Vol: '+vol+nl;
+  msg+='Passagers: '+passagers+nl;
+  if(bagages&&bagages!=='aucun')msg+='Bagages: '+(bagLabels[bagages]||bagages)+nl;
+  if(siegesBebe&&siegesBebe!=='non')msg+='Siege: '+(bebeLabels[siegesBebe]||siegesBebe)+nl;
+  if(type==='ar'&&dateR)msg+='Retour: '+dateR+(heureR?' a '+heureR:'')+nl;
+  if(notes)msg+=nl+'Notes: '+notes+nl;
   if(window._calcResult){
-    msg+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
-    msg+='\ud83d\udcb6 Tarif: '+window._calcResult.prix+'\u20ac';
-    if(window._calcResult.type==='ar-diff')msg+=' (acompte ~'+(Math.ceil(window._calcResult.prix/2/5)*5)+'\u20ac \u00e0 l\'aller)';
-    msg+='\n\ud83d\udcef Distance: '+window._calcResult.km+' km';
-    msg+='\n\ud83d\ude99 V\u00e9hicule: '+(parseInt(passagers)>=4?'Minivan (+20\u20ac)':'Berline');
+    msg+=nl+'━━━━━━━━━━━━━━━━━━━━━━━'+nl;
+    msg+='Tarif estime: '+window._calcResult.prix+'EUR'+nl;
+    msg+='Distance: '+window._calcResult.km+' km'+nl;
+    msg+=(parseInt(passagers)>=4?'Vehicule: Minivan (+20EUR)':'Vehicule: Berline');
   }
+  var fd=new FormData();
+  fd.append('_subject','Reservation '+prenom+' '+nom+' - '+date);
+  fd.append('Nom',prenom+' '+nom);
+  fd.append('Telephone',tel);
+  fd.append('Email',data.get('email')||'Non renseigne');
+  fd.append('Type',(type==='ar'?'Aller-retour':'Aller simple'));
+  fd.append('Date',date+' a '+heure);
+  if(heurePickupStr)fd.append('Prise en charge',heurePickupStr+' ('+marge+'min avant vol)');
+  if(heureDepStr)fd.append('Depart Carrieres',heureDepStr);
+  fd.append('Depart',depart);
+  fd.append('Arrivee',arrivee);
+  if(vol)fd.append('Vol',vol);
+  fd.append('Passagers',passagers);
+  if(bagages&&bagages!=='aucun')fd.append('Bagages',bagLabels[bagages]||bagages);
+  if(siegesBebe&&siegesBebe!=='non')fd.append('Siege enfant',bebeLabels[siegesBebe]||siegesBebe);
+  if(vehiculePref&&vehiculePref!=='auto')fd.append('Vehicule',vehiculePref==='berline'?'Berline':'Minivan (+20EUR)');
+  if(type==='ar'&&dateR)fd.append('Retour',dateR+(heureR?' a '+heureR:''));
+  if(notes)fd.append('Notes',notes);
+  if(window._calcResult)fd.append('Tarif',window._calcResult.prix+'EUR - '+window._calcResult.km+' km');
+  fetch('https://formspree.io/f/maqdzbpl',{
+    method:'POST',body:fd,headers:{Accept:'application/json'}
+  }).then(function(r){
+    console.log(r.ok?'Email envoye':'Formspree erreur '+r.status);
+  }).catch(function(err){console.warn('Formspree:',err);});
   window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
-  // Afficher succès
   form.style.display='none';
   document.getElementById('form-success').classList.add('show');
 }
