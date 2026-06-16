@@ -20,32 +20,68 @@
 <meta property="og:locale" content="fr_BE">
 
 <!-- Schema.org LocalBusiness -->
-<script type="application/ld+json">
-{
+<script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "TaxiService",
+  "@type": ["LocalBusiness", "TaxiService"],
   "name": "Facciolini Mobility",
-  "description": "Service de chauffeur privé et navettes aéroport dans le Hainaut, Belgique",
+  "description": "Service de chauffeur privé et navettes aéroport dans le Hainaut, Belgique. Transport privé 24h/24 vers Zaventem, Charleroi et toute la Belgique.",
   "url": "https://facciolinimobility.be",
   "telephone": "+32471692650",
   "email": "facciolini.mobility@outlook.com",
+  "image": "https://facciolinimobility.be/icon-512.png",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Rue Saint-Éloi 173",
     "addressLocality": "Carnières",
     "postalCode": "7141",
+    "addressRegion": "Hainaut",
     "addressCountry": "BE"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "50.4833",
+    "longitude": "4.2167"
   },
   "areaServed": ["Hainaut", "Bruxelles", "Belgique"],
   "openingHours": "Mo-Su 00:00-24:00",
   "priceRange": "€€",
+  "currenciesAccepted": "EUR",
+  "paymentAccepted": "Cash, Credit Card, Bank Transfer",
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "5",
-    "reviewCount": "23"
-  }
-}
-</script>
+    "ratingValue": "5.0",
+    "bestRating": "5",
+    "worstRating": "1",
+    "reviewCount": "23",
+    "itemReviewed": {
+      "@type": "LocalBusiness",
+      "name": "Facciolini Mobility"
+    }
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": {"@type": "Person", "name": "Boris D."},
+      "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+      "reviewBody": "Service impeccable, ponctuel et très professionnel. Je recommande vivement pour les navettes aéroport.",
+      "datePublished": "2026-06-01"
+    },
+    {
+      "@type": "Review",
+      "author": {"@type": "Person", "name": "Nicolas B."},
+      "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+      "reviewBody": "Chauffeur très sympathique, véhicule propre et confortable. Parfait pour l'aéroport de Zaventem.",
+      "datePublished": "2026-06-05"
+    },
+    {
+      "@type": "Review",
+      "author": {"@type": "Person", "name": "Anais P."},
+      "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+      "reviewBody": "Excellent service, toujours à l'heure. Je fais régulièrement appel à Facciolini Mobility pour mes déplacements.",
+      "datePublished": "2026-06-10"
+    }
+  ]
+}</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
