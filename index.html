@@ -909,7 +909,7 @@ function toggleMenu(){
 }
 
 // ===== CALCULATEUR =====
-const TARIF_COURT=1.40,TARIF_LONG=1.50,RAYON=30,MIN=50,ARRONDI=5,SUP_CAMION=20;
+const TARIF_COURT=1.50,TARIF_LONG=1.50,RAYON=30,MIN=60,ARRONDI=5,SUP_CAMION=20;
 let calcCoords={dep:null,arr:null};
 let acTimers={};
 
@@ -1086,10 +1086,10 @@ async function calculerPrix(){
     const isZaventem=arrVal.includes('zaventem')||arrVal.includes('bru')||arrVal.includes('brussels airport')||arrVal.includes('bruxelles national');
     let prixFixe=null,prixFixeLabel='';
     if(isCarnieres&&isCharleroi){
-      prixFixe=isTalento?70:50;
+      prixFixe=isTalento?80:60;
       prixFixeLabel='Tarif fixe Carnières → Charleroi';
     } else if(isCarnieres&&isZaventem){
-      prixFixe=isTalento?110:90;
+      prixFixe=isTalento?120:95;
       prixFixeLabel='Tarif fixe Carnières → Zaventem';
     }
     let prix,detail;
