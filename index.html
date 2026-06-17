@@ -959,6 +959,8 @@ function checkCapacite(){
     if(hint)hint.textContent=msgHint;
     if(bagHint){bagHint.textContent='';bagHint.style.color='';}
   } else {
+    // Revenir en Berline automatiquement si plus nécessaire
+    setCalcVeh('seat');
     if(hint){hint.textContent='';hint.style.color='';}
     if(bagHint){
       bagHint.textContent=msgBag;
