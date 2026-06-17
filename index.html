@@ -531,6 +531,17 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             <option value="7" style="color:#f8f4ee;background:#131720">7 passagers — Minivan (+20&#x20ac;)</option>
           </select>
         </div>
+        <div class="calc-field">
+          <label>Bagages</label>
+          <select class="calc-input" id="calc-bagages" style="cursor:pointer;color:#f8f4ee;background:#131720">
+            <option value="aucun" style="color:#f8f4ee;background:#131720">Aucun / Cabine uniquement</option>
+            <option value="1grande" style="color:#f8f4ee;background:#131720">1 grande valise</option>
+            <option value="2grandes" style="color:#f8f4ee;background:#131720">2 grandes valises</option>
+            <option value="3grandes" style="color:#f8f4ee;background:#131720">3 grandes valises</option>
+            <option value="4plus" style="color:#f8f4ee;background:#131720">4+ valises</option>
+          </select>
+          <div id="calc-bagages-hint" style="font-size:0.8rem;margin-top:6px;min-height:18px"></div>
+        </div>
 
         <!-- Info distance -->
         <div class="calc-field" style="grid-column:1/-1">
@@ -919,6 +930,42 @@ function setCalcVeh(v){
     b.classList.toggle('active', b.dataset.val===v);
   });
 }
+
+function checkCapacite(){
+  var passagers=parseInt(document.getElementById('calc-passagers').value)||1;
+  var bagages=document.getElementById('calc-bagages')?document.getElementById('calc-bagages').value:'aucun';
+  var hint=document.getElementById('calc-veh-hint');
+  var bagHint=document.getElementById('calc-bagages-hint');
+  var grandesValises={'1grande':1,'2grandes':2,'3grandes':3,'4plus':4}[bagages]||0;
+  // Règles capacité
+  var forcerMinivan=false;
+  var msgHint='';
+  var msgBag='';
+  if(passagers>=4){
+    forcerMinivan=true;
+    msgHint='🚐 Minivan requis pour 4 passagers et plus.';
+  } else if(grandesValises>=4){
+    forcerMinivan=true;
+    msgHint='🚐 Minivan requis pour 4 grandes valises et plus.';
+  } else if(passagers>=3&&grandesValises>=3){
+    forcerMinivan=true;
+    msgHint='🚐 Minivan requis : 3 passagers + 3 grandes valises dépasse la capacité de la Berline.';
+  } else if(passagers===2&&grandesValises===3){
+    msgBag='⚠️ Limite Berline : la 3ème valise voyagera sur la banquette arrière.';
+  }
+  if(forcerMinivan){
+    setCalcVeh('talento');
+    if(hint)hint.style.color='var(--or)';
+    if(hint)hint.textContent=msgHint;
+    if(bagHint){bagHint.textContent='';bagHint.style.color='';}
+  } else {
+    if(hint){hint.textContent='';hint.style.color='';}
+    if(bagHint){
+      bagHint.textContent=msgBag;
+      bagHint.style.color=msgBag?'#f0a500':'';
+    }
+  }
+}
 function setFormType(v){
   document.getElementById('f-type').value=v;
   document.querySelectorAll('#form-type-row .form-type-btn').forEach(b=>{
@@ -1301,7 +1348,9 @@ function submitForm(e){
 
   // --- Select passagers ---
   var passEl = document.getElementById('calc-passagers');
-  if(passEl)passEl.addEventListener('change', updPassagersVeh);
+  if(passEl)passEl.addEventListener('change', function(){ updPassagersVeh(); checkCapacite(); });
+  var bagEl = document.getElementById('calc-bagages');
+  if(bagEl)bagEl.addEventListener('change', checkCapacite);
 
   // --- Boutons adresse retour même jour ---
   var retJourTypeDiv = document.getElementById('calc-retour-jour-type');
