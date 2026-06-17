@@ -1033,17 +1033,28 @@ async function calculerPrix(){
     // Distance retour (si différente)
     const distRetourInput=document.getElementById('calc-dist-retour');
     const kmRetour=(type==='ar-jour'&&distRetourInput&&distRetourInput.value)?parseFloat(distRetourInput.value):km;
-    let base=km*tarif;
-    if(type==='ar-jour')base=(km+kmRetour)*tarif;
-    else if(type==='ar-diff')base=km*2*tarif;
-    // Appliquer le minimum AVANT le supplément minivan
-    let prix=Math.max(MIN,roundTo(base,ARRONDI));
+    // Calcul du minimum par trajet (le minimum s'applique à chaque course individuellement)
+    const baseAller=km*tarif;
+    const prixAller=Math.max(MIN,roundTo(baseAller,ARRONDI));
+    let prix,base;
+    if(type==='ar-jour'){
+      const baseRetour=kmRetour*tarif;
+      const prixRetour=Math.max(MIN,roundTo(baseRetour,ARRONDI));
+      prix=prixAller+prixRetour;
+      base=baseAller+baseRetour;
+    } else if(type==='ar-diff'){
+      prix=prixAller*2;
+      base=baseAller*2;
+    } else {
+      prix=prixAller;
+      base=baseAller;
+    }
     if(isTalento)prix=roundTo(prix+SUP_CAMION,ARRONDI);
     const typeLabel={aller:'Aller simple','ar-jour':'Aller-retour même jour','ar-diff':'Aller-retour date différente'}[type];
     document.getElementById('calc-price-val').textContent=prix+' €';
     document.getElementById('calc-price-label').textContent=typeLabel+' · Prix fixe TTC';
     let detail='<strong>Détail :</strong> '+km+' km × '+tarif.toFixed(2)+'€/km';
-    if(type!=='aller')detail+=' × 2 (A/R)';
+    if(type!=='aller')detail+=' × 2 trajets (min. '+MIN+'€/trajet)';
     if(isTalento)detail+=' + '+SUP_CAMION+'€ (Minivan)';
     detail+=' = '+base.toFixed(0)+'€ → arrondi '+prix+'€';
     detail+='<br><strong>Note :</strong> Péages et parking non inclus (facturation réelle).';
