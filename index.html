@@ -1352,9 +1352,16 @@ function submitForm(e){
 
   // --- Select passagers ---
   var passEl = document.getElementById('calc-passagers');
-  if(passEl)passEl.addEventListener('change', function(){ updPassagersVeh(); checkCapacite(); });
+  if(passEl)passEl.addEventListener('change', function(){
+    updPassagersVeh();
+    checkCapacite();
+    if(window._calcKm)calculerPrix();
+  });
   var bagEl = document.getElementById('calc-bagages');
-  if(bagEl)bagEl.addEventListener('change', checkCapacite);
+  if(bagEl)bagEl.addEventListener('change', function(){
+    checkCapacite();
+    if(window._calcKm)calculerPrix();
+  });
 
   // --- Boutons adresse retour même jour ---
   var retJourTypeDiv = document.getElementById('calc-retour-jour-type');
