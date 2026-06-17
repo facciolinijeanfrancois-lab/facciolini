@@ -1100,10 +1100,9 @@ async function calculerPrix(){
     if(prixFixe!==null){
       const prixAller=prixFixe;
       prix=isAR?prixAller*2:prixAller;
-      detail='<strong>'+prixFixeLabel+'</strong>';
-      if(isAR)detail+=' × 2 (A/R) = '+prix+'€';
-      detail+='<br><strong>Note :</strong> Péages et parking non inclus (facturation réelle).';
-      if(type==='ar-diff')detail+='<br><strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.';
+      detail='';
+      if(type==='ar-diff')detail+='<strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.<br>';
+      detail+='<br><span style="color:var(--or2);font-weight:600">✓ Inclus dans le prix :</span><br>\n🏠 Prise en charge à domicile · ✈️ Dépôt à l&#39;aéroport<br>\n🚶 Accompagnement jusqu&#39;au terminal · 🕐 Attente &amp; accompagnement au retour<br>\n💧 Bouteilles d&#39;eau offertes aller &amp; retour';
     } else {
       // Calcul normal au km avec tarif basé sur distance totale
       const tarif=km>RAYON?TARIF_LONG:TARIF_COURT;
@@ -1125,12 +1124,9 @@ async function calculerPrix(){
         base=baseAller;
       }
       if(isTalento)prix=roundTo(prix+SUP_CAMION,ARRONDI);
-      detail='<strong>Détail :</strong> '+km+' km × '+tarif.toFixed(2)+'€/km';
-      if(isAR)detail+=' × 2 trajets (min. '+MIN+'€/trajet)';
-      if(isTalento)detail+=' + '+SUP_CAMION+'€ (Minivan)';
-      detail+=' = '+base.toFixed(0)+'€ → arrondi '+prix+'€';
-      detail+='<br><strong>Note :</strong> Péages et parking non inclus (facturation réelle).';
-      if(type==='ar-diff')detail+='<br><strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.';
+      detail='';
+      if(type==='ar-diff')detail+='<strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.<br>';
+      detail+='<br><span style="color:var(--or2);font-weight:600">✓ Inclus dans le prix :</span><br>\n🏠 Prise en charge à domicile · ✈️ Dépôt à l&#39;aéroport<br>\n🚶 Accompagnement jusqu&#39;au terminal · 🕐 Attente &amp; accompagnement au retour<br>\n💧 Bouteilles d&#39;eau offertes aller &amp; retour';
     }
     document.getElementById('calc-price-val').textContent=prix+' €';
     document.getElementById('calc-price-label').textContent=typeLabel+' · Prix fixe TTC';
