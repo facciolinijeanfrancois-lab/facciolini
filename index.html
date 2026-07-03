@@ -824,6 +824,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
               <div class="fg"><label class="fl">Date retour</label><input type="date" class="fi" name="date_retour" id="f-date-retour"></div>
               <div class="fg"><label class="fl">Heure retour</label><input type="time" class="fi" name="heure_retour" id="f-heure-retour"></div>
             </div>
+            <div class="fg"><label class="fl">Num&#xe9;ro de vol retour</label><input type="text" class="fi" name="vol_retour" id="f-vol-retour" placeholder="Ex: SN3725" style="text-transform:uppercase"></div>
           </div>
           <div class="form-row">
             <div class="fg">
@@ -1268,9 +1269,12 @@ async function submitForm(e){
   var depart=data.get('depart')||'',arrivee=data.get('arrivee')||'';
   var date=data.get('date')||'',heure=data.get('heure')||'';
   var type=data.get('type')||'aller',vol=data.get('vol')||'',passagers=data.get('passagers')||'1';
+  var volRetour=data.get('vol_retour')||'';
   var notes=data.get('notes')||'';
   var dateR=data.get('date_retour')||'',heureR=data.get('heure_retour')||'';
   var marge=parseInt(data.get('marge')||120);
+  var margeLabels={90:'1h30',120:'2h00',150:'2h30',180:'3h00'};
+  var margeAff=margeLabels[marge]||(Math.floor(marge/60)+'h'+(marge%60<10?'0':'')+(marge%60));
   var bagages=data.get('bagages')||'aucun';
   var siegesBebe=data.get('sieges_bebe')||'non';
   var vehiculePref=data.get('vehicule_pref')||'auto';
@@ -1302,16 +1306,19 @@ async function submitForm(e){
   msg+=prenom+' '+nom+' | '+tel+nl;
   if(data.get('email'))msg+=data.get('email')+nl;
   msg+=nl+(type==='ar'?'Aller-retour':'Aller simple')+nl;
-  msg+=dateAff+' a '+heure+nl;
+  msg+=dateAff+nl;
+  msg+='Heure de decollage: '+heure+nl;
+  msg+='Marge souhaitee avant vol: '+margeAff+nl;
   if(heureDepStr)msg+='Partir Carrieres a '+heureDepStr+nl;
-  if(heurePickupStr)msg+='Prise en charge: '+heurePickupStr+' ('+marge+'min avant vol)'+nl;
+  if(heurePickupStr)msg+='Suggestion prise en charge: '+heurePickupStr+nl;
   msg+='Depart: '+depart+nl;
   msg+='Arrivee: '+arrivee+nl;
-  if(vol)msg+='Vol: '+vol+nl;
+  if(vol)msg+='Vol aller: '+vol+nl;
   msg+='Passagers: '+passagers+nl;
   if(bagages&&bagages!=='aucun')msg+='Bagages: '+(bagLabels[bagages]||bagages)+nl;
   if(siegesBebe&&siegesBebe!=='non')msg+='Siege: '+(bebeLabels[siegesBebe]||siegesBebe)+nl;
   if(type==='ar'&&dateR)msg+='Retour: '+dateRAff+(heureR?' a '+heureR:'')+nl;
+  if(type==='ar'&&volRetour)msg+='Vol retour: '+volRetour+nl;
   if(notes)msg+=nl+'Notes: '+notes+nl;
   if(calcResult){
     msg+=nl+'━━━━━━━━━━━━━━━━━━━━━━━'+nl;
@@ -1330,16 +1337,19 @@ async function submitForm(e){
     'phone':tel,
     'message':
       'TYPE: '+(type==='ar'?'Aller-retour':'Aller simple')+'\n'+
-      'DATE: '+dateAff+' a '+heure+'\n'+
+      'DATE: '+dateAff+'\n'+
+      'HEURE DE DECOLLAGE: '+heure+'\n'+
+      'MARGE SOUHAITEE AVANT VOL: '+margeAff+'\n'+
       (heureDepStr?'DEPART CARRIERES: '+heureDepStr+'\n':'')+
-      (heurePickupStr?'PRISE EN CHARGE: '+heurePickupStr+'\n':'')+
+      (heurePickupStr?'SUGGESTION PRISE EN CHARGE: '+heurePickupStr+'\n':'')+
       'DEPART: '+depart+'\n'+
       'ARRIVEE: '+arrivee+'\n'+
-      (vol?'VOL: '+vol+'\n':'')+
+      (vol?'VOL ALLER: '+vol+'\n':'')+
       'PASSAGERS: '+passagers+'\n'+
       (bagages&&bagages!=='aucun'?'BAGAGES: '+(bagLabels[bagages]||bagages)+'\n':'')+
       (siegesBebe&&siegesBebe!=='non'?'SIEGE ENFANT: '+(bebeLabels[siegesBebe]||siegesBebe)+'\n':'')+
       (type==='ar'&&dateR?'RETOUR: '+dateRAff+(heureR?' a '+heureR:'')+'\n':'')+
+      (type==='ar'&&volRetour?'VOL RETOUR: '+volRetour+'\n':'')+
       (notes?'NOTES: '+notes+'\n':'')+
       (calcResult?'TARIF ESTIME: '+calcResult.prix+'EUR - '+calcResult.km+' km'+(calcResult.estime?' (estimation auto)':''):'TARIF: non calcule')
   };
