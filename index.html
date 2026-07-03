@@ -11,6 +11,9 @@
 <meta name="geo.region" content="BE-WHT">
 <meta name="geo.placename" content="Carnières, Hainaut, Belgique">
 <link rel="canonical" href="https://facciolinimobility.be/">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 
 <!-- Open Graph -->
 <meta property="og:title" content="Facciolini Mobility — Chauffeur Privé Hainaut">
@@ -997,14 +1000,6 @@ function checkCapacite(){
     }
   }
 }
-function setFormType(v){
-  document.getElementById('f-type').value=v;
-  document.querySelectorAll('#form-type-row .form-type-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.val===v);
-  });
-  document.getElementById('f-retour-bloc').style.display=v==='ar'?'block':'none';
-}
-
 function roundTo(n,r){return Math.ceil(n/r)*r;}
 
 async function acCalc(input,dropId,role){
@@ -1197,12 +1192,13 @@ function prefillForm(){
 // ===== FORMULAIRE =====
 function setFormType(v,btn){
   document.getElementById('f-type').value=v;
-  btn.parentElement.querySelectorAll('.form-type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('#form-type-row .form-type-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.val===v);
+  });
   document.getElementById('f-retour-bloc').style.display=v==='ar'?'block':'none';
 }
 
-function submitForm(e){
+async function submitForm(e){
   e.preventDefault();
   var form=document.getElementById('resa-form');
   var data=new FormData(form);
@@ -1255,47 +1251,7 @@ function submitForm(e){
     msg+='Distance: '+window._calcResult.km+' km'+nl;
     msg+='Vehicule: '+(parseInt(passagers)>=4||vehiculePref==='minivan'?'Minivan (+20EUR)':'Berline');
   }
-  var fd=new FormData();
-  fd.append('_subject','Reservation '+prenom+' '+nom+' - '+date);
-  fd.append('Nom',prenom+' '+nom);
-  fd.append('Telephone',tel);
-  fd.append('Email',data.get('email')||'Non renseigne');
-  fd.append('Type',(type==='ar'?'Aller-retour':'Aller simple'));
-  fd.append('Date',date+' a '+heure);
-  if(heurePickupStr)fd.append('Prise en charge',heurePickupStr+' ('+marge+'min avant vol)');
-  if(heureDepStr)fd.append('Depart Carrieres',heureDepStr);
-  fd.append('Depart',depart);
-  fd.append('Arrivee',arrivee);
-  if(vol)fd.append('Vol',vol);
-  fd.append('Passagers',passagers);
-  if(bagages&&bagages!=='aucun')fd.append('Bagages',bagLabels[bagages]||bagages);
-  if(siegesBebe&&siegesBebe!=='non')fd.append('Siege enfant',bebeLabels[siegesBebe]||siegesBebe);
-  if(vehiculePref&&vehiculePref!=='auto')fd.append('Vehicule',vehiculePref==='berline'?'Berline':'Minivan (+20EUR)');
-  if(type==='ar'&&dateR)fd.append('Retour',dateR+(heureR?' a '+heureR:''));
-  if(notes)fd.append('Notes',notes);
-  if(window._calcResult)fd.append('Tarif',window._calcResult.prix+'EUR - '+window._calcResult.km+' km');
-  // Email via Formspree - utiliser JSON pour éviter les problèmes CORS
-  var formspreeData={
-    '_subject':'Reservation '+prenom+' '+nom+' - '+date,
-    '_replyto':data.get('email')||tel,
-    'Nom':prenom+' '+nom,
-    'Telephone':tel,
-    'Email':data.get('email')||'Non renseigne',
-    'Type':(type==='ar'?'Aller-retour':'Aller simple'),
-    'Date':date+' a '+heure,
-    'Depart':depart,
-    'Arrivee':arrivee,
-    'Vol':vol||'Non renseigne',
-    'Passagers':passagers,
-    'Bagages':bagLabels[bagages]||bagages,
-    'Siege_enfant':bebeLabels[siegesBebe]||siegesBebe,
-    'Retour':type==='ar'&&dateR?dateR+(heureR?' a '+heureR:''):'',
-    'Notes':notes||'',
-    'Tarif':window._calcResult?window._calcResult.prix+'EUR - '+window._calcResult.km+' km':'Non calcule',
-    'Heure_depart_Carrieres':heureDepStr||'Non calcule',
-    'Prise_en_charge':heurePickupStr||'Non calcule'
-  };
-  // Email via Web3Forms - fonctionne sans restriction CORS
+  // Email via Web3Forms
   var w3fData={
     'access_key':'1d46a126-9dab-4f6e-a0f1-bffec0073d89',
     'subject':'Reservation '+prenom+' '+nom+' - '+date,
@@ -1319,18 +1275,30 @@ function submitForm(e){
       (notes?'NOTES: '+notes+'\n':'')+
       (window._calcResult?'TARIF ESTIME: '+window._calcResult.prix+'EUR - '+window._calcResult.km+' km':'')
   };
-  fetch('https://api.web3forms.com/submit',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify(w3fData)
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.success){console.log('✅ Email Web3Forms envoye');}
+  var emailOk=false;
+  try{
+    var r=await fetch('https://api.web3forms.com/submit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(w3fData)
+    });
+    var d=await r.json();
+    emailOk=!!d.success;
+    if(emailOk){console.log('✅ Email Web3Forms envoye');}
     else{console.warn('Web3Forms erreur:',d.message);}
-  }).catch(function(e){console.warn('Web3Forms fetch error:',e);});
+  }catch(err){console.warn('Web3Forms fetch error:',err);}
 
-    window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
+  window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
   form.style.display='none';
-  document.getElementById('form-success').classList.add('show');
+  var successBox=document.getElementById('form-success');
+  if(!emailOk){
+    successBox.innerHTML='<div style="font-size:3rem;margin-bottom:16px">⚠️</div>'+
+      '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.5rem;margin-bottom:12px">Demande préparée, mais l\'envoi automatique a échoué</h3>'+
+      '<p style="color:var(--gris);margin-bottom:24px">Pas d\'inquiétude : une fenêtre WhatsApp vient de s\'ouvrir avec tous vos détails pré-remplis — merci de cliquer sur Envoyer pour que votre demande nous parvienne bien. Vous pouvez aussi nous appeler directement.</p>'+
+      '<a href="https://wa.me/32471692650" target="_blank" class="btn btn-wa">💬 Envoyer sur WhatsApp</a> '+
+      '<a href="tel:0471692650" class="btn" style="margin-left:8px">📞 Appeler</a>';
+  }
+  successBox.classList.add('show');
 }
 
 // ===== EVENT LISTENERS BOUTONS =====
