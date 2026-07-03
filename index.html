@@ -840,7 +840,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           </div>
           <div class="form-row">
             <div class="fg"><label class="fl">Passagers *</label>
-              <select class="fi" name="passagers" required>
+              <select class="fi" name="passagers" id="f-passagers" required>
                 <option value="1">1 passager</option>
                 <option value="2">2 passagers</option>
                 <option value="3">3 passagers</option>
@@ -851,7 +851,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
               </select>
             </div>
             <div class="fg"><label class="fl">Bagages</label>
-              <select class="fi" name="bagages">
+              <select class="fi" name="bagages" id="f-bagages">
                 <option value="aucun">Aucun bagage</option>
                 <option value="cabine">Cabine uniquement</option>
                 <option value="1grande">1 grande valise</option>
@@ -876,7 +876,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
               </select>
             </div>
             <div class="fg"><label class="fl">V&#xe9;hicule pr&#xe9;f&#xe9;r&#xe9;</label>
-              <select class="fi" name="vehicule_pref">
+              <select class="fi" name="vehicule_pref" id="f-vehicule-pref">
                 <option value="auto">Automatique selon passagers</option>
                 <option value="berline">Berline — max 3 passagers</option>
                 <option value="minivan">Minivan (+20&#x20ac;) — max 7 passagers</option>
@@ -1207,6 +1207,11 @@ async function calculerPrix(){
     window._calcResult={prix,type,km,
       dep:document.getElementById('calc-depart').value,
       arr:document.getElementById('calc-arrivee').value,
+      dateAller:document.getElementById('calc-date-aller')?.value||'',
+      heureAller:document.getElementById('calc-heure-aller')?.value||'',
+      passagers:document.getElementById('calc-passagers')?.value||'1',
+      bagages:document.getElementById('calc-bagages')?.value||'aucun',
+      veh:veh,
       heureRetourJour,dateRetourDiff,heureRetourDiff};
     result.classList.add('show');
     result.scrollIntoView({behavior:'smooth',block:'center'});
@@ -1222,7 +1227,11 @@ function prefillForm(){
   // Pré-remplir adresses
   var fd=document.getElementById('f-depart');if(fd)fd.value=r.dep;
   var fa=document.getElementById('f-arrivee');if(fa)fa.value=r.arr;
-  var fd2=document.getElementById('f-date');if(fd2&&!fd2.value)fd2.value=new Date().toISOString().split('T')[0];
+  var fd2=document.getElementById('f-date');if(fd2)fd2.value=r.dateAller||new Date().toISOString().split('T')[0];
+  var fh=document.getElementById('f-heure');if(fh&&r.heureAller)fh.value=r.heureAller;
+  var fp=document.getElementById('f-passagers');if(fp&&r.passagers)fp.value=r.passagers;
+  var fb=document.getElementById('f-bagages');if(fb&&r.bagages)fb.value=r.bagages;
+  var fv=document.getElementById('f-vehicule-pref');if(fv&&r.veh)fv.value=r.veh==='talento'?'minivan':'berline';
   // Pré-remplir type de course
   if(r.type==='ar-jour'||r.type==='ar-diff'){
     var arBtn=document.querySelector('#form-type-row .form-type-btn[data-val="ar"]');
@@ -1230,6 +1239,9 @@ function prefillForm(){
     if(r.type==='ar-diff'&&r.dateRetourDiff){
       var fdr=document.getElementById('f-date-retour');if(fdr)fdr.value=r.dateRetourDiff;
       var fhr=document.getElementById('f-heure-retour');if(fhr)fhr.value=r.heureRetourDiff;
+    }else if(r.type==='ar-jour'&&r.heureRetourJour){
+      var fdr2=document.getElementById('f-date-retour');if(fdr2)fdr2.value=r.dateAller||fd2.value;
+      var fhr2=document.getElementById('f-heure-retour');if(fhr2)fhr2.value=r.heureRetourJour;
     }
   }
   // Scroller vers le formulaire
