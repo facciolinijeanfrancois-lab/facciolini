@@ -353,5 +353,18 @@ gtag('consent', 'default', {
 })();
 </script>
 
+<!-- Suivi GA4 des clics téléphone / WhatsApp (leads) -->
+<script>
+document.addEventListener('click', function(e){
+  var el = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
+  if(!el || typeof gtag !== 'function') return;
+  var method = el.getAttribute('href').indexOf('tel:') === 0 ? 'telephone' : 'whatsapp';
+  gtag('event', 'contact_click', {
+    'method': method,
+    'page_location': window.location.href
+  });
+});
+</script>
+
 </body>
 </html>
