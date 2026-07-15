@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<!-- Google Consent Mode v2 (RGPD : par défaut refusé tant que l'utilisateur n'a pas choisi) -->
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  'analytics_storage': 'denied',
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied'
+});
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y5G8253ZKZ"></script>
+<script>
+  gtag('js', new Date());
+  gtag('config', 'G-Y5G8253ZKZ');
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Navette Aéroport Charleroi (CRL) depuis Hainaut | Facciolini Mobility</title>
@@ -280,6 +298,41 @@
   <p><a href="/">Accueil</a> <a href="/#calculateur">Tarifs</a> <a href="/navette-zaventem">Navette Zaventem</a> <a href="/navette-charleroi">Navette Charleroi</a> <a href="/#reservation">Réserver</a></p>
   <p style="margin-top:16px;">BCE 1033.793.336 · Transport privé Hainaut · © 2026 Facciolini Mobility</p>
 </footer>
+
+<!-- Bandeau cookies RGPD -->
+<div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:#0d0d0d; border-top:1px solid #c9a84c; padding:20px; box-shadow:0 -4px 20px rgba(0,0,0,0.4); font-family:'Inter', sans-serif;">
+  <div style="max-width:1000px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;">
+    <p style="color:#e8e8e8; font-size:14px; margin:0; flex:1; min-width:240px; line-height:1.5;">
+      Nous utilisons des cookies pour mesurer l'audience du site (Google Analytics). Vous pouvez accepter ou refuser à tout moment.
+    </p>
+    <div style="display:flex; gap:10px; flex-shrink:0;">
+      <button id="cookie-refuse" style="background:transparent; border:1px solid #666; color:#e8e8e8; padding:10px 22px; border-radius:30px; cursor:pointer; font-size:14px; font-family:'Inter', sans-serif;">Refuser</button>
+      <button id="cookie-accept" style="background:#c9a84c; border:none; color:#0d0d0d; padding:10px 22px; border-radius:30px; cursor:pointer; font-weight:600; font-size:14px; font-family:'Inter', sans-serif;">Accepter</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var consent = localStorage.getItem('cookie_consent');
+  var banner = document.getElementById('cookie-banner');
+  if (!consent) {
+    banner.style.display = 'block';
+  } else if (consent === 'accepted' && typeof gtag === 'function') {
+    gtag('consent', 'update', { 'analytics_storage': 'granted' });
+  }
+  document.getElementById('cookie-accept').addEventListener('click', function(){
+    localStorage.setItem('cookie_consent', 'accepted');
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', { 'analytics_storage': 'granted' });
+    }
+    banner.style.display = 'none';
+  });
+  document.getElementById('cookie-refuse').addEventListener('click', function(){
+    localStorage.setItem('cookie_consent', 'refused');
+    banner.style.display = 'none';
+  });
+})();
+</script>
 
 </body>
 </html>
