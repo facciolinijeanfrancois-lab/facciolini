@@ -1384,6 +1384,14 @@ async function submitForm(e){
     else{console.warn('Web3Forms erreur:',d.message);}
   }catch(err){console.warn('Web3Forms fetch error:',err);}
 
+  if(typeof gtag==='function'){
+    gtag('event','generate_lead',{
+      'currency':'EUR',
+      'value':(calcResult&&calcResult.prix)?calcResult.prix:0,
+      'trip_type':(type==='ar'?'aller-retour':'aller simple'),
+      'email_ok':emailOk
+    });
+  }
   window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
   form.style.display='none';
   var successBox=document.getElementById('form-success');
@@ -1530,6 +1538,19 @@ document.querySelectorAll('.service-card,.avis-card,.why-item,.zone-item').forEa
     banner.style.display = 'none';
   });
 })();
+</script>
+
+<!-- Suivi GA4 des clics téléphone / WhatsApp (leads) -->
+<script>
+document.addEventListener('click', function(e){
+  var el = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
+  if(!el || typeof gtag !== 'function') return;
+  var method = el.getAttribute('href').indexOf('tel:') === 0 ? 'telephone' : 'whatsapp';
+  gtag('event', 'contact_click', {
+    'method': method,
+    'page_location': window.location.href
+  });
+});
 </script>
 
 </body>
