@@ -425,17 +425,17 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
 
         <!-- Date et heure aller -->
         <div class="calc-field">
-          <label>Date</label>
+          <label for="calc-date-aller">Date</label>
           <input type="date" class="calc-input" id="calc-date-aller">
         </div>
         <div class="calc-field">
-          <label>Heure de d&#xe9;collage</label>
+          <label for="calc-heure-aller">Heure de d&#xe9;collage</label>
           <input type="time" class="calc-input" id="calc-heure-aller">
         </div>
 
         <!-- Départ -->
         <div class="calc-field" style="grid-column:1/-1">
-          <label>Adresse de d&#xe9;part</label>
+          <label for="calc-depart">Adresse de d&#xe9;part</label>
           <div class="ac-wrap-calc">
             <input type="text" class="calc-input" id="calc-depart" placeholder="Ex: Rue Saint-&#xc9;loi, Carni&#xe8;res..." autocomplete="off">
             <input type="hidden" id="calc-dep-lat"><input type="hidden" id="calc-dep-lon">
@@ -445,7 +445,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
 
         <!-- Arrivée -->
         <div class="calc-field" style="grid-column:1/-1">
-          <label>Adresse d'arriv&#xe9;e</label>
+          <label for="calc-arrivee">Adresse d'arriv&#xe9;e</label>
           <div class="ac-wrap-calc">
             <input type="text" class="calc-input" id="calc-arrivee" placeholder="Ex: Brussels Airport, Zaventem..." autocomplete="off">
             <input type="hidden" id="calc-arr-lat"><input type="hidden" id="calc-arr-lon">
@@ -459,11 +459,11 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:14px">&#x21a9; Retour m&#xea;me jour</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
               <div class="calc-field">
-                <label>Heure de retour</label>
+                <label for="calc-heure-retour-jour">Heure de retour</label>
                 <input type="time" class="calc-input" id="calc-heure-retour-jour">
               </div>
               <div class="calc-field">
-                <label>Distance retour (km)</label>
+                <label for="calc-dist-retour-jour">Distance retour (km)</label>
                 <input type="number" class="calc-input" id="calc-dist-retour-jour" placeholder="= aller si vide" min="1" step="1">
                 <div style="font-size:0.72rem;color:var(--gris);margin-top:4px">Vide = m&#xea;me distance qu'&#xe0; l'aller</div>
               </div>
@@ -475,7 +475,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             </div>
             <div id="calc-retour-jour-adr" style="display:none">
               <div class="calc-field" style="grid-column:1/-1">
-                <label>Lieu de r&#xe9;cup&#xe9;ration (retour)</label>
+                <label for="calc-dep-retour-jour">Lieu de r&#xe9;cup&#xe9;ration (retour)</label>
                 <div class="ac-wrap-calc">
                   <input type="text" class="calc-input" id="calc-dep-retour-jour" placeholder="Ex: Brussels Airport..." autocomplete="off">
                   <input type="hidden" id="calc-dep-ret-jour-lat"><input type="hidden" id="calc-dep-ret-jour-lon">
@@ -492,11 +492,11 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--or);font-weight:500;margin-bottom:14px">&#x21a9; Trajet retour</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
               <div class="calc-field">
-                <label>Date de retour</label>
+                <label for="calc-date-retour-diff">Date de retour</label>
                 <input type="date" class="calc-input" id="calc-date-retour-diff">
               </div>
               <div class="calc-field">
-                <label>Heure de retour</label>
+                <label for="calc-heure-retour-diff">Heure de retour</label>
                 <input type="time" class="calc-input" id="calc-heure-retour-diff">
               </div>
             </div>
@@ -508,7 +508,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             <div id="calc-retour-diff-adr" style="display:none">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                 <div class="calc-field">
-                  <label>D&#xe9;part retour</label>
+                  <label for="calc-dep-retour-diff">D&#xe9;part retour</label>
                   <div class="ac-wrap-calc">
                     <input type="text" class="calc-input" id="calc-dep-retour-diff" placeholder="Ex: Brussels Airport..." autocomplete="off">
                     <input type="hidden" id="calc-dep-ret-diff-lat"><input type="hidden" id="calc-dep-ret-diff-lon">
@@ -516,7 +516,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                   </div>
                 </div>
                 <div class="calc-field">
-                  <label>Arriv&#xe9;e retour</label>
+                  <label for="calc-arr-retour-diff">Arriv&#xe9;e retour</label>
                   <div class="ac-wrap-calc">
                     <input type="text" class="calc-input" id="calc-arr-retour-diff" placeholder="Ex: Carni&#xe8;res, Mons..." autocomplete="off">
                     <input type="hidden" id="calc-arr-ret-diff-lat"><input type="hidden" id="calc-arr-ret-diff-lon">
@@ -539,7 +539,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           <div id="calc-veh-hint" style="font-size:0.8rem;color:var(--or);margin-top:6px;min-height:18px"></div>
         </div>
         <div class="calc-field">
-          <label>Passagers</label>
+          <label for="calc-passagers">Passagers</label>
           <select class="calc-input" id="calc-passagers" style="cursor:pointer;color:#f8f4ee;background:#131720">
             <option value="1" style="color:#f8f4ee;background:#131720">1 passager</option>
             <option value="2" style="color:#f8f4ee;background:#131720">2 passagers</option>
@@ -551,7 +551,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           </select>
         </div>
         <div class="calc-field">
-          <label>Grandes valises</label>
+          <label for="calc-bagages-grandes">Grandes valises</label>
           <select class="calc-input" id="calc-bagages-grandes" style="cursor:pointer;color:#f8f4ee;background:#131720">
             <option value="0" style="color:#f8f4ee;background:#131720">Aucune</option>
             <option value="1" style="color:#f8f4ee;background:#131720">1 grande valise</option>
@@ -561,7 +561,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           </select>
         </div>
         <div class="calc-field">
-          <label>Petites valises / cabine</label>
+          <label for="calc-bagages-petites">Petites valises / cabine</label>
           <select class="calc-input" id="calc-bagages-petites" style="cursor:pointer;color:#f8f4ee;background:#131720">
             <option value="0" style="color:#f8f4ee;background:#131720">Aucune</option>
             <option value="1" style="color:#f8f4ee;background:#131720">1 petite valise</option>
@@ -832,12 +832,12 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
       <div class="form-wrap">
         <form id="resa-form" class="form-grid" onsubmit="submitForm(event)">
           <div class="form-row">
-            <div class="fg"><label class="fl">Prénom *</label><input type="text" class="fi" name="prenom" id="f-prenom" placeholder="Marie" required></div>
-            <div class="fg"><label class="fl">Nom *</label><input type="text" class="fi" name="nom" id="f-nom" placeholder="Dupont" required></div>
+            <div class="fg"><label class="fl" for="f-prenom">Prénom *</label><input type="text" class="fi" name="prenom" id="f-prenom" placeholder="Marie" required></div>
+            <div class="fg"><label class="fl" for="f-nom">Nom *</label><input type="text" class="fi" name="nom" id="f-nom" placeholder="Dupont" required></div>
           </div>
           <div class="form-row">
-            <div class="fg"><label class="fl">Téléphone *</label><input type="tel" class="fi" name="tel" id="f-tel" placeholder="+32 471 ..." required></div>
-            <div class="fg"><label class="fl">Email</label><input type="email" class="fi" name="email" placeholder="marie@email.com"></div>
+            <div class="fg"><label class="fl" for="f-tel">Téléphone *</label><input type="tel" class="fi" name="tel" id="f-tel" placeholder="+32 471 ..." required></div>
+            <div class="fg"><label class="fl" for="f-email">Email</label><input type="email" class="fi" name="email" id="f-email" placeholder="marie@email.com"></div>
           </div>
           <div class="fg">
             <label class="fl">Type de course</label>
@@ -847,22 +847,22 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             </div>
             <input type="hidden" name="type" id="f-type" value="aller">
           </div>
-          <div class="fg"><label class="fl">Adresse de départ *</label><input type="text" class="fi" name="depart" id="f-depart" placeholder="Votre adresse..." required></div>
-          <div class="fg"><label class="fl">Adresse d'arrivée *</label><input type="text" class="fi" name="arrivee" id="f-arrivee" placeholder="Aéroport, gare..." required></div>
+          <div class="fg"><label class="fl" for="f-depart">Adresse de départ *</label><input type="text" class="fi" name="depart" id="f-depart" placeholder="Votre adresse..." required></div>
+          <div class="fg"><label class="fl" for="f-arrivee">Adresse d'arrivée *</label><input type="text" class="fi" name="arrivee" id="f-arrivee" placeholder="Aéroport, gare..." required></div>
           <div class="form-row">
-            <div class="fg"><label class="fl">Date *</label><input type="date" class="fi" name="date" id="f-date" required></div>
-            <div class="fg"><label class="fl">Heure de d&#xe9;collage *</label><input type="time" class="fi" name="heure" id="f-heure" required></div>
+            <div class="fg"><label class="fl" for="f-date">Date *</label><input type="date" class="fi" name="date" id="f-date" required></div>
+            <div class="fg"><label class="fl" for="f-heure">Heure de d&#xe9;collage *</label><input type="time" class="fi" name="heure" id="f-heure" required></div>
           </div>
           <div id="f-retour-bloc" style="display:none">
             <div class="form-row" style="margin-top:0">
-              <div class="fg"><label class="fl">Date retour</label><input type="date" class="fi" name="date_retour" id="f-date-retour"></div>
-              <div class="fg"><label class="fl">Heure retour</label><input type="time" class="fi" name="heure_retour" id="f-heure-retour"></div>
+              <div class="fg"><label class="fl" for="f-date-retour">Date retour</label><input type="date" class="fi" name="date_retour" id="f-date-retour"></div>
+              <div class="fg"><label class="fl" for="f-heure-retour">Heure retour</label><input type="time" class="fi" name="heure_retour" id="f-heure-retour"></div>
             </div>
-            <div class="fg"><label class="fl">Num&#xe9;ro de vol retour</label><input type="text" class="fi" name="vol_retour" id="f-vol-retour" placeholder="Ex: SN3725" style="text-transform:uppercase"></div>
+            <div class="fg"><label class="fl" for="f-vol-retour">Num&#xe9;ro de vol retour</label><input type="text" class="fi" name="vol_retour" id="f-vol-retour" placeholder="Ex: SN3725" style="text-transform:uppercase"></div>
           </div>
           <div class="form-row">
             <div class="fg">
-              <label class="fl">Marge souhait&#xe9;e avant vol</label>
+              <label class="fl" for="f-marge">Marge souhait&#xe9;e avant vol</label>
               <select class="fi" name="marge" id="f-marge">
                 <option value="90">1h30 — Vols court-courriers</option>
                 <option value="120" selected>2h00 — Standard recommand&#xe9;</option>
@@ -871,10 +871,10 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
               </select>
               <span style="font-size:0.72rem;color:var(--gris);margin-top:5px;display:block">&#x26a0;&#xfe0f; Pr&#xe9;voyez plus de temps aux heures de pointe</span>
             </div>
-            <div class="fg"><label class="fl">Num&#xe9;ro de vol</label><input type="text" class="fi" name="vol" id="f-vol" placeholder="Ex: SN3724" style="text-transform:uppercase"></div>
+            <div class="fg"><label class="fl" for="f-vol">Num&#xe9;ro de vol</label><input type="text" class="fi" name="vol" id="f-vol" placeholder="Ex: SN3724" style="text-transform:uppercase"></div>
           </div>
           <div class="form-row">
-            <div class="fg"><label class="fl">Passagers *</label>
+            <div class="fg"><label class="fl" for="f-passagers">Passagers *</label>
               <select class="fi" name="passagers" id="f-passagers" required>
                 <option value="1">1 passager</option>
                 <option value="2">2 passagers</option>
@@ -885,7 +885,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="7">7 passagers — Minivan (+20&#x20ac;)</option>
               </select>
             </div>
-            <div class="fg"><label class="fl">Grandes valises</label>
+            <div class="fg"><label class="fl" for="f-bagages-grandes">Grandes valises</label>
               <select class="fi" name="bagages_grandes" id="f-bagages-grandes">
                 <option value="0">Aucune</option>
                 <option value="1">1 grande valise</option>
@@ -896,7 +896,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             </div>
           </div>
           <div class="form-row">
-            <div class="fg"><label class="fl">Petites valises / cabine</label>
+            <div class="fg"><label class="fl" for="f-bagages-petites">Petites valises / cabine</label>
               <select class="fi" name="bagages_petites" id="f-bagages-petites">
                 <option value="0">Aucune</option>
                 <option value="1">1 petite valise</option>
@@ -905,7 +905,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="4">4+ petites valises</option>
               </select>
             </div>
-            <div class="fg"><label class="fl">&#xc9;quipement suppl&#xe9;mentaire</label>
+            <div class="fg"><label class="fl" for="f-equipement">&#xc9;quipement suppl&#xe9;mentaire</label>
               <select class="fi" name="equipement" id="f-equipement">
                 <option value="aucun">Aucun</option>
                 <option value="ski">Mat&#xe9;riel ski / sport</option>
@@ -914,8 +914,8 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             </div>
           </div>
           <div class="form-row">
-            <div class="fg"><label class="fl">Si&#xe8;ge b&#xe9;b&#xe9; / enfant</label>
-              <select class="fi" name="sieges_bebe">
+            <div class="fg"><label class="fl" for="f-sieges-bebe">Si&#xe8;ge b&#xe9;b&#xe9; / enfant</label>
+              <select class="fi" name="sieges_bebe" id="f-sieges-bebe">
                 <option value="non">Pas besoin</option>
                 <option value="1bebe">1 si&#xe8;ge b&#xe9;b&#xe9; (0-13 kg)</option>
                 <option value="2bebes">2 si&#xe8;ges b&#xe9;b&#xe9;</option>
@@ -925,7 +925,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="mix">Combinaison (pr&#xe9;cisez en notes)</option>
               </select>
             </div>
-            <div class="fg"><label class="fl">V&#xe9;hicule pr&#xe9;f&#xe9;r&#xe9;</label>
+            <div class="fg"><label class="fl" for="f-vehicule-pref">V&#xe9;hicule pr&#xe9;f&#xe9;r&#xe9;</label>
               <select class="fi" name="vehicule_pref" id="f-vehicule-pref">
                 <option value="auto">Automatique selon passagers</option>
                 <option value="berline">Berline — max 3 passagers</option>
@@ -933,7 +933,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
               </select>
             </div>
           </div>
-          <div class="fg"><label class="fl">Notes suppl&#xe9;mentaires</label><textarea class="ft" name="notes" placeholder="Informations compl&#xe9;mentaires, demandes sp&#xe9;ciales..."></textarea></div>
+          <div class="fg"><label class="fl" for="f-notes">Notes suppl&#xe9;mentaires</label><textarea class="ft" name="notes" id="f-notes" placeholder="Informations compl&#xe9;mentaires, demandes sp&#xe9;ciales..."></textarea></div>
           <button type="submit" class="form-submit" id="resa-submit-btn">Envoyer ma demande de réservation →</button>
           <p class="form-note">Nous vous répondons par téléphone ou WhatsApp dans les plus brefs délais pour confirmer et communiquer le prix exact.</p>
         </form>
