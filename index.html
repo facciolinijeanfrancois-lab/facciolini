@@ -551,13 +551,23 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           </select>
         </div>
         <div class="calc-field">
-          <label>Bagages</label>
-          <select class="calc-input" id="calc-bagages" style="cursor:pointer;color:#f8f4ee;background:#131720">
-            <option value="aucun" style="color:#f8f4ee;background:#131720">Aucun / Cabine uniquement</option>
-            <option value="1grande" style="color:#f8f4ee;background:#131720">1 grande valise</option>
-            <option value="2grandes" style="color:#f8f4ee;background:#131720">2 grandes valises</option>
-            <option value="3grandes" style="color:#f8f4ee;background:#131720">3 grandes valises</option>
-            <option value="4plus" style="color:#f8f4ee;background:#131720">4+ valises</option>
+          <label>Grandes valises</label>
+          <select class="calc-input" id="calc-bagages-grandes" style="cursor:pointer;color:#f8f4ee;background:#131720">
+            <option value="0" style="color:#f8f4ee;background:#131720">Aucune</option>
+            <option value="1" style="color:#f8f4ee;background:#131720">1 grande valise</option>
+            <option value="2" style="color:#f8f4ee;background:#131720">2 grandes valises</option>
+            <option value="3" style="color:#f8f4ee;background:#131720">3 grandes valises</option>
+            <option value="4" style="color:#f8f4ee;background:#131720">4+ grandes valises</option>
+          </select>
+        </div>
+        <div class="calc-field">
+          <label>Petites valises / cabine</label>
+          <select class="calc-input" id="calc-bagages-petites" style="cursor:pointer;color:#f8f4ee;background:#131720">
+            <option value="0" style="color:#f8f4ee;background:#131720">Aucune</option>
+            <option value="1" style="color:#f8f4ee;background:#131720">1 petite valise</option>
+            <option value="2" style="color:#f8f4ee;background:#131720">2 petites valises</option>
+            <option value="3" style="color:#f8f4ee;background:#131720">3 petites valises</option>
+            <option value="4" style="color:#f8f4ee;background:#131720">4+ petites valises</option>
           </select>
           <div id="calc-bagages-hint" style="font-size:0.8rem;margin-top:6px;min-height:18px"></div>
         </div>
@@ -875,14 +885,29 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="7">7 passagers — Minivan (+20&#x20ac;)</option>
               </select>
             </div>
-            <div class="fg"><label class="fl">Bagages</label>
-              <select class="fi" name="bagages" id="f-bagages">
-                <option value="aucun">Aucun bagage</option>
-                <option value="cabine">Cabine uniquement</option>
-                <option value="1grande">1 grande valise</option>
-                <option value="2grandes">2 grandes valises</option>
-                <option value="3grandes">3 grandes valises</option>
-                <option value="4plus">4+ valises (pr&#xe9;cisez)</option>
+            <div class="fg"><label class="fl">Grandes valises</label>
+              <select class="fi" name="bagages_grandes" id="f-bagages-grandes">
+                <option value="0">Aucune</option>
+                <option value="1">1 grande valise</option>
+                <option value="2">2 grandes valises</option>
+                <option value="3">3 grandes valises</option>
+                <option value="4">4+ grandes valises</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="fg"><label class="fl">Petites valises / cabine</label>
+              <select class="fi" name="bagages_petites" id="f-bagages-petites">
+                <option value="0">Aucune</option>
+                <option value="1">1 petite valise</option>
+                <option value="2">2 petites valises</option>
+                <option value="3">3 petites valises</option>
+                <option value="4">4+ petites valises</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">&#xc9;quipement suppl&#xe9;mentaire</label>
+              <select class="fi" name="equipement" id="f-equipement">
+                <option value="aucun">Aucun</option>
                 <option value="ski">Mat&#xe9;riel ski / sport</option>
                 <option value="velo">V&#xe9;lo</option>
               </select>
@@ -1038,10 +1063,10 @@ function setCalcVeh(v){
 
 function checkCapacite(){
   var passagers=parseInt(document.getElementById('calc-passagers').value)||1;
-  var bagages=document.getElementById('calc-bagages')?document.getElementById('calc-bagages').value:'aucun';
+  var grandesValises=parseInt(document.getElementById('calc-bagages-grandes')?document.getElementById('calc-bagages-grandes').value:0)||0;
+  var petitesValises=parseInt(document.getElementById('calc-bagages-petites')?document.getElementById('calc-bagages-petites').value:0)||0;
   var hint=document.getElementById('calc-veh-hint');
   var bagHint=document.getElementById('calc-bagages-hint');
-  var grandesValises={'1grande':1,'2grandes':2,'3grandes':3,'4plus':4}[bagages]||0;
   // Règles capacité
   var forcerMinivan=false;
   var msgHint='';
@@ -1235,7 +1260,8 @@ async function calculerPrix(){
       dateAller:document.getElementById('calc-date-aller')?.value||'',
       heureAller:document.getElementById('calc-heure-aller')?.value||'',
       passagers:document.getElementById('calc-passagers')?.value||'1',
-      bagages:document.getElementById('calc-bagages')?.value||'aucun',
+      bagagesGrandes:document.getElementById('calc-bagages-grandes')?.value||'0',
+      bagagesPetites:document.getElementById('calc-bagages-petites')?.value||'0',
       veh:veh,
       heureRetourJour,dateRetourDiff,heureRetourDiff};
     result.classList.add('show');
@@ -1255,7 +1281,8 @@ function prefillForm(){
   var fd2=document.getElementById('f-date');if(fd2)fd2.value=r.dateAller||new Date().toISOString().split('T')[0];
   var fh=document.getElementById('f-heure');if(fh&&r.heureAller)fh.value=r.heureAller;
   var fp=document.getElementById('f-passagers');if(fp&&r.passagers)fp.value=r.passagers;
-  var fb=document.getElementById('f-bagages');if(fb&&r.bagages)fb.value=r.bagages;
+  var fbg=document.getElementById('f-bagages-grandes');if(fbg&&r.bagagesGrandes)fbg.value=r.bagagesGrandes;
+  var fbp=document.getElementById('f-bagages-petites');if(fbp&&r.bagagesPetites)fbp.value=r.bagagesPetites;
   var fv=document.getElementById('f-vehicule-pref');if(fv&&r.veh)fv.value=r.veh==='talento'?'minivan':'berline';
   // Pré-remplir type de course
   if(r.type==='ar-jour'||r.type==='ar-diff'){
@@ -1299,7 +1326,9 @@ async function submitForm(e){
   var marge=parseInt(data.get('marge')||120);
   var margeLabels={90:'1h30',120:'2h00',150:'2h30',180:'3h00'};
   var margeAff=margeLabels[marge]||(Math.floor(marge/60)+'h'+(marge%60<10?'0':'')+(marge%60));
-  var bagages=data.get('bagages')||'aucun';
+  var bagagesGrandes=parseInt(data.get('bagages_grandes')||0)||0;
+  var bagagesPetites=parseInt(data.get('bagages_petites')||0)||0;
+  var equipement=data.get('equipement')||'aucun';
   var siegesBebe=data.get('sieges_bebe')||'non';
   var vehiculePref=data.get('vehicule_pref')||'auto';
   var heurePickupStr='',heureDepStr='';
@@ -1316,7 +1345,12 @@ async function submitForm(e){
     var hD2=Math.floor(hDep/60),mD2=hDep%60;
     heureDepStr=(hD2<10?'0':'')+hD2+'h'+(mD2<10?'0':'')+mD2;
   }
-  var bagLabels={'aucun':'Aucun','cabine':'Cabine','1grande':'1 grande valise','2grandes':'2 grandes valises','3grandes':'3 grandes valises','4plus':'4+ valises','ski':'Materiel ski','velo':'Velo'};
+  var equipLabels={'aucun':'','ski':'Materiel ski / sport','velo':'Velo'};
+  var bagParts=[];
+  if(bagagesGrandes>0)bagParts.push(bagagesGrandes+' grande'+(bagagesGrandes>1?'s':'')+' valise'+(bagagesGrandes>1?'s':''));
+  if(bagagesPetites>0)bagParts.push(bagagesPetites+' petite'+(bagagesPetites>1?'s':'')+' valise'+(bagagesPetites>1?'s':''));
+  if(equipement!=='aucun'&&equipLabels[equipement])bagParts.push(equipLabels[equipement]);
+  var bagagesLabel=bagParts.join(', ')||'Aucun';
   var bebeLabels={'non':'','1bebe':'1 siege bebe (0-13kg)','2bebes':'2 sieges bebe','1enfant':'1 siege enfant','2enfants':'2 sieges enfants','1rehausseur':'1 rehausseur','mix':'Combinaison sieges'};
   var dateAff=fmtDateFR(date),dateRAff=fmtDateFR(dateR);
   var isTalentoGuess=parseInt(passagers)>=4||vehiculePref==='minivan';
@@ -1339,7 +1373,7 @@ async function submitForm(e){
   msg+='Arrivee: '+arrivee+nl;
   if(vol)msg+='Vol aller: '+vol+nl;
   msg+='Passagers: '+passagers+nl;
-  if(bagages&&bagages!=='aucun')msg+='Bagages: '+(bagLabels[bagages]||bagages)+nl;
+  if(bagagesLabel&&bagagesLabel!=='Aucun')msg+='Bagages: '+bagagesLabel+nl;
   if(siegesBebe&&siegesBebe!=='non')msg+='Siege: '+(bebeLabels[siegesBebe]||siegesBebe)+nl;
   if(type==='ar'&&dateR)msg+='Retour: '+dateRAff+(heureR?' a '+heureR:'')+nl;
   if(type==='ar'&&volRetour)msg+='Vol retour: '+volRetour+nl;
@@ -1370,7 +1404,7 @@ async function submitForm(e){
       'ARRIVEE: '+arrivee+'\n'+
       (vol?'VOL ALLER: '+vol+'\n':'')+
       'PASSAGERS: '+passagers+'\n'+
-      (bagages&&bagages!=='aucun'?'BAGAGES: '+(bagLabels[bagages]||bagages)+'\n':'')+
+      (bagagesLabel&&bagagesLabel!=='Aucun'?'BAGAGES: '+bagagesLabel+'\n':'')+
       (siegesBebe&&siegesBebe!=='non'?'SIEGE ENFANT: '+(bebeLabels[siegesBebe]||siegesBebe)+'\n':'')+
       (type==='ar'&&dateR?'RETOUR: '+dateRAff+(heureR?' a '+heureR:'')+'\n':'')+
       (type==='ar'&&volRetour?'VOL RETOUR: '+volRetour+'\n':'')+
@@ -1458,8 +1492,13 @@ async function submitForm(e){
     checkCapacite();
     if(window._calcKm)calculerPrix();
   });
-  var bagEl = document.getElementById('calc-bagages');
-  if(bagEl)bagEl.addEventListener('change', function(){
+  var bagElG = document.getElementById('calc-bagages-grandes');
+  if(bagElG)bagElG.addEventListener('change', function(){
+    checkCapacite();
+    if(window._calcKm)calculerPrix();
+  });
+  var bagElP = document.getElementById('calc-bagages-petites');
+  if(bagElP)bagElP.addEventListener('change', function(){
     checkCapacite();
     if(window._calcKm)calculerPrix();
   });
