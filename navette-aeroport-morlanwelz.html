@@ -37,51 +37,80 @@ gtag('consent', 'default', {
 <link rel="apple-touch-icon" href="/icon-192.png">
 
 
-<script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@type": "Service",
-  "name": "Navette Aéroport depuis Morlanwelz vers Zaventem et Charleroi",
-  "description": "Service de navette privée depuis Morlanwelz vers les aéroports de Bruxelles-Zaventem (BRU) et Charleroi (CRL). Tarif fixe, disponible 24h/24, suivi de vol inclus.",
-  "provider": {
-    "@type": "LocalBusiness",
-    "name": "Facciolini Mobility",
-    "url": "https://facciolinimobility.be",
-    "telephone": "+32471692650",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Rue Saint-Éloi 173",
-      "addressLocality": "Carnières",
-      "postalCode": "7141",
-      "addressRegion": "Hainaut",
-      "addressCountry": "BE"
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Navette Aéroport depuis Morlanwelz vers Zaventem et Charleroi",
+    "description": "Service de navette privée depuis Morlanwelz vers les aéroports de Bruxelles-Zaventem (BRU) et Charleroi (CRL). Tarif fixe, disponible 24h/24, suivi de vol inclus.",
+    "provider": {
+        "@type": "LocalBusiness",
+        "name": "Facciolini Mobility",
+        "url": "https://facciolinimobility.be",
+        "telephone": "+32471692650",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rue Saint-Éloi 173",
+            "addressLocality": "Carnières",
+            "postalCode": "7141",
+            "addressRegion": "Hainaut",
+            "addressCountry": "BE"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "bestRating": "5",
+            "worstRating": "1",
+            "reviewCount": "40"
+        }
+    },
+    "areaServed": [
+        {
+            "@type": "City",
+            "name": "Carnières"
+        },
+        {
+            "@type": "City",
+            "name": "Morlanwelz"
+        },
+        {
+            "@type": "City",
+            "name": "Mons"
+        },
+        {
+            "@type": "City",
+            "name": "La Louvière"
+        },
+        {
+            "@type": "City",
+            "name": "Binche"
+        },
+        {
+            "@type": "City",
+            "name": "Manage"
+        },
+        {
+            "@type": "City",
+            "name": "Anderlues"
+        },
+        {
+            "@type": "City",
+            "name": "Chapelle-lez-Herlaimont"
+        },
+        {
+            "@type": "City",
+            "name": "Thuin"
+        }
+    ],
+    "serviceType": "Navette aéroport",
+    "offers": {
+        "@type": "Offer",
+        "priceCurrency": "EUR",
+        "description": "Tarif fixe calculé selon la distance exacte depuis votre adresse. Utilisez notre calculateur pour un prix immédiat.",
+        "availability": "https://schema.org/InStock"
     }
-  },
-  "areaServed": [
-    {"@type": "City", "name": "Carnières"},
-    {"@type": "City", "name": "Morlanwelz"},
-    {"@type": "City", "name": "Mons"},
-    {"@type": "City", "name": "La Louvière"},
-    {"@type": "City", "name": "Binche"},
-    {"@type": "City", "name": "Manage"},
-    {"@type": "City", "name": "Anderlues"},
-    {"@type": "City", "name": "Chapelle-lez-Herlaimont"},
-    {"@type": "City", "name": "Thuin"}
-  ],
-  "serviceType": "Navette aéroport",
-  "offers": {
-    "@type": "Offer",
-    "priceCurrency": "EUR",
-    "description": "Tarif fixe calculé selon la distance exacte depuis votre adresse. Utilisez notre calculateur pour un prix immédiat.",
-    "availability": "https://schema.org/InStock"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "5.0",
-    "bestRating": "5",
-    "worstRating": "1",
-    "reviewCount": "40"
-  }
-}</script>
+}
+    </script>
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
