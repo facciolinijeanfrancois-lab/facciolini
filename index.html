@@ -22,8 +22,8 @@ gtag('consent', 'default', {
 <meta charset="UTF-8">
 <meta name="google-site-verification" content="KEJicqAPhrPprYoKD6ViFXxWAXGTJ-IJHju8TzPOV3c" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Facciolini Mobility — Chauffeur Privé Aéroport | Hainaut, Belgique</title>
-<meta name="description" content="Chauffeur privé pour navettes aéroport Brussels Zaventem et Charleroi depuis le Hainaut. Carnières, Mons, Morlanwelz. Tarifs fixes, disponible 24h/24. ☎ 0471 69 26 50">
+<title>Facciolini Mobility | Chauffeur Privé Aéroport Hainaut</title>
+<meta name="description" content="Chauffeur privé pour navettes aéroport Zaventem et Charleroi depuis le Hainaut. Tarifs fixes, disponible 24h/24. ☎ 0471 69 26 50">
 <meta name="keywords" content="chauffeur privé Hainaut, navette aéroport Zaventem, navette Charleroi, taxi Carnières, transport privé Mons, chauffeur Morlanwelz, navette Brussels Airport, VTC Belgique">
 <meta name="robots" content="index, follow">
 <meta name="geo.region" content="BE-WHT">
@@ -38,6 +38,13 @@ gtag('consent', 'default', {
 <meta property="og:description" content="Navettes aéroport Zaventem & Charleroi depuis le Hainaut. Tarifs fixes, 24h/24.">
 <meta property="og:url" content="https://facciolinimobility.be">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://facciolinimobility.be/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Facciolini Mobility - Chauffeur privé Hainaut">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Facciolini Mobility">
+<meta name="twitter:image" content="https://facciolinimobility.be/og-image.png">
 <meta property="og:locale" content="fr_BE">
 
 <!-- Schema.org LocalBusiness -->
@@ -860,6 +867,24 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             </div>
             <div class="fg"><label class="fl" for="f-vol-retour">Num&#xe9;ro de vol retour</label><input type="text" class="fi" name="vol_retour" id="f-vol-retour" placeholder="Ex: SN3725" style="text-transform:uppercase"></div>
           </div>
+          <div class="fg"><label class="fl" for="f-passagers">Passagers *</label>
+            <select class="fi" name="passagers" id="f-passagers" required>
+              <option value="1">1 passager</option>
+              <option value="2">2 passagers</option>
+              <option value="3">3 passagers</option>
+              <option value="4">4 passagers — Minivan (+20&#x20ac;)</option>
+              <option value="5">5 passagers — Minivan (+20&#x20ac;)</option>
+              <option value="6">6 passagers — Minivan (+20&#x20ac;)</option>
+              <option value="7">7 passagers — Minivan (+20&#x20ac;)</option>
+            </select>
+          </div>
+          <div class="fg">
+            <button type="button" id="toggle-options-btn" onclick="toggleOptionsForm()" style="background:transparent;border:1px dashed var(--border2);border-radius:10px;padding:12px 16px;color:var(--or2);font-size:0.88rem;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;width:100%">
+              <span>+ Options suppl&#xe9;mentaires <span style="color:var(--gris);font-weight:400">(bagages, vol, si&#xe8;ge b&#xe9;b&#xe9;, v&#xe9;hicule...)</span></span>
+              <span id="toggle-options-icon">&#x25be;</span>
+            </button>
+          </div>
+          <div id="options-supplementaires" style="display:none">
           <div class="form-row">
             <div class="fg">
               <label class="fl" for="f-marge">Marge souhait&#xe9;e avant vol</label>
@@ -874,17 +899,6 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
             <div class="fg"><label class="fl" for="f-vol">Num&#xe9;ro de vol</label><input type="text" class="fi" name="vol" id="f-vol" placeholder="Ex: SN3724" style="text-transform:uppercase"></div>
           </div>
           <div class="form-row">
-            <div class="fg"><label class="fl" for="f-passagers">Passagers *</label>
-              <select class="fi" name="passagers" id="f-passagers" required>
-                <option value="1">1 passager</option>
-                <option value="2">2 passagers</option>
-                <option value="3">3 passagers</option>
-                <option value="4">4 passagers — Minivan (+20&#x20ac;)</option>
-                <option value="5">5 passagers — Minivan (+20&#x20ac;)</option>
-                <option value="6">6 passagers — Minivan (+20&#x20ac;)</option>
-                <option value="7">7 passagers — Minivan (+20&#x20ac;)</option>
-              </select>
-            </div>
             <div class="fg"><label class="fl" for="f-bagages-grandes">Grandes valises</label>
               <select class="fi" name="bagages_grandes" id="f-bagages-grandes">
                 <option value="0">Aucune</option>
@@ -894,8 +908,6 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="4">4+ grandes valises</option>
               </select>
             </div>
-          </div>
-          <div class="form-row">
             <div class="fg"><label class="fl" for="f-bagages-petites">Petites valises / cabine</label>
               <select class="fi" name="bagages_petites" id="f-bagages-petites">
                 <option value="0">Aucune</option>
@@ -905,6 +917,8 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="4">4+ petites valises</option>
               </select>
             </div>
+          </div>
+          <div class="form-row">
             <div class="fg"><label class="fl" for="f-equipement">&#xc9;quipement suppl&#xe9;mentaire</label>
               <select class="fi" name="equipement" id="f-equipement">
                 <option value="aucun">Aucun</option>
@@ -912,8 +926,6 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="velo">V&#xe9;lo</option>
               </select>
             </div>
-          </div>
-          <div class="form-row">
             <div class="fg"><label class="fl" for="f-sieges-bebe">Si&#xe8;ge b&#xe9;b&#xe9; / enfant</label>
               <select class="fi" name="sieges_bebe" id="f-sieges-bebe">
                 <option value="non">Pas besoin</option>
@@ -925,6 +937,8 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="mix">Combinaison (pr&#xe9;cisez en notes)</option>
               </select>
             </div>
+          </div>
+          <div class="form-row">
             <div class="fg"><label class="fl" for="f-vehicule-pref">V&#xe9;hicule pr&#xe9;f&#xe9;r&#xe9;</label>
               <select class="fi" name="vehicule_pref" id="f-vehicule-pref">
                 <option value="auto">Automatique selon passagers</option>
@@ -932,8 +946,9 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
                 <option value="minivan">Minivan (+20&#x20ac;) — max 7 passagers</option>
               </select>
             </div>
+            <div class="fg"><label class="fl" for="f-notes">Notes suppl&#xe9;mentaires</label><textarea class="ft" name="notes" id="f-notes" placeholder="Informations compl&#xe9;mentaires, demandes sp&#xe9;ciales..."></textarea></div>
           </div>
-          <div class="fg"><label class="fl" for="f-notes">Notes suppl&#xe9;mentaires</label><textarea class="ft" name="notes" id="f-notes" placeholder="Informations compl&#xe9;mentaires, demandes sp&#xe9;ciales..."></textarea></div>
+          </div>
           <button type="submit" class="form-submit" id="resa-submit-btn">Envoyer ma demande de réservation →</button>
           <p class="form-note">Nous vous répondons par téléphone ou WhatsApp dans les plus brefs délais pour confirmer et communiquer le prix exact.</p>
         </form>
@@ -1284,6 +1299,12 @@ function prefillForm(){
   var fbg=document.getElementById('f-bagages-grandes');if(fbg&&r.bagagesGrandes)fbg.value=r.bagagesGrandes;
   var fbp=document.getElementById('f-bagages-petites');if(fbp&&r.bagagesPetites)fbp.value=r.bagagesPetites;
   var fv=document.getElementById('f-vehicule-pref');if(fv&&r.veh)fv.value=r.veh==='talento'?'minivan':'berline';
+  // Ouvrir les options si des données optionnelles ont été pré-remplies
+  if((r.bagagesGrandes&&r.bagagesGrandes!=='0')||(r.bagagesPetites&&r.bagagesPetites!=='0')||r.veh){
+    var optBox=document.getElementById('options-supplementaires');
+    var optIcon=document.getElementById('toggle-options-icon');
+    if(optBox){optBox.style.display='block';if(optIcon)optIcon.innerHTML='&#x25b4;';}
+  }
   // Pré-remplir type de course
   if(r.type==='ar-jour'||r.type==='ar-diff'){
     var arBtn=document.querySelector('#form-type-row .form-type-btn[data-val="ar"]');
@@ -1302,6 +1323,13 @@ function prefillForm(){
 }
 
 // ===== FORMULAIRE =====
+function toggleOptionsForm(){
+  var box=document.getElementById('options-supplementaires');
+  var icon=document.getElementById('toggle-options-icon');
+  var isHidden=box.style.display==='none';
+  box.style.display=isHidden?'block':'none';
+  icon.innerHTML=isHidden?'&#x25b4;':'&#x25be;';
+}
 function setFormType(v,btn){
   document.getElementById('f-type').value=v;
   document.querySelectorAll('#form-type-row .form-type-btn').forEach(function(b){
