@@ -255,7 +255,7 @@ gtag('consent', 'default', {
   <p>Carnières, Mons, Binche, La Louvière, Charleroi, Thuin — l'aéroport le plus proche du Hainaut, où que vous soyez dans la région. Tarif fixe, chauffeur ponctuel, suivi de vol inclus.</p>
   <div class="hero-btns">
     <a href="/#reservation" class="btn-primary">📅 Réserver ma navette</a>
-    <a href="tel:0471692650" class="btn-secondary">📞 0471 69 26 50</a>
+    <a href="tel:+32471692650" class="btn-secondary">📞 0471 69 26 50</a>
   </div>
   <div class="hero-stats">
     <div class="stat"><div class="stat-num">40</div><div class="stat-label">Avis 5 étoiles</div></div>
@@ -388,7 +388,7 @@ gtag('consent', 'default', {
 <div class="cta-section">
   <h2>Prêt à voyager <em style="color:#8a6d1f;">sans stress</em> ?</h2>
   <p>Réservez votre navette Charleroi en ligne ou appelez directement. Réponse rapide garantie.</p>
-  <a href="tel:0471692650" class="cta-phone">📞 0471 69 26 50</a>
+  <a href="tel:+32471692650" class="cta-phone">📞 0471 69 26 50</a>
   <div class="hero-btns">
     <a href="/#reservation" class="btn-primary" style="background:#c9a84c;">Réserver en ligne →</a>
     <a href="https://wa.me/32471692650?text=Bonjour, je voudrais réserver une navette vers Charleroi." class="btn-secondary" style="background:transparent;color:#fff;border-color:#555;">💬 WhatsApp</a>
@@ -398,6 +398,7 @@ gtag('consent', 'default', {
 <footer>
   <p style="margin-bottom:12px;"><strong>Facciolini Mobility</strong> — Chauffeur privé basé à Carnières, Hainaut</p>
   <p><a href="/">Accueil</a> <a href="/#calculateur">Tarifs</a> <a href="/navette-zaventem">Navette Zaventem</a> <a href="/navette-charleroi">Navette Charleroi</a> <a href="/#reservation">Réserver</a></p>
+  <p style="margin-top:10px;"><a href="/mentions-legales">Mentions légales</a> <a href="/politique-confidentialite">Politique de confidentialité</a></p>
   <p style="margin-top:16px;">BCE 1033.793.336 · Transport privé Hainaut · © 2026 Facciolini Mobility</p>
 </footer>
 
@@ -405,7 +406,7 @@ gtag('consent', 'default', {
 <div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:#0d0d0d; border-top:1px solid #c9a84c; padding:20px; box-shadow:0 -4px 20px rgba(0,0,0,0.4); font-family:'Inter', sans-serif;">
   <div style="max-width:1000px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;">
     <p style="color:#e8e8e8; font-size:14px; margin:0; flex:1; min-width:240px; line-height:1.5;">
-      Nous utilisons des cookies pour mesurer l'audience du site (Google Analytics). Vous pouvez accepter ou refuser à tout moment.
+      Nous utilisons des cookies pour mesurer l'audience du site (Google Analytics). Vous pouvez accepter ou refuser à tout moment. <a href="/politique-confidentialite" style="color:#c9a84c; text-decoration:underline;">En savoir plus</a>
     </p>
     <div style="display:flex; gap:10px; flex-shrink:0;">
       <button id="cookie-refuse" style="background:transparent; border:1px solid #666; color:#e8e8e8; padding:10px 22px; border-radius:30px; cursor:pointer; font-size:14px; font-family:'Inter', sans-serif;">Refuser</button>
@@ -449,5 +450,21 @@ document.addEventListener('click', function(e){
 });
 </script>
 
+
+<script>
+/* Suivi GA4 : clics vers le formulaire de reservation et le calculateur */
+(function(){
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('a[href*="#reservation"], a[href*="#calculateur"]');
+    if(!el || typeof gtag !== 'function') return;
+    var href = el.getAttribute('href') || '';
+    gtag('event', 'devis_click', {
+      'cta_target': href.indexOf('#calculateur') > -1 ? 'calculateur' : 'reservation',
+      'cta_label': (el.textContent || '').trim().slice(0, 60),
+      'source_page': window.location.pathname
+    });
+  });
+})();
+</script>
 </body>
 </html>
