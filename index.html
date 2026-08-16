@@ -1053,7 +1053,7 @@ async function estimatePriceFallback(depart,arrivee,type,isTalento){
       var base=km*tarif;
       prix=Math.max(MIN,roundTo(base,ARRONDI));
       if(isAR)prix*=2;
-      if(isTalento)prix=roundTo(prix+SUP_CAMION,ARRONDI);
+      if(isTalento)prix=roundTo(prix+SUP_CAMION*(isAR?2:1),ARRONDI);
     }
     return {prix:prix,km:km,estime:true};
   }catch(e){return null;}
@@ -1261,7 +1261,7 @@ async function calculerPrix(){
         prix=prixAller;
         base=baseAller;
       }
-      if(isTalento)prix=roundTo(prix+SUP_CAMION,ARRONDI);
+      if(isTalento)prix=roundTo(prix+SUP_CAMION*(isAR?2:1),ARRONDI);
       detail='';
       if(type==='ar-diff')detail+='<strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.<br>';
       detail+='<br><span style="color:var(--or2);font-weight:600">✓ Inclus dans le prix :</span><br>\n🏠 Prise en charge à domicile · ✈️ Dépôt à l&#39;aéroport<br>\n🚶 Accompagnement jusqu&#39;au terminal · 🕐 Attente &amp; accompagnement au retour<br>\n💧 Bouteilles d&#39;eau offertes aller &amp; retour';
