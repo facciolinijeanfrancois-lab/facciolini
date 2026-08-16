@@ -80,27 +80,27 @@ gtag('consent', 'default', {
     "ratingValue": "5.0",
     "bestRating": "5",
     "worstRating": "1",
-    "reviewCount": "40"
+    "reviewCount": "45"
   },
   "review": [
     {
       "@type": "Review",
       "author": {"@type": "Person", "name": "Boris D."},
-      "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+      "reviewRating": {"@type": "Rating", "ratingValue": "5.0", "bestRating": "5"},
       "reviewBody": "Service impeccable, ponctuel et très professionnel. Je recommande vivement pour les navettes aéroport.",
       "datePublished": "2026-06-01"
     },
     {
       "@type": "Review",
       "author": {"@type": "Person", "name": "Nicolas B."},
-      "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+      "reviewRating": {"@type": "Rating", "ratingValue": "5.0", "bestRating": "5"},
       "reviewBody": "Chauffeur très sympathique, véhicule propre et confortable. Parfait pour l'aéroport de Zaventem.",
       "datePublished": "2026-06-05"
     },
     {
       "@type": "Review",
       "author": {"@type": "Person", "name": "Anais P."},
-      "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+      "reviewRating": {"@type": "Rating", "ratingValue": "5.0", "bestRating": "5"},
       "reviewBody": "Excellent service, toujours à l'heure. Je fais régulièrement appel à Facciolini Mobility pour mes déplacements.",
       "datePublished": "2026-06-10"
     }
@@ -717,7 +717,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <div style="display:flex;flex-direction:column;gap:0">
           <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:1.3rem">⭐</span>
-            <div style="text-align:left"><div style="font-weight:600;font-size:0.92rem">40 avis 5 étoiles Google</div><div style="font-size:0.78rem;color:var(--gris)">Clients satisfaits depuis 2024</div></div>
+            <div style="text-align:left"><div style="font-weight:600;font-size:0.92rem"><span data-avis-nombre>45</span> avis <span data-avis-note>5,0</span> étoiles Google</div><div style="font-size:0.78rem;color:var(--gris)">Clients satisfaits depuis 2024</div></div>
           </div>
           <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:1.3rem">🕐</span>
@@ -754,7 +754,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <div>
           <div class="avis-note">5,0</div>
           <div class="avis-stars">★★★★★</div>
-          <div class="avis-count">40 avis Google</div>
+          <div class="avis-count"><span data-avis-nombre>45</span> avis Google</div>
         </div>
         <a href="https://www.google.com/search?q=Facciolini+Mobility" target="_blank" class="btn btn-outline" style="font-size:0.82rem">Voir tous les avis →</a>
       </div>
@@ -1653,5 +1653,6 @@ document.addEventListener('click', function(e){
   });
 })();
 </script>
+<script src="/avis.js" defer></script>
 </body>
 </html>
