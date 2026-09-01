@@ -7,11 +7,11 @@
    Netlify redéploie et TOUT le site se met à jour :
    les textes visibles ET les données structurées Google.
 
-   Dernière mise à jour : 16/08/2026
+   Dernière mise à jour : 01/09/2026
    ========================================================= */
 
 window.AVIS = {
-  nombre: 45,      // <-- nombre d'avis Google
+  nombre: 51,      // <-- nombre d'avis Google
   note: '5.0'      // <-- note moyenne (point décimal, format Google)
 };
 
