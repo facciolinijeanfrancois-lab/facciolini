@@ -421,9 +421,22 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
     <div class="calc-wrap">
       <div class="calc-grid">
 
+        <!-- Type de service -->
+        <div class="calc-field" style="grid-column:1/-1">
+          <label>De quoi avez-vous besoin&#xa0;?</label>
+          <div class="calc-type-grid" id="calc-service-grid">
+            <button class="calc-type-btn active" data-svc="aeroport">&#x2708;&#xfe0f; Navette a&#xe9;roport</button>
+            <button class="calc-type-btn" data-svc="prive">&#x1f697; Trajet priv&#xe9;</button>
+          </div>
+          <input type="hidden" id="calc-service" value="aeroport">
+          <div class="calc-hint" id="calc-service-hint" style="margin-top:8px;font-size:0.82rem;color:var(--gris)">
+            Zaventem, Charleroi ou tout autre a&#xe9;roport &#x2014; avec suivi de vol inclus.
+          </div>
+        </div>
+
         <!-- Type de course -->
         <div class="calc-field" style="grid-column:1/-1">
-          <label>Type de course</label>
+          <label id="calc-type-label">Type de course</label>
           <div class="calc-type-grid" id="calc-type-grid">
             <button class="calc-type-btn active" data-val="aller">&#x2192; Aller simple</button>
             <button class="calc-type-btn" data-val="ar-jour">&#x21c4; A/R m&#xea;me jour</button>
@@ -438,7 +451,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
           <input type="date" class="calc-input" id="calc-date-aller">
         </div>
         <div class="calc-field">
-          <label for="calc-heure-aller">Heure de d&#xe9;collage</label>
+          <label for="calc-heure-aller" id="calc-heure-label">Heure de d&#xe9;collage</label>
           <input type="time" class="calc-input" id="calc-heure-aller">
         </div>
 
@@ -1011,6 +1024,10 @@ function toggleMenu(){
 
 // ===== CALCULATEUR =====
 const TARIF_COURT=1.50,TARIF_LONG=1.50,RAYON=30,MIN=60,ARRONDI=5,SUP_CAMION=20;
+// Trajet prive local : prise en charge selon l'eloignement du client + 1,50 EUR/km
+const BASE_CARN={lat:50.4361,lon:4.2436};        // Carnieres
+const PC_PROCHE=25,PC_LOIN=40,RAYON_PROCHE=20,RAYON_PRIVE=40;
+const MIN_PRIVE_PROCHE=45,MIN_PRIVE_LOIN=60;
 
 function fmtDateFR(ds){
   if(!ds)return '';
@@ -1197,6 +1214,13 @@ async function calcDistanceAuto(){
     }
   }catch(e){if(info)info.textContent='';}
 }
+function distDepuisBase(pt){
+  if(!pt) return null;
+  const R=6371, dLat=(pt.lat-BASE_CARN.lat)*Math.PI/180, dLon=(pt.lon-BASE_CARN.lon)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(BASE_CARN.lat*Math.PI/180)*Math.cos(pt.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.25); // x1,25 = correction route
+}
+
 async function calculerPrix(){
   const btn=document.getElementById('calc-btn'),load=document.getElementById('calc-loading');
   const result=document.getElementById('calc-result');
@@ -1235,8 +1259,34 @@ async function calculerPrix(){
       prixFixe=isTalento?120:95;
       prixFixeLabel='Tarif fixe Carnières → Zaventem';
     }
+    const service=(document.getElementById('calc-service')||{}).value||'aeroport';
     let prix,detail;
-    if(prixFixe!==null){
+
+    if(service==='prive'){
+      // ===== TRAJET PRIVE LOCAL =====
+      const dBase=distDepuisBase(dep);
+      if(dBase!==null && dBase>RAYON_PRIVE){
+        btn.style.display='block';load.style.display='none';
+        alert("Ce d\u00e9part est situ\u00e9 \u00e0 plus de "+RAYON_PRIVE+" km de notre base.\n\nPour ce trajet, contactez-nous directement au 0471 69 26 50 : nous \u00e9tablirons un devis sur mesure.");
+        return;
+      }
+      const loin=(dBase!==null && dBase>RAYON_PROCHE);
+      const pc=loin?PC_LOIN:PC_PROCHE;
+      const minP=loin?MIN_PRIVE_LOIN:MIN_PRIVE_PROCHE;
+      const prixAller=Math.max(minP,roundTo(pc+km*TARIF_COURT,ARRONDI));
+      prix=isAR?prixAller*2:prixAller;
+      if(isTalento)prix=roundTo(prix+SUP_CAMION*(isAR?2:1),ARRONDI);
+      detail='<strong>Trajet priv\u00e9</strong> &middot; prise en charge '+pc+'&nbsp;&euro; '
+        +(loin?'(zone \u00e9loign\u00e9e)':'(zone proche)')+' + '+km+'&nbsp;km<br>';
+      if(isAR)detail+='Aller-retour&nbsp;: deux prises en charge, sans frais d\'attente.<br>';
+      detail+='<br><span style="color:var(--or2);font-weight:600">\u2713 Inclus dans le prix :</span><br>'
+        +'\ud83c\udfe0 Prise en charge \u00e0 l\'adresse de votre choix<br>'
+        +'\ud83d\udd50 Aucun frais d\'attente si nous vous ramenons<br>'
+        +'\ud83d\udcb6 P\u00e9ages et parking compris \u00b7 Prix identique nuit et week-end';
+      document.getElementById('calc-price-val').textContent=prix+' €';
+      document.getElementById('calc-price-label').textContent=(isAR?'Trajet priv\u00e9 aller-retour':'Trajet priv\u00e9')+' · Prix fixe TTC';
+      document.getElementById('calc-detail').innerHTML=detail;
+    } else if(prixFixe!==null){
       const prixAller=prixFixe;
       prix=isAR?prixAller*2:prixAller;
       detail='';
@@ -1267,9 +1317,11 @@ async function calculerPrix(){
       if(type==='ar-diff')detail+='<strong>A/R date différente :</strong> Acompte à l\'aller, solde au retour.<br>';
       detail+='<br><span style="color:var(--or2);font-weight:600">✓ Inclus dans le prix :</span><br>\n🏠 Prise en charge à domicile · ✈️ Dépôt à l&#39;aéroport<br>\n🚶 Accompagnement jusqu&#39;au terminal · 🕐 Attente &amp; accompagnement au retour<br>\n💧 Bouteilles d&#39;eau offertes aller &amp; retour';
     }
-    document.getElementById('calc-price-val').textContent=prix+' €';
-    document.getElementById('calc-price-label').textContent=typeLabel+' · Prix fixe TTC';
-    document.getElementById('calc-detail').innerHTML=detail;
+    if(service!=='prive'){
+      document.getElementById('calc-price-val').textContent=prix+' €';
+      document.getElementById('calc-price-label').textContent=typeLabel+' · Prix fixe TTC';
+      document.getElementById('calc-detail').innerHTML=detail;
+    }
     const heureRetourJour=document.getElementById('calc-heure-retour')?.value||'';
     const dateRetourDiff=document.getElementById('calc-date-retour')?.value||'';
     const heureRetourDiff=document.getElementById('calc-heure-retour-diff')?.value||'';
@@ -1655,5 +1707,58 @@ document.addEventListener('click', function(e){
 })();
 </script>
 <script src="/avis.js" defer></script>
+
+<script>
+/* ===== SELECTEUR DE SERVICE DU CALCULATEUR ===== */
+(function(){
+  function maj(){
+    var svc=(document.getElementById('calc-service')||{}).value||'aeroport';
+    var prive=(svc==='prive');
+    var hint=document.getElementById('calc-service-hint');
+    var lblH=document.getElementById('calc-heure-label');
+    var lblT=document.getElementById('calc-type-label');
+    var grid=document.getElementById('calc-type-grid');
+
+    if(hint) hint.innerHTML = prive
+      ? "Restaurant, gare, h&ocirc;pital, rendez-vous, soir&eacute;e &mdash; d'une adresse &agrave; une autre, dans un rayon de 40&nbsp;km. &Agrave; partir de 45&nbsp;&euro; l'aller."
+      : "Zaventem, Charleroi ou tout autre a&eacute;roport &mdash; avec suivi de vol inclus.";
+    if(lblH) lblH.innerHTML = prive ? "Heure de prise en charge" : "Heure de d&eacute;collage";
+    if(lblT) lblT.innerHTML = prive ? "Aller simple ou aller-retour&nbsp;?" : "Type de course";
+
+    if(grid){
+      var b=grid.querySelectorAll('.calc-type-btn');
+      if(b[0]) b[0].innerHTML = prive ? '&rarr; Aller simple' : '&rarr; Aller simple';
+      if(b[1]) b[1].innerHTML = prive ? '&#8644; Aller-retour' : '&#8644; A/R m&ecirc;me jour';
+      if(b[2]) b[2].style.display = prive ? 'none' : '';
+      /* si A/R date differente etait selectionne, on repasse sur aller simple */
+      if(prive && document.getElementById('calc-type').value==='ar-diff'){
+        document.getElementById('calc-type').value='aller';
+        b.forEach(function(x){x.classList.remove('active');});
+        if(b[0])b[0].classList.add('active');
+        ['calc-bloc-jour','calc-bloc-diff'].forEach(function(id){
+          var e=document.getElementById(id); if(e)e.style.display='none';
+        });
+      }
+    }
+  }
+
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('#calc-service-grid .calc-type-btn');
+    if(!b)return;
+    e.preventDefault();
+    document.querySelectorAll('#calc-service-grid .calc-type-btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    var f=document.getElementById('calc-service');
+    if(f)f.value=b.dataset.svc;
+    maj();
+    if(typeof gtag==='function'){
+      gtag('event','calc_service_change',{'service':b.dataset.svc});
+    }
+  });
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',maj);
+  else maj();
+})();
+</script>
 </body>
 </html>
