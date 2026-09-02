@@ -1240,6 +1240,11 @@ async function calculerPrix(){
       if(d.routes&&d.routes[0]){km=Math.round(d.routes[0].distance/1000);window._calcKm=km;}
     }
     if(!km){throw new Error('Distance non calculée');}
+    if(km>400){
+      btn.style.display='block';load.style.display='none';
+      alert("La distance calcul\u00e9e ("+km+" km) semble anormale.\n\nV\u00e9rifiez que vous avez bien s\u00e9lectionn\u00e9 vos adresses dans la liste d\u00e9roulante. Si le trajet est r\u00e9ellement aussi long, appelez-nous au 0471 69 26 50 pour un devis sur mesure.");
+      return;
+    }
     const type=document.getElementById('calc-type').value;
     const veh=document.getElementById('calc-veh').value;
     const isTalento=veh==='talento';
