@@ -362,5 +362,21 @@ gtag('consent', 'default', {
 })();
 </script>
 <script src="/avis.js" defer></script>
+
+<script>
+/* Suivi GA4 : clics vers le formulaire de reservation et le calculateur */
+(function(){
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('a[href*="#reservation"], a[href*="#calculateur"]');
+    if(!el || typeof gtag !== 'function') return;
+    var href = el.getAttribute('href') || '';
+    gtag('event', 'devis_click', {
+      'cta_target': href.indexOf('#calculateur') > -1 ? 'calculateur' : 'reservation',
+      'cta_label': (el.textContent || '').trim().slice(0, 60),
+      'source_page': window.location.pathname
+    });
+  });
+})();
+</script>
 </body>
 </html>

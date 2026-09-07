@@ -1029,6 +1029,28 @@ const BASE_CARN={lat:50.4361,lon:4.2436};        // Carnieres
 const PC_PROCHE=25,PC_LOIN=40,RAYON_PROCHE=20,RAYON_PRIVE=40;
 const MIN_PRIVE_PROCHE=45,MIN_PRIVE_LOIN=60;
 
+/* Detection stricte : exige un marqueur aeroportuaire, pour qu'une
+   "rue de Charleroi" ne declenche pas le tarif fixe aeroport. */
+function _estVoirie(txt,mot){
+  return new RegExp('(rue|chauss[ée]e|avenue|route|chemin|boulevard|place|all[ée]e|dr[èe]ve|clos|square|impasse|sentier)\\s+(de\\s+|du\\s+|des\\s+|d\')?'+mot,'i').test(txt);
+}
+function _estCarnieres(d){
+  var mots=['carnière','carnieres','morlanwelz',"bois-d'haine","bois d'haine",'mont-sainte-aldegonde','mariemont'];
+  for(var i=0;i<mots.length;i++){
+    if(d.indexOf(mots[i])!==-1 && !_estVoirie(d,mots[i])) return true;
+  }
+  return d.indexOf('7141')!==-1 || /saint[-\s]?eloi/.test(d);
+}
+function _estAeroportCharleroi(a){
+  var marq=/(a[ée]roport|airport|luchthaven|terminal|\bcrl\b)/i.test(a);
+  return marq && (a.indexOf('charleroi')!==-1 || a.indexOf('gosselies')!==-1 || a.indexOf('brussels south')!==-1);
+}
+function _estAeroportZaventem(a){
+  var marq=/(a[ée]roport|airport|luchthaven|terminal|\bbru\b)/i.test(a);
+  return marq && (a.indexOf('zaventem')!==-1 || a.indexOf('brussels airport')!==-1 || a.indexOf('bruxelles national')!==-1 || a.indexOf('brussel nationaal')!==-1);
+}
+
+
 function fmtDateFR(ds){
   if(!ds)return '';
   var d=new Date(ds+'T00:00:00');
@@ -1058,9 +1080,9 @@ async function estimatePriceFallback(depart,arrivee,type,isTalento){
     var km=Math.round(d.routes[0].distance/1000);
     var isAR=(type==='ar');
     var depVal=depart.toLowerCase(),arrVal=arrivee.toLowerCase();
-    var isCarnieres=depVal.includes('carnière')||depVal.includes('carnieres')||depVal.includes('morlanwelz')||depVal.includes("bois-d'haine")||depVal.includes("bois d'haine")||depVal.includes('saint-eloi')||depVal.includes('7141');
-    var isCharleroi=arrVal.includes('charleroi')||arrVal.includes('crl');
-    var isZaventem=arrVal.includes('zaventem')||arrVal.includes('bru')||arrVal.includes('brussels airport')||arrVal.includes('bruxelles national');
+    var isCarnieres=_estCarnieres(depVal);
+    var isCharleroi=_estAeroportCharleroi(arrVal);
+    var isZaventem=_estAeroportZaventem(arrVal);
     var prix;
     if(isCarnieres&&isCharleroi){
       prix=isTalento?80:60;if(isAR)prix*=2;
@@ -1253,9 +1275,9 @@ async function calculerPrix(){
     // ===== PRIX FIXES CARNIÈRES =====
     const depVal=document.getElementById('calc-depart').value.toLowerCase();
     const arrVal=document.getElementById('calc-arrivee').value.toLowerCase();
-    const isCarnieres=depVal.includes('carnière')||depVal.includes('carnieres')||depVal.includes('morlanwelz')||depVal.includes('bois-d\'haine')||depVal.includes('bois d\'haine')||depVal.includes('saint-eloi')||depVal.includes('7141');
-    const isCharleroi=arrVal.includes('charleroi')||arrVal.includes('crl');
-    const isZaventem=arrVal.includes('zaventem')||arrVal.includes('bru')||arrVal.includes('brussels airport')||arrVal.includes('bruxelles national');
+    var isCarnieres=_estCarnieres(depVal);
+    var isCharleroi=_estAeroportCharleroi(arrVal);
+    var isZaventem=_estAeroportZaventem(arrVal);
     let prixFixe=null,prixFixeLabel='';
     if(isCarnieres&&isCharleroi){
       prixFixe=isTalento?80:60;
