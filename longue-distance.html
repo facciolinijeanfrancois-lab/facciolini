@@ -174,6 +174,8 @@ gtag('consent', 'default', {
   .nav-links { display: flex; gap: 24px; list-style: none; }
   .nav-links a { color: #555; text-decoration: none; font-size: 14px; }
   .nav-cta { background: #1a1a1a; color: #fff !important; padding: 8px 16px; border-radius: 6px; font-size: 13px !important; }
+  .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; background: none; border: none; }
+  .burger span { display: block; width: 22px; height: 2px; background: #1a1a1a; border-radius: 2px; }
 
   /* HERO */
   .hero { background: #f8f8f6; padding: 64px 24px 56px; text-align: center; }
@@ -239,7 +241,12 @@ gtag('consent', 'default', {
 
   @media (max-width: 600px) {
     .hero h1 { font-size: 26px; }
-    .nav-links { display: none; }
+    .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0; flex-direction: column; gap: 0; background: #fff; border-bottom: 1px solid #e8e8e8; box-shadow: 0 8px 20px rgba(0,0,0,.08); margin: 0; padding: 8px 0; z-index: 150; }
+    .nav-links.open { display: flex; }
+    .nav-links li { width: 100%; }
+    .nav-links a { display: block; padding: 12px 24px; }
+    .nav-links .nav-cta { display: inline-block; margin: 8px 24px; }
+    .burger { display: flex; }
     .trajet-row { flex-direction: column; align-items: flex-start; gap: 10px; }
     .trajet-price { text-align: left; }
   }
@@ -268,6 +275,9 @@ gtag('consent', 'default', {
     <li><a href="/a-propos">&Agrave; propos</a></li>
     <li><a href="/#reservation" class="nav-cta">R&eacute;server</a></li>
   </ul>
+  <button class="burger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 
@@ -283,102 +293,102 @@ gtag('consent', 'default', {
 
 <section>
   <h2>Pourquoi partir <em>d'ailleurs</em> que Charleroi</h2>
-  <p>Charleroi ne dessert pas tout. Pour les long-courriers, les correspondances intercontinentales ou certaines destinations saisonni&egrave;res, il faut souvent rejoindre Roissy, Schiphol ou Cologne. C'est aussi le cas quand une liaison est supprim&eacute;e, ou quand un vol est annul&eacute; et qu'il faut rebondir vite.</p>
-  <p>Nous assurons ces trajets r&eacute;guli&egrave;rement&nbsp;: Paris-Orly, Gare de Lyon, Bruges, Anvers. Le principe reste le m&ecirc;me que pour nos navettes a&eacute;roport&nbsp;: <strong>prise en charge &agrave; domicile, tarif fixe annonc&eacute; avant le d&eacute;part, et aucune majoration de nuit ou de week-end.</strong></p>
+  <p>Charleroi ne dessert pas tout. Pour les long-courriers, les correspondances intercontinentales ou certaines destinations saisonnières, il faut souvent rejoindre Roissy, Schiphol ou Cologne. C'est aussi le cas quand une liaison est supprimée, ou quand un vol est annulé et qu'il faut rebondir vite.</p>
+  <p>Nous assurons ces trajets régulièrement : Paris-Orly, Gare de Lyon, Bruges, Anvers. Le principe reste le même que pour nos navettes aéroport : <strong>prise en charge à domicile, tarif fixe annoncé avant le départ, et aucune majoration de nuit ou de week-end.</strong></p>
 </section>
 
 <section style="background:#f8f8f6; max-width:100%; padding:52px 24px;">
 <div style="max-width:900px; margin:0 auto;">
   <h2>Nos <em>destinations</em> et tarifs</h2>
-  <p>Prix forfaitaires depuis Carni&egrave;res, pour un trajet aller. Depuis une autre commune du Hainaut, l'&eacute;cart reste faible &mdash; demandez votre devis exact.</p>
+  <p>Prix forfaitaires depuis Carnières, pour un trajet aller. Depuis une autre commune du Hainaut, l'écart reste faible — demandez votre devis exact.</p>
   <table class="ttab">
-    <thead><tr><th>Destination</th><th>Dur&eacute;e</th><th>Berline (1-3 pers.)</th><th>Minivan (4-7 pers.)</th></tr></thead>
+    <thead><tr><th>Destination</th><th>Durée</th><th>Berline (1-3 pers.)</th><th>Minivan (4-7 pers.)</th></tr></thead>
     <tbody>
       <tr>
         <td data-l="Destination"><strong>Gare de Bruxelles-Midi</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Thalys, Eurostar, TGV vers Paris, Londres, Amsterdam et Cologne</span></td>
-        <td data-l="Dur&eacute;e">47 min</td>
-        <td data-l="Berline"><strong>80&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">100&nbsp;&euro;</td>
+        <td data-l="Durée">47 min</td>
+        <td data-l="Berline"><strong>80 €</strong></td>
+        <td data-l="Minivan">100 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport de Li&egrave;ge</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Vols charter et compagnies r&eacute;gionales</span></td>
-        <td data-l="Dur&eacute;e">1h06</td>
-        <td data-l="Berline"><strong>150&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">170&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport de Liège</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Vols charter et compagnies régionales</span></td>
+        <td data-l="Durée">1h06</td>
+        <td data-l="Berline"><strong>150 €</strong></td>
+        <td data-l="Minivan">170 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport de Lille-Lesquin</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Alternative fr&eacute;quente quand Charleroi ne dessert pas la destination</span></td>
-        <td data-l="Dur&eacute;e">1h17</td>
-        <td data-l="Berline"><strong>160&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">180&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport de Lille-Lesquin</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Alternative fréquente quand Charleroi ne dessert pas la destination</span></td>
+        <td data-l="Durée">1h17</td>
+        <td data-l="Berline"><strong>160 €</strong></td>
+        <td data-l="Minivan">180 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>Bruges</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Week-ends, mariages et s&eacute;jours touristiques</span></td>
-        <td data-l="Dur&eacute;e">1h49</td>
-        <td data-l="Berline"><strong>220&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">240&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Bruges</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Week-ends, mariages et séjours touristiques</span></td>
+        <td data-l="Durée">1h49</td>
+        <td data-l="Berline"><strong>220 €</strong></td>
+        <td data-l="Minivan">240 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport d'Eindhoven</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Base low-cost n&eacute;erlandaise, souvent moins ch&egrave;re</span></td>
-        <td data-l="Dur&eacute;e">2h18</td>
-        <td data-l="Berline"><strong>280&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">300&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport d'Eindhoven</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Base low-cost néerlandaise, souvent moins chère</span></td>
+        <td data-l="Durée">2h18</td>
+        <td data-l="Berline"><strong>280 €</strong></td>
+        <td data-l="Minivan">300 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport de Luxembourg</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Vols d'affaires et correspondances Luxair</span></td>
-        <td data-l="Dur&eacute;e">2h24</td>
-        <td data-l="Berline"><strong>335&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">355&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport de Luxembourg</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Vols d'affaires et correspondances Luxair</span></td>
+        <td data-l="Durée">2h24</td>
+        <td data-l="Berline"><strong>335 €</strong></td>
+        <td data-l="Minivan">355 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport de Cologne-Bonn</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Nombreuses liaisons vers l'Europe de l'Est et la Turquie</span></td>
-        <td data-l="Dur&eacute;e">2h37</td>
-        <td data-l="Berline"><strong>360&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">380&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport de Cologne-Bonn</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Nombreuses liaisons vers l'Europe de l'Est et la Turquie</span></td>
+        <td data-l="Durée">2h37</td>
+        <td data-l="Berline"><strong>360 €</strong></td>
+        <td data-l="Minivan">380 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport Paris-Charles de Gaulle</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Long-courriers, correspondances Air France et SkyTeam</span></td>
-        <td data-l="Dur&eacute;e">2h37</td>
-        <td data-l="Berline"><strong>375&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">395&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport Paris-Charles de Gaulle</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Long-courriers, correspondances Air France et SkyTeam</span></td>
+        <td data-l="Durée">2h37</td>
+        <td data-l="Berline"><strong>375 €</strong></td>
+        <td data-l="Minivan">395 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport de D&uuml;sseldorf</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Hub Eurowings et Lufthansa</span></td>
-        <td data-l="Dur&eacute;e">2h44</td>
-        <td data-l="Berline"><strong>375&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">395&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport de Düsseldorf</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Hub Eurowings et Lufthansa</span></td>
+        <td data-l="Durée">2h44</td>
+        <td data-l="Berline"><strong>375 €</strong></td>
+        <td data-l="Minivan">395 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport Amsterdam-Schiphol</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Hub KLM, l'un des mieux connect&eacute;s d'Europe</span></td>
-        <td data-l="Dur&eacute;e">3h17</td>
-        <td data-l="Berline"><strong>395&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">415&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport Amsterdam-Schiphol</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Hub KLM, l'un des mieux connectés d'Europe</span></td>
+        <td data-l="Durée">3h17</td>
+        <td data-l="Berline"><strong>395 €</strong></td>
+        <td data-l="Minivan">415 €</td>
       </tr>
       <tr>
         <td data-l="Destination"><strong>Paris Gare du Nord</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Correspondances ferroviaires vers toute la France</span></td>
-        <td data-l="Dur&eacute;e">2h57</td>
-        <td data-l="Berline"><strong>405&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">425&nbsp;&euro;</td>
+        <td data-l="Durée">2h57</td>
+        <td data-l="Berline"><strong>405 €</strong></td>
+        <td data-l="Minivan">425 €</td>
       </tr>
       <tr>
-        <td data-l="Destination"><strong>A&eacute;roport Paris-Orly</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Vols vers l'outre-mer, le Maghreb et le sud de l'Europe</span></td>
-        <td data-l="Dur&eacute;e">3h08</td>
-        <td data-l="Berline"><strong>430&nbsp;&euro;</strong></td>
-        <td data-l="Minivan">450&nbsp;&euro;</td>
+        <td data-l="Destination"><strong>Aéroport Paris-Orly</strong><span style="display:block;font-size:12px;color:#888;margin-top:2px;">Vols vers l'outre-mer, le Maghreb et le sud de l'Europe</span></td>
+        <td data-l="Durée">3h08</td>
+        <td data-l="Berline"><strong>430 €</strong></td>
+        <td data-l="Minivan">450 €</td>
       </tr>
     </tbody>
   </table>
-  <p style="font-size:13px;color:#888;">Tarifs par trajet, retour du v&eacute;hicule inclus. Un aller-retour correspond au double. <strong>P&eacute;ages et parking compris</strong> &mdash; le prix annonc&eacute; est le prix final.</p>
+  <p style="font-size:13px;color:#888;">Tarifs par trajet, retour du véhicule inclus. Un aller-retour correspond au double. <strong>Péages et parking compris</strong> — le prix annoncé est le prix final.</p>
 </div>
 </section>
 
 <section>
   <h2>Quand la longue distance <em>devient rentable</em></h2>
-  <p>Un exemple concret. Une famille de quatre personnes de La Louvi&egrave;re doit rejoindre Roissy pour un vol long-courrier.</p>
+  <p>Un exemple concret. Une famille de quatre personnes de La Louvière doit rejoindre Roissy pour un vol long-courrier.</p>
   <div class="info-grid">
-    <div class="info-box"><div class="info-icon">&#128642;</div><h3>En train</h3><p>Trajet jusqu'&agrave; Bruxelles-Midi, correspondance Thalys, puis RER B jusqu'au terminal. Trois changements avec les valises, et un co&ucirc;t qui d&eacute;passe souvent 400&nbsp;&euro; &agrave; quatre.</p></div>
-    <div class="info-box"><div class="info-icon">&#128663;</div><h3>En voiture</h3><p>Carburant, p&eacute;ages et surtout <strong>le parking de Roissy</strong>, qui d&eacute;passe 150&nbsp;&euro; pour une semaine. Sans compter la fatigue au retour.</p></div>
-    <div class="info-box"><div class="info-icon">&#127974;</div><h3>Avec nous</h3><p>395&nbsp;&euro; en minivan, porte &agrave; porte, sans correspondance ni parking. &Agrave; quatre, cela revient &agrave; moins de 100&nbsp;&euro; par personne.</p></div>
+    <div class="info-box"><div class="info-icon">&#128642;</div><h3>En train</h3><p>Trajet jusqu'à Bruxelles-Midi, correspondance Thalys, puis RER B jusqu'au terminal. Trois changements avec les valises, et un coût qui dépasse souvent 400 € à quatre.</p></div>
+    <div class="info-box"><div class="info-icon">&#128663;</div><h3>En voiture</h3><p>Carburant, péages et surtout <strong>le parking de Roissy</strong>, qui dépasse 150 € pour une semaine. Sans compter la fatigue au retour.</p></div>
+    <div class="info-box"><div class="info-icon">&#127974;</div><h3>Avec nous</h3><p>395 € en minivan, porte à porte, sans correspondance ni parking. À quatre, cela revient à moins de 100 € par personne.</p></div>
   </div>
 </section>
 
@@ -386,39 +396,39 @@ gtag('consent', 'default', {
 <div style="max-width:800px; margin:0 auto;">
   <h2>Ce qui est <em>compris</em></h2>
   <div class="info-grid">
-    <div class="info-box"><div class="info-icon">&#128337;</div><h3>Horaire sur mesure</h3><p>Vous choisissez l'heure de d&eacute;part. Nous calculons la marge n&eacute;cessaire selon le trafic et la distance.</p></div>
-    <div class="info-box"><div class="info-icon">&#129530;</div><h3>Bagages sans limite</h3><p>Jusqu'&agrave; la capacit&eacute; du v&eacute;hicule, sans surco&ucirc;t. Aucune valise &agrave; porter, aucun escalier.</p></div>
-    <div class="info-box"><div class="info-icon">&#9992;</div><h3>Suivi de vol au retour</h3><p>M&ecirc;me &agrave; Roissy ou Schiphol, nous suivons votre atterrissage et ajustons l'heure sans surco&ucirc;t.</p></div>
-    <div class="info-box"><div class="info-icon">&#128176;</div><h3>Prix ferme</h3><p>Le montant est annonc&eacute; avant le d&eacute;part et ne bouge pas, quelles que soient les conditions de circulation.</p></div>
+    <div class="info-box"><div class="info-icon">&#128337;</div><h3>Horaire sur mesure</h3><p>Vous choisissez l'heure de départ. Nous calculons la marge nécessaire selon le trafic et la distance.</p></div>
+    <div class="info-box"><div class="info-icon">&#129530;</div><h3>Bagages sans limite</h3><p>Jusqu'à la capacité du véhicule, sans surcoût. Aucune valise à porter, aucun escalier.</p></div>
+    <div class="info-box"><div class="info-icon">&#9992;</div><h3>Suivi de vol au retour</h3><p>Même à Roissy ou Schiphol, nous suivons votre atterrissage et ajustons l'heure sans surcoût.</p></div>
+    <div class="info-box"><div class="info-icon">&#128176;</div><h3>Prix ferme</h3><p>Le montant est annoncé avant le départ et ne bouge pas, quelles que soient les conditions de circulation.</p></div>
   </div>
 </div>
 </section>
 
 <section>
-  <h2>Questions <em>fr&eacute;quentes</em></h2>
+  <h2>Questions <em>fréquentes</em></h2>
   <div class="faq-item">
-    <div class="faq-q">Le prix inclut-il le retour du chauffeur&nbsp;?</div>
-    <div class="faq-a">Oui. Le tarif annonc&eacute; couvre l'aller depuis votre adresse et le retour du v&eacute;hicule. Vous ne payez pas deux fois la distance. Un aller-retour, en revanche, correspond &agrave; deux courses distinctes et se facture au double.</div>
+    <div class="faq-q">Le prix inclut-il le retour du chauffeur ?</div>
+    <div class="faq-a">Oui. Le tarif annoncé couvre l'aller depuis votre adresse et le retour du véhicule. Vous ne payez pas deux fois la distance. Un aller-retour, en revanche, correspond à deux courses distinctes et se facture au double.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Puis-je r&eacute;server un aller-retour avec attente sur place&nbsp;?</div>
-    <div class="faq-a">Oui, c'est fr&eacute;quent pour les rendez-vous professionnels &agrave; Paris ou Luxembourg. Nous convenons alors d'un forfait qui inclut le temps d'attente. Contactez-nous avec votre horaire pr&eacute;cis.</div>
+    <div class="faq-q">Puis-je réserver un aller-retour avec attente sur place ?</div>
+    <div class="faq-a">Oui, c'est fréquent pour les rendez-vous professionnels à Paris ou Luxembourg. Nous convenons alors d'un forfait qui inclut le temps d'attente. Contactez-nous avec votre horaire précis.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Combien de temps &agrave; l'avance faut-il r&eacute;server&nbsp;?</div>
-    <div class="faq-a">Pour une longue distance, pr&eacute;venez-nous id&eacute;alement une semaine &agrave; l'avance&nbsp;: ces trajets mobilisent la journ&eacute;e enti&egrave;re. Nous acceptons cependant les demandes de derni&egrave;re minute selon nos disponibilit&eacute;s.</div>
+    <div class="faq-q">Combien de temps à l'avance faut-il réserver ?</div>
+    <div class="faq-a">Pour une longue distance, prévenez-nous idéalement une semaine à l'avance : ces trajets mobilisent la journée entière. Nous acceptons cependant les demandes de dernière minute selon nos disponibilités.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Les p&eacute;ages sont-ils en suppl&eacute;ment&nbsp;?</div>
-    <div class="faq-a">Non. Les p&eacute;ages, le carburant et le parking sont compris dans le tarif annonc&eacute;, y compris sur les trajets vers Paris, Orly et Roissy. Le prix que nous vous donnons est celui que vous payez, sans ligne suppl&eacute;mentaire au retour.</div>
+    <div class="faq-q">Les péages sont-ils en supplément ?</div>
+    <div class="faq-a">Non. Les péages, le carburant et le parking sont compris dans le tarif annoncé, y compris sur les trajets vers Paris, Orly et Roissy. Le prix que nous vous donnons est celui que vous payez, sans ligne supplémentaire au retour.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Est-ce vraiment plus int&eacute;ressant que le train&nbsp;?</div>
-    <div class="faq-a">Seul, le train reste souvent moins cher. &Agrave; partir de trois personnes avec bagages, le calcul s'inverse&nbsp;: pas de correspondance, pas de valises &agrave; porter, un d&eacute;part depuis votre porte et un horaire que vous choisissez.</div>
+    <div class="faq-q">Est-ce vraiment plus intéressant que le train ?</div>
+    <div class="faq-a">Seul, le train reste souvent moins cher. À partir de trois personnes avec bagages, le calcul s'inverse : pas de correspondance, pas de valises à porter, un départ depuis votre porte et un horaire que vous choisissez.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Quels documents pour passer la fronti&egrave;re&nbsp;?</div>
-    <div class="faq-a">Une carte d'identit&eacute; ou un passeport en cours de validit&eacute; suffit dans l'espace Schengen. Nos v&eacute;hicules et assurances couvrent les d&eacute;placements internationaux.</div>
+    <div class="faq-q">Quels documents pour passer la frontière ?</div>
+    <div class="faq-a">Une carte d'identité ou un passeport en cours de validité suffit dans l'espace Schengen. Nos véhicules et assurances couvrent les déplacements internationaux.</div>
   </div>
 </section>
 
@@ -434,11 +444,11 @@ gtag('consent', 'default', {
 </section>
 
 <div class="cta-section">
-  <h2>Un trajet <em style="color:#8a6d1f;">hors des sentiers battus</em>&nbsp;?</h2>
-  <p>Toute destination en Belgique et dans les pays limitrophes. Appelez pour un devis, la r&eacute;ponse est imm&eacute;diate.</p>
+  <h2>Un trajet <em style="color:#8a6d1f;">hors des sentiers battus</em> ?</h2>
+  <p>Toute destination en Belgique et dans les pays limitrophes. Appelez pour un devis, la réponse est immédiate.</p>
   <a href="tel:+32471692650" class="cta-phone">&#128222; 0471 69 26 50</a>
   <div class="hero-btns">
-    <a href="/#reservation" class="btn-primary" style="background:#c9a84c;">Demander un devis &rarr;</a>
+    <a href="/#reservation" class="btn-primary" style="background:#c9a84c;">Demander un devis →</a>
     <a href="https://wa.me/32471692650?text=Bonjour, je voudrais un devis pour un trajet longue distance." class="btn-secondary" style="background:transparent;color:#fff;border-color:#555;">&#128172; WhatsApp</a>
   </div>
 </div>
