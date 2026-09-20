@@ -44,6 +44,8 @@ gtag('consent', 'default', {
   .nav-links { display: flex; gap: 24px; list-style: none; }
   .nav-links a { color: #555; text-decoration: none; font-size: 14px; }
   .nav-cta { background: #1a1a1a; color: #fff !important; padding: 8px 16px; border-radius: 6px; font-size: 13px !important; }
+  .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; background: none; border: none; }
+  .burger span { display: block; width: 22px; height: 2px; background: #1a1a1a; border-radius: 2px; }
 
   /* HERO */
   .hero { background: #f8f8f6; padding: 64px 24px 56px; text-align: center; }
@@ -109,7 +111,12 @@ gtag('consent', 'default', {
 
   @media (max-width: 600px) {
     .hero h1 { font-size: 26px; }
-    .nav-links { display: none; }
+    .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0; flex-direction: column; gap: 0; background: #fff; border-bottom: 1px solid #e8e8e8; box-shadow: 0 8px 20px rgba(0,0,0,.08); margin: 0; padding: 8px 0; z-index: 150; }
+    .nav-links.open { display: flex; }
+    .nav-links li { width: 100%; }
+    .nav-links a { display: block; padding: 12px 24px; }
+    .nav-links .nav-cta { display: inline-block; margin: 8px 24px; }
+    .burger { display: flex; }
     .trajet-row { flex-direction: column; align-items: flex-start; gap: 10px; }
     .trajet-price { text-align: left; }
   }
@@ -149,6 +156,9 @@ gtag('consent', 'default', {
     <li><a href="/navette-charleroi">Navette Charleroi</a></li>
     <li><a href="/#reservation" class="nav-cta">Réserver</a></li>
   </ul>
+  <button class="burger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <div class="legal">
