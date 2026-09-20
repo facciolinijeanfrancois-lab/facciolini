@@ -82,6 +82,8 @@ gtag('consent', 'default', {
   .nav-links { display: flex; gap: 24px; list-style: none; }
   .nav-links a { color: #555; text-decoration: none; font-size: 14px; }
   .nav-cta { background: #1a1a1a; color: #fff !important; padding: 8px 16px; border-radius: 6px; font-size: 13px !important; }
+  .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; background: none; border: none; }
+  .burger span { display: block; width: 22px; height: 2px; background: #1a1a1a; border-radius: 2px; }
 
   /* HERO */
   .hero { background: #f8f8f6; padding: 64px 24px 56px; text-align: center; }
@@ -147,7 +149,12 @@ gtag('consent', 'default', {
 
   @media (max-width: 600px) {
     .hero h1 { font-size: 26px; }
-    .nav-links { display: none; }
+    .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0; flex-direction: column; gap: 0; background: #fff; border-bottom: 1px solid #e8e8e8; box-shadow: 0 8px 20px rgba(0,0,0,.08); margin: 0; padding: 8px 0; z-index: 150; }
+    .nav-links.open { display: flex; }
+    .nav-links li { width: 100%; }
+    .nav-links a { display: block; padding: 12px 24px; }
+    .nav-links .nav-cta { display: inline-block; margin: 8px 24px; }
+    .burger { display: flex; }
     .trajet-row { flex-direction: column; align-items: flex-start; gap: 10px; }
     .trajet-price { text-align: left; }
   }
@@ -178,6 +185,9 @@ gtag('consent', 'default', {
     <li><a href="/navette-charleroi">Navette Charleroi</a></li>
     <li><a href="/#reservation" class="nav-cta">Réserver</a></li>
   </ul>
+  <button class="burger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <div class="hero">
@@ -206,69 +216,69 @@ gtag('consent', 'default', {
   <h2>Ce que nous nous <em>engageons</em> &agrave; faire</h2>
   <div style="margin:22px 0">
     <div class="engagement"><div class="ic">&#128337;</div><div><b>Arriver en avance, toujours</b><span>Nous calculons l'heure de d&eacute;part depuis votre adresse en tenant compte du trafic habituel et d'une marge confortable avant l'enregistrement.</span></div></div>
-    <div class="engagement"><div class="ic">&#9992;</div><div><b>Suivre votre vol au retour</b><span>Si votre avion atterrit en retard, nous ajustons l'heure sans surco&ucirc;t. Vous n'avez pas &agrave; nous pr&eacute;venir.</span></div></div>
-    <div class="engagement"><div class="ic">&#128176;</div><div><b>Annoncer le prix &agrave; l'avance</b><span>Le tarif est confirm&eacute; &agrave; la r&eacute;servation et ne bouge plus. Ni compteur, ni majoration de nuit, de week-end ou de jour f&eacute;ri&eacute;.</span></div></div>
-    <div class="engagement"><div class="ic">&#127760;</div><div><b>Vous accueillir en trois langues</b><span>Fran&ccedil;ais, anglais et n&eacute;erlandais &mdash; utile pour les familles internationales et les d&eacute;placements professionnels.</span></div></div>
-    <div class="engagement"><div class="ic">&#128694;</div><div><b>Vous accompagner jusqu'au terminal</b><span>Bagages compris. Nous ne d&eacute;posons pas sur le trottoir en vous souhaitant bonne chance.</span></div></div>
+    <div class="engagement"><div class="ic">&#9992;</div><div><b>Suivre votre vol au retour</b><span>Si votre avion atterrit en retard, nous ajustons l'heure sans surcoût. Vous n'avez pas à nous prévenir.</span></div></div>
+    <div class="engagement"><div class="ic">&#128176;</div><div><b>Annoncer le prix &agrave; l'avance</b><span>Le tarif est confirmé à la réservation et ne bouge plus. Ni compteur, ni majoration de nuit, de week-end ou de jour férié.</span></div></div>
+    <div class="engagement"><div class="ic">&#127760;</div><div><b>Vous accueillir en trois langues</b><span>Français, anglais et néerlandais — utile pour les familles internationales et les déplacements professionnels.</span></div></div>
+    <div class="engagement"><div class="ic">&#128694;</div><div><b>Vous accompagner jusqu'au terminal</b><span>Bagages compris. Nous ne déposons pas sur le trottoir en vous souhaitant bonne chance.</span></div></div>
   </div>
 
   <h2>Nos <em>garanties</em></h2>
-  <p>Confier sa famille &agrave; un inconnu avant l'aube demande de la confiance. Voici ce qui l'encadre&nbsp;:</p>
+  <p>Confier sa famille à un inconnu avant l'aube demande de la confiance. Voici ce qui l'encadre :</p>
   <div class="legal-card">
-    <div><strong>Entreprise enregistr&eacute;e</strong> &mdash; BCE 1033.793.336, si&egrave;ge &agrave; Carni&egrave;res (Morlanwelz)</div>
-    <div><strong>Autorisation de transport</strong> &mdash; activit&eacute; de location de voiture avec chauffeur, soumise &agrave; autorisation pr&eacute;alable de la R&eacute;gion wallonne</div>
-    <div><strong>Assurances professionnelles</strong> &mdash; couverture obligatoire du transport r&eacute;mun&eacute;r&eacute; de personnes</div>
-    <div><strong>Facturation en r&egrave;gle</strong> &mdash; facture disponible sur demande pour les d&eacute;placements professionnels</div>
+    <div><strong>Entreprise enregistrée</strong> — BCE 1033.793.336, siège à Carnières (Morlanwelz)</div>
+    <div><strong>Autorisation de transport</strong> — activité de location de voiture avec chauffeur, soumise à autorisation préalable de la Région wallonne</div>
+    <div><strong>Assurances professionnelles</strong> — couverture obligatoire du transport rémunéré de personnes</div>
+    <div><strong>Facturation en règle</strong> — facture disponible sur demande pour les déplacements professionnels</div>
   </div>
-  <p style="font-size:13.5px;color:#888">Le d&eacute;tail complet figure dans nos <a href="/mentions-legales" style="color:#8a6d1f;">mentions l&eacute;gales</a>.</p>
+  <p style="font-size:13.5px;color:#888">Le détail complet figure dans nos <a href="/mentions-legales" style="color:#8a6d1f;">mentions légales</a>.</p>
 
   <h2>Ce que disent <em>nos clients</em></h2>
-  <p>Sur <span data-avis-nombre>51</span> avis Google, la note moyenne est de <span data-avis-note>5,0</span> sur 5. Les mots qui reviennent le plus souvent dans les commentaires&nbsp;: la ponctualit&eacute;, la gentillesse du chauffeur, et le fait que le prix annonc&eacute; soit celui qu'on paie.</p>
-  <p><a href="https://www.google.com/maps/place/Facciolini+Mobility" target="_blank" rel="noopener" style="color:#8a6d1f;font-weight:600">Lire les avis sur Google &rarr;</a></p>
+  <p>Sur <span data-avis-nombre>51</span> avis Google, la note moyenne est de <span data-avis-note>5,0</span> sur 5. Les mots qui reviennent le plus souvent dans les commentaires : la ponctualité, la gentillesse du chauffeur, et le fait que le prix annoncé soit celui qu'on paie.</p>
+  <p><a href="https://www.google.com/maps/place/Facciolini+Mobility" target="_blank" rel="noopener" style="color:#8a6d1f;font-weight:600">Lire les avis sur Google →</a></p>
 
   <h2>Notre <em>zone</em></h2>
-  <p>Nous intervenons dans tout le Hainaut, avec une pr&eacute;sence particuli&egrave;re &agrave;
+  <p>Nous intervenons dans tout le Hainaut, avec une présence particulière à
   <a href="/navette-aeroport-morlanwelz" style="color:#8a6d1f;">Morlanwelz</a>,
-  <a href="/navette-aeroport-la-louviere" style="color:#8a6d1f;">La Louvi&egrave;re</a>,
+  <a href="/navette-aeroport-la-louviere" style="color:#8a6d1f;">La Louvière</a>,
   <a href="/navette-aeroport-binche" style="color:#8a6d1f;">Binche</a> et
   <a href="/navette-aeroport-mons" style="color:#8a6d1f;">Mons</a>.
   Nos destinations principales sont
   <a href="/navette-zaventem" style="color:#8a6d1f;">Brussels Airport Zaventem</a> et
   <a href="/navette-charleroi" style="color:#8a6d1f;">Charleroi Brussels South</a>,
   mais nous assurons aussi les gares, les longues distances et les
-  <a href="/transport-entreprises" style="color:#8a6d1f;">d&eacute;placements professionnels</a>.</p>
-  <p>Tous nos prix sont publi&eacute;s&nbsp;: <a href="/tarifs" style="color:#8a6d1f;font-weight:600">consultez la grille tarifaire par commune</a>.</p>
+  <a href="/transport-entreprises" style="color:#8a6d1f;">déplacements professionnels</a>.</p>
+  <p>Tous nos prix sont publiés : <a href="/tarifs" style="color:#8a6d1f;font-weight:600">consultez la grille tarifaire par commune</a>.</p>
 
-  <h2>Questions <em>fr&eacute;quentes</em></h2>
+  <h2>Questions <em>fréquentes</em></h2>
   <div class="faq-item">
-    <div class="faq-q">&Ecirc;tes-vous un chauffeur professionnel d&eacute;clar&eacute;&nbsp;?</div>
-    <div class="faq-a">Oui. Facciolini Mobility est une entreprise enregistr&eacute;e &agrave; la Banque-Carrefour des Entreprises sous le num&eacute;ro 1033.793.336, exer&ccedil;ant une activit&eacute; de location de voiture avec chauffeur soumise &agrave; autorisation pr&eacute;alable. Nous disposons des assurances obligatoires couvrant le transport r&eacute;mun&eacute;r&eacute; de personnes.</div>
+    <div class="faq-q">Êtes-vous un chauffeur professionnel déclaré ?</div>
+    <div class="faq-a">Oui. Facciolini Mobility est une entreprise enregistrée à la Banque-Carrefour des Entreprises sous le numéro 1033.793.336, exerçant une activité de location de voiture avec chauffeur soumise à autorisation préalable. Nous disposons des assurances obligatoires couvrant le transport rémunéré de personnes.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Qui conduit&nbsp;?</div>
-    <div class="faq-a">Jean-Fran&ccedil;ois Facciolini, le fondateur, assure lui-m&ecirc;me la grande majorit&eacute; des courses. Vous savez donc qui viendra vous chercher, et c'est la m&ecirc;me personne qui r&eacute;pond au t&eacute;l&eacute;phone.</div>
+    <div class="faq-q">Qui conduit ?</div>
+    <div class="faq-a">Jean-François Facciolini, le fondateur, assure lui-même la grande majorité des courses. Vous savez donc qui viendra vous chercher, et c'est la même personne qui répond au téléphone.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Quels v&eacute;hicules utilisez-vous&nbsp;?</div>
-    <div class="faq-a">Une berline confortable pour 1 &agrave; 3 passagers, et un minivan 7 places pour les familles, les groupes et les bagages volumineux. Les deux v&eacute;hicules sont entretenus r&eacute;guli&egrave;rement et nettoy&eacute;s avant chaque course.</div>
+    <div class="faq-q">Quels véhicules utilisez-vous ?</div>
+    <div class="faq-a">Une berline confortable pour 1 à 3 passagers, et un minivan 7 places pour les familles, les groupes et les bagages volumineux. Les deux véhicules sont entretenus régulièrement et nettoyés avant chaque course.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Que se passe-t-il si mon vol est retard&eacute;&nbsp;?</div>
-    <div class="faq-a">Nous suivons votre vol en temps r&eacute;el. Si l'atterrissage est d&eacute;cal&eacute;, l'heure de prise en charge est ajust&eacute;e automatiquement, sans surco&ucirc;t et sans que vous ayez &agrave; appeler.</div>
+    <div class="faq-q">Que se passe-t-il si mon vol est retardé ?</div>
+    <div class="faq-a">Nous suivons votre vol en temps réel. Si l'atterrissage est décalé, l'heure de prise en charge est ajustée automatiquement, sans surcoût et sans que vous ayez à appeler.</div>
   </div>
   <div class="faq-item">
-    <div class="faq-q">Roulez-vous vraiment la nuit&nbsp;?</div>
-    <div class="faq-a">Oui. Une bonne partie de nos courses partent entre 3h et 5h du matin pour les vols les plus t&ocirc;t. Il n'y a aucune majoration de nuit, de week-end ni de jour f&eacute;ri&eacute;.</div>
+    <div class="faq-q">Roulez-vous vraiment la nuit ?</div>
+    <div class="faq-a">Oui. Une bonne partie de nos courses partent entre 3h et 5h du matin pour les vols les plus tôt. Il n'y a aucune majoration de nuit, de week-end ni de jour férié.</div>
   </div>
 
 </div>
 
 <div class="cta-section">
-  <h2>Une question&nbsp;? <em style="color:#8a6d1f;">Appelez directement</em></h2>
-  <p>Pas de standard, pas de r&eacute;pondeur automatique. Vous parlez &agrave; la personne qui conduira.</p>
+  <h2>Une question ? <em style="color:#8a6d1f;">Appelez directement</em></h2>
+  <p>Pas de standard, pas de répondeur automatique. Vous parlez à la personne qui conduira.</p>
   <a href="tel:+32471692650" class="cta-phone">&#128222; 0471 69 26 50</a>
   <div class="hero-btns">
-    <a href="/#reservation" class="btn-primary" style="background:#c9a84c;">R&eacute;server en ligne &rarr;</a>
+    <a href="/#reservation" class="btn-primary" style="background:#c9a84c;">Réserver en ligne →</a>
     <a href="https://wa.me/32471692650?text=Bonjour, j'aurais une question." class="btn-secondary" style="background:transparent;color:#fff;border-color:#555;">&#128172; WhatsApp</a>
   </div>
 </div>
