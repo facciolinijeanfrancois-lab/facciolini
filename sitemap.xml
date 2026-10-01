@@ -8,37 +8,37 @@
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-zaventem</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.9</priority>
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-charleroi</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.9</priority>
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-aeroport-mons</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.8</priority>
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-aeroport-la-louviere</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.8</priority>
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-aeroport-binche</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.8</priority>
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-aeroport-morlanwelz</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.8</priority>
     </url>
@@ -62,7 +62,7 @@
     </url>
     <url>
           <loc>https://facciolinimobility.be/tarifs</loc>
-          <lastmod>2026-09-20</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.9</priority>
     </url>
@@ -88,8 +88,104 @@
     </url>
     <url>
           <loc>https://facciolinimobility.be/navette-aeroport-hainaut</loc>
-          <lastmod>2026-09-28</lastmod>
+          <lastmod>2026-10-01</lastmod>
           <changefreq>monthly</changefreq>
           <priority>0.9</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-zaventem-depuis-charleroi</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-soignies</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-braine-le-comte</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-manage</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-seneffe</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-chapelle-lez-herlaimont</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-anderlues</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-fontaine-l-eveque</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-courcelles</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-le-roeulx</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-ecaussinnes</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-estinnes</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-thuin</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-lobbes</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-erquelinnes</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
+    </url>
+    <url>
+          <loc>https://facciolinimobility.be/navette-aeroport-beaumont</loc>
+          <lastmod>2026-10-01</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>0.7</priority>
     </url>
 </urlset>
