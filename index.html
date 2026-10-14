@@ -1065,7 +1065,8 @@ function fmtDateFR(ds){
 async function geocodeAdresse(q){
   try{
     var url='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=1&lang=fr&bbox=2.3,49.4,6.5,51.5';
-    var resp=await fetch(url);
+    var ctrl=new AbortController();var to=setTimeout(function(){try{ctrl.abort();}catch(e){}},12000);
+    var resp=await fetch(url,{signal:ctrl.signal});clearTimeout(to);
     var data=await resp.json();
     var f=data.features&&data.features[0];
     if(!f)return null;
@@ -1162,36 +1163,62 @@ function checkCapacite(){
 }
 function roundTo(n,r){return Math.ceil(n/r)*r;}
 
+/* Recherche d'adresses du calculateur (service gratuit Photon / OpenStreetMap)
+   - une seule recherche à la fois : la précédente est annulée, une réponse lente ne remplace plus la bonne liste
+   - « Recherche en cours… » visible, délai maximum 12 s puis message clair
+   - le numéro tapé est gardé quand la carte ne connaît que la rue */
+var acSeqCalc={},acCtrlCalc={},acCacheCalc={};
+function acEscCalc(t){return String(t||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function acNumCalc(q){var m=String(q).match(/(?:^|[\s,])(\d{1,3}[a-zA-Z]?)(?=[\s,]|$)/);return m?m[1]:'';}
+function acMsgCalc(drop,txt){drop.innerHTML='<div class="ac-item-calc" style="pointer-events:none;opacity:0.75"><div class="ac-sub-calc">'+txt+'</div></div>';drop.style.display='block';}
 async function acCalc(input,dropId,role){
   var q=input.value.trim(),drop=document.getElementById(dropId);
   clearTimeout(acTimers[role]);
+  if(acCtrlCalc[role]){try{acCtrlCalc[role].abort();}catch(e){}acCtrlCalc[role]=null;}
   if(q.length<3){drop.style.display='none';return;}
+  var seq=acSeqCalc[role]=(acSeqCalc[role]||0)+1;
+  acMsgCalc(drop,'🔎 Recherche de l\'adresse…');
   acTimers[role]=setTimeout(async function(){
+    var url='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=6&lang=fr&bbox=2.3,49.4,6.5,51.5';
+    var results;
     try{
-      var url='https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&limit=6&lang=fr&bbox=2.3,49.4,6.5,51.5';
-      var resp=await fetch(url);
-      var data=await resp.json();
-      var results=data.features||[];
-      if(!results.length){drop.style.display='none';return;}
-      drop.innerHTML='';
-      results.forEach(function(r){
-        var p=r.properties,coords=r.geometry.coordinates;
-        var main=[p.name,p.street?(p.housenumber?p.street+' '+p.housenumber:p.street):null].filter(Boolean).join(', ')||p.name||'';
-        var city=p.city||p.town||p.village||'',country=p.country||'';
-        var full=[main,city,country].filter(Boolean).join(', ');
-        var div=document.createElement('div');
-        div.className='ac-item-calc';
-        div.innerHTML='<div class="ac-main-calc">'+(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+city+', '+country+'</div>':'');
-        div.dataset.display=full;
-        div.dataset.lat=coords[1];
-        div.dataset.lon=coords[0];
-        div.dataset.role=role;
-        div.addEventListener('click',function(){acSelCalc(this.dataset.role,this);});
-        drop.appendChild(div);
-      });
-      drop.style.display='block';
-    }catch(e){drop.style.display='none';}
-  },350);
+      if(acCacheCalc[url])results=acCacheCalc[url];
+      else{
+        var ctrl=new AbortController();acCtrlCalc[role]=ctrl;
+        var to=setTimeout(function(){try{ctrl.abort();}catch(e){}},12000);
+        var resp=await fetch(url,{signal:ctrl.signal});clearTimeout(to);
+        var data=await resp.json();results=data.features||[];acCacheCalc[url]=results;
+      }
+    }catch(e){
+      if(seq!==acSeqCalc[role])return;
+      acMsgCalc(drop,'⏱️ La recherche d\'adresse ne répond pas. Réessayez, ou appelez-nous : nous vous donnons le prix tout de suite.');return;
+    }
+    if(seq!==acSeqCalc[role])return; /* réponse périmée */
+    if(!results.length){acMsgCalc(drop,'Adresse introuvable. Essayez sans le numéro, avec la commune (ex. « Rue de Mons, Binche »).');return;}
+    var num=acNumCalc(q),vus={};
+    drop.innerHTML='';
+    results.forEach(function(r){
+      var p=r.properties,coords=r.geometry.coordinates;
+      var rue=p.street||(p.osm_key==='highway'?p.name:'');
+      var numero=p.housenumber||'';
+      if(!numero&&num&&rue)numero=num;
+      var ligne=rue?(rue+(numero?' '+numero:'')):'';
+      var main=[p.name&&p.name!==rue?p.name:null,ligne||null].filter(Boolean).join(', ')||p.name||'';
+      var city=p.city||p.town||p.village||p.locality||'',cp=p.postcode||'',country=p.country||'';
+      var full=[main,[cp,city].filter(Boolean).join(' '),country&&country!=='Belgique'&&country!=='België'?country:''].filter(Boolean).join(', ');
+      if(!main&&!city)return;if(vus[full])return;vus[full]=1;
+      var div=document.createElement('div');
+      div.className='ac-item-calc';
+      div.innerHTML='<div class="ac-main-calc">'+acEscCalc(main||city)+'</div>'+(city?'<div class="ac-sub-calc">'+acEscCalc([cp,city].filter(Boolean).join(' ')+(country&&country!=='Belgique'?', '+country:''))+'</div>':'');
+      div.dataset.display=full;
+      div.dataset.lat=coords[1];
+      div.dataset.lon=coords[0];
+      div.dataset.role=role;
+      div.addEventListener('click',function(){acSelCalc(this.dataset.role,this);});
+      drop.appendChild(div);
+    });
+    drop.style.display='block';
+  },400);
 }
 function acSelCalc(role,el){
   var display=el.getAttribute('data-display');
