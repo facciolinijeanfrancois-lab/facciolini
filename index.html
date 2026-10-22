@@ -139,6 +139,10 @@ header.scrolled{background:rgba(8,10,14,0.95);backdrop-filter:blur(20px);padding
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;letter-spacing:0.05em;}
 .logo span{color:var(--or);}
 nav{display:flex;align-items:center;gap:32px;}
+.lang-top{display:flex;gap:6px;margin-left:20px;margin-right:auto;}
+.lang-top a{font-size:0.72rem;font-weight:600;letter-spacing:0.06em;color:var(--or2);border:1px solid var(--border2);border-radius:20px;padding:4px 9px;}
+.lang-top a:hover{background:rgba(201,168,76,0.12);}
+@media(min-width:901px){.lang-top{order:3;margin-right:0;}.header-inner nav{margin-left:auto;}}
 nav a{font-size:0.88rem;color:var(--gris);letter-spacing:0.04em;transition:color 0.2s;}
 nav a:hover{color:var(--or2);}
 .nav-cta{padding:10px 22px;border:1px solid var(--border2);border-radius:50px;color:var(--or2);font-size:0.85rem;transition:all 0.3s;}
@@ -339,6 +343,8 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
   <a href="#avis" onclick="toggleMenu()">Avis</a>
   <a href="#zones" onclick="toggleMenu()">Zones</a>
   <a href="#reservation" onclick="toggleMenu()">Réserver</a>
+  <a href="/en/airport-transfer" lang="en" style="font-size:1.2rem">🇬🇧 English</a>
+  <a href="/nl/luchthavenvervoer-zaventem" lang="nl" style="font-size:1.2rem">🇳🇱 Nederlands</a>
 </div>
 
 <!-- HEADER -->
@@ -353,6 +359,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
         <a href="#zones">Zones</a>
         <a href="#reservation" class="nav-cta">Réserver</a>
       </nav>
+      <div class="lang-top"><a href="/en/airport-transfer" hreflang="en" lang="en" title="English">EN</a><a href="/nl/luchthavenvervoer-zaventem" hreflang="nl" lang="nl" title="Nederlands">NL</a></div>
       <div class="burger" onclick="toggleMenu()" aria-label="Menu">
         <span></span><span></span><span></span>
       </div>
@@ -366,7 +373,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
     <div class="hero-content">
       <span class="hero-eyebrow fade-up">Hainaut · Belgique · 7j/7</span>
       <h1 class="fade-up-2">Votre chauffeur privé<br><em>vers tous les aéroports</em></h1>
-      <p class="hero-desc fade-up-3">De Carnières, Mons ou Morlanwelz vers Brussels Zaventem, Charleroi ou partout en Belgique. Tarif fixe annoncé à l'avance, pas de surprise.</p>
+      <p class="hero-desc fade-up-3">Transporteur de personnes basé à Carnières : de Mons, La Louvière ou Morlanwelz vers Brussels Zaventem, Charleroi ou partout en Belgique. Tarif fixe annoncé à l'avance, pas de surprise.</p>
       <div class="hero-actions fade-up-3">
         <a href="#calculateur" class="btn btn-gold">Calculer mon tarif</a>
         <a href="tel:+32471692650" class="btn btn-outline">📞 0471 69 26 50</a>
@@ -663,7 +670,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
     </div>
   </div>
 
-    <p style="text-align:center; margin-top:28px; font-size:13px; color:var(--gris1);">🇳🇱 Ook Nederlandstalige bezoekers welkom — <a href="/nl/luchthavenvervoer-zaventem" style="color:var(--or2);">lees deze pagina in het Nederlands</a></p>
+    <p style="text-align:center; margin-top:28px; font-size:13px; color:var(--gris1);">🇳🇱 Ook Nederlandstalige bezoekers welkom — <a href="/nl/luchthavenvervoer-zaventem" style="color:var(--or2);">lees deze pagina in het Nederlands</a><br>🇬🇧 English-speaking visitors welcome — <a href="/en/airport-transfer" lang="en" style="color:var(--or2);">read this page in English</a></p>
   </section>
 
 <!-- POURQUOI NOUS -->
