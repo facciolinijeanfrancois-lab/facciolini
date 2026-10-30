@@ -841,6 +841,7 @@ footer{background:var(--noir2);border-top:1px solid var(--border);padding:56px 0
 
       <div class="form-wrap">
         <form id="resa-form" class="form-grid" onsubmit="submitForm(event)">
+          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label for="f-site-web">Ne pas remplir</label><input type="text" name="site_web" id="f-site-web" tabindex="-1" autocomplete="off"></div>
           <div class="form-row">
             <div class="fg"><label class="fl" for="f-prenom">Prénom *</label><input type="text" class="fi" name="prenom" id="f-prenom" placeholder="Marie" required></div>
             <div class="fg"><label class="fl" for="f-nom">Nom *</label><input type="text" class="fi" name="nom" id="f-nom" placeholder="Dupont" required></div>
@@ -1545,6 +1546,15 @@ async function submitForm(e){
       (notes?'NOTES: '+notes+'\n':'')+
       (calcResult?'TARIF ESTIME: '+calcResult.prix+'EUR - '+calcResult.km+' km'+(calcResult.estime?' (estimation auto)':''):'TARIF: non calcule')
   };
+  /* Demande envoyée aussi dans l'application (Firebase) — en parallèle, sans bloquer l'e-mail ni WhatsApp */
+  var appPromise=envoyerDemandeApp({
+    prenom:prenom,nom:nom,tel:tel,email:data.get('email')||'',type:type,date:date,heureVol:heure,marge:marge,
+    pickup:heurePickupStr.replace('h',':'),depart:depart,arrivee:arrivee,vol:vol,passagers:parseInt(passagers)||1,
+    grandes:bagagesGrandes,petites:bagagesPetites,equipement:equipement,sieges:siegesBebe,vehicule:isTalentoGuess?'minivan':'berline',
+    dateRetour:type==='ar'?dateR:'',heureRetour:type==='ar'?heureR:'',volRetour:type==='ar'?volRetour:'',notes:notes,
+    prix:calcResult&&calcResult.prix?Number(calcResult.prix)||0:0,km:calcResult&&calcResult.km?Number(calcResult.km)||0:0,
+    estime:!!(calcResult&&calcResult.estime),pot:data.get('site_web')||''
+  });
   var emailOk=false;
   try{
     var r=await fetch('https://api.web3forms.com/submit',{
@@ -1574,6 +1584,7 @@ async function submitForm(e){
       'page_location':window.location.href
     });
   }
+  try{await appPromise;}catch(e){}
   window.open('https://wa.me/32471692650?text='+encodeURIComponent(msg),'_blank');
   form.style.display='none';
   var successBox=document.getElementById('form-success');
@@ -1585,6 +1596,39 @@ async function submitForm(e){
       '<a href="tel:+32471692650" class="btn" style="margin-left:8px">📞 Appeler</a>';
   }
   successBox.classList.add('show');
+}
+
+// ===== DEMANDE -> APPLICATION (Firebase Firestore, formule gratuite) =====
+var _formDebut=0;
+(function(){var f=document.getElementById('resa-form');if(!f)return;
+  var go=function(){if(!_formDebut)_formDebut=Date.now();};
+  f.addEventListener('focusin',go);f.addEventListener('input',go);f.addEventListener('click',go);})();
+var _envoisDemande=[];
+function envoyerDemandeApp(d){
+  var raisons=[],now=Date.now();
+  if(d.pot)raisons.push('champ piège rempli');
+  var duree=_formDebut?Math.round((now-_formDebut)/1000):0;
+  if(!_formDebut||duree<8)raisons.push('formulaire rempli en '+duree+' s');
+  _envoisDemande=_envoisDemande.filter(function(t){return now-t<600000;});
+  if(_envoisDemande.length>=3)raisons.push('plusieurs envois en 10 min');
+  _envoisDemande.push(now);
+  var cut=function(v,n){return String(v==null?'':v).slice(0,n);};
+  var S=function(v,n){return {stringValue:cut(v,n||200)};},N=function(v){v=Number(v)||0;return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};};
+  var champs={
+    statut:S('nouvelle'),recu:{timestampValue:new Date().toISOString()},
+    suspect:{booleanValue:raisons.length>0},raison:S(raisons.join(', '),200),
+    prenom:S(d.prenom,80),nom:S(d.nom,80),tel:S(d.tel,40),email:S(d.email,120),type:S(d.type,10),
+    date:S(d.date,10),heureVol:S(d.heureVol,5),marge:N(d.marge),pickup:S(d.pickup,5),
+    depart:S(d.depart,300),arrivee:S(d.arrivee,300),vol:S(d.vol,20),passagers:N(d.passagers),
+    grandes:N(d.grandes),petites:N(d.petites),equipement:S(d.equipement,20),sieges:S(d.sieges,20),vehicule:S(d.vehicule,10),
+    dateRetour:S(d.dateRetour,10),heureRetour:S(d.heureRetour,5),volRetour:S(d.volRetour,20),notes:S(d.notes,1500),
+    prix:N(d.prix),km:N(d.km),estime:{booleanValue:!!d.estime},page:S(location.pathname,100)
+  };
+  var ctrl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctrl)ctrl.abort();},4000);
+  return fetch('https://firestore.googleapis.com/v1/projects/facciolini-app/databases/(default)/documents/demandes?key=AIzaSyDwQjKxCjhO2gliRRUY8FB6zwjxDDYh3Us',
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:champs}),signal:ctrl?ctrl.signal:undefined})
+    .then(function(r){clearTimeout(to);if(!r.ok)console.warn('Demande app : refusée',r.status);})
+    .catch(function(e){clearTimeout(to);console.warn('Demande app : échec',e);});
 }
 
 // ===== EVENT LISTENERS BOUTONS =====
